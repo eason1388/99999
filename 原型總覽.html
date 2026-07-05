@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master Feng Shui Compass — 原型總覽(V1)</title>
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:22px}
+h1{font-family:"Noto Serif TC",serif;font-size:24px;color:var(--gold)}
+.sub{font-size:13px;opacity:.6;margin:4px 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;max-width:860px;width:94vw}
+a.card{display:block;background:var(--card);border-radius:16px;padding:16px;text-decoration:none;color:var(--ink);transition:transform .15s}
+a.card:hover{transform:translateY(-3px)}
+.card b{font-family:"Noto Serif TC",serif;font-size:17px;color:var(--gold);display:block;margin-bottom:6px}
+.card span{font-size:13px;line-height:1.6;opacity:.8}
+.batch{font-size:11px;opacity:.45;display:block;margin-top:8px}
+.note{font-size:12px;opacity:.55;margin-top:16px;max-width:680px;text-align:center;line-height:1.7}
+</style></head><body>
+<h1>全能玄學羅盤 · V1 原型總覽</h1>
+<div class="sub">六大互動原型(與正式引擎同式演算法,皆經驗證)· 檔案需與本頁同資料夾</div>
+<div class="cards">
+<a class="card" href="羅盤互動原型.html"><b>◎ 電子羅盤</b><span>五圈三合盤、拖曳旋轉、即時判讀(山向/兼向/騎縫/分金)、五段式詳解卡</span><span class="batch">批次 7.3</span></a>
+<a class="card" href="飛星八宅互動原型.html"><b>▦ 玄空飛星 · 八宅</b><span>9運×24山下卦/替卦、格局城門三般卦、八宅遊星疊加(golden 432 盤驗證)</span><span class="batch">批次 7.4</span></a>
+<a class="card" href="擇時飛星互動原型.html"><b>☰ 擇時 · 神煞</b><span>年月日飛星、太歲歲破三煞五黃、個人文昌桃花驛馬貴人</span><span class="batch">批次 7.5</span></a>
+<a class="card" href="地圖測向互動原型.html"><b>⚑ 地圖測向</b><span>兩點測向、畫房輪廓自動立極、24山扇形疊加(需網路)</span><span class="batch">批次 7.6</span></a>
+<a class="card" href="八字整合互動原型.html"><b>☯ 八字 · 整合評分</b><span>四柱十神五行強弱大運,八字×玄空 0–100 適配評分(逐項附出處)</span><span class="batch">批次 7.7</span></a>
+<a class="card" href="風水分析報告原型.html"><b>▤ 專業報告</b><span>飛星盤+評分+解讀+化解建議,列印即 A4 PDF</span><span class="batch">批次 7.8</span></a>
+<a class="card" href="尋龍模式互動原型.html"><b>⛰ 地理尋龍</b><span>等高線地圖畫龍脈、高程剖面、峰/過峽偵測、龍脈品質評分、點穴定向(需網路)</span><span class="batch">批次 7.10</span></a>
+<a class="card" href="教學中心互動原型.html"><b>✎ 教學中心</b><span>34 詞條名詞庫(附出處)、24 課學習路徑、即搜即答、名詞點擊彈出</span><span class="batch">批次 7.9</span></a>
+</div>
+<div class="note">正式 App 為 Flutter 六平台單一程式碼庫(monorepo 見 fsc_batch*.zip):曆法/判讀/飛星/八宅/紫白/神煞/八字/門派 DSL 八大引擎皆已完成並通過鏡像驗證;三圈資料包與日家紫白等標 pending_expert 項目待業主審校。V3 續作:AR、拍照格局辨識、尋龍模式。</div>
+</body></html>

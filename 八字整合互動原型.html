@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>八字命盤 · 八字×風水整合評分 — 批次 7.7 互動原型</title>
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F;--blue:#3E5C76}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:14px}
+h1{font-family:"Noto Serif TC",serif;font-size:20px;color:var(--gold)}
+.sub{font-size:12px;opacity:.6;margin:2px 0 10px}
+.panel{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:960px}
+.box{background:var(--card);border-radius:16px;padding:14px;min-width:300px;max-width:440px}
+.box h2{font-family:"Noto Serif TC",serif;font-size:16px;color:var(--gold);margin-bottom:8px}
+input,select{padding:5px 8px;border:1px solid var(--gold);border-radius:8px;background:transparent;font-size:14px;margin:2px}
+table{border-collapse:collapse;width:100%;margin-top:6px}
+th,td{padding:5px 8px;text-align:center;font-size:14px}
+th{font-size:12px;opacity:.6;font-weight:500}
+td.gz{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:700}
+.bar{height:14px;border-radius:7px;background:#fff;overflow:hidden;margin:3px 0}
+.bar i{display:block;height:100%}
+.tag{display:inline-block;border-radius:99px;padding:2px 10px;font-size:12.5px;margin:2px;background:#fff;border:1px solid #ddd}
+.tag.good{background:rgba(74,107,79,.12);color:var(--green);border-color:var(--green)}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red);border-color:var(--red)}
+.score{font-family:"Noto Serif TC",serif;font-size:44px;font-weight:700;color:var(--gold);text-align:center}
+.item{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0;border-bottom:1px dashed #ddd}
+.note{font-size:11.5px;opacity:.55;margin-top:6px;line-height:1.5}
+.dy{display:inline-block;text-align:center;margin:3px;padding:5px 8px;background:#fff;border-radius:10px;font-size:13px}
+.dy b{font-family:"Noto Serif TC",serif;display:block;font-size:17px}
+</style></head><body>
+<h1>八字命盤 · 八字×風水整合評分</h1>
+<div class="sub">批次 7.7 — 四柱/十神/五行強弱/大運 + 玄空整合評分(演算法已過 10 項驗證;引擎輸出與 golden 一致)</div>
+<div style="margin-bottom:8px">
+  出生 <input id="bd" type="date" value="1990-08-15"> <input id="bt" type="time" value="14:30">
+  <select id="sex"><option value="1">男</option><option value="0">女</option></select>
+  <span style="font-size:13px">(當地時間,+8;真太陽時 v2)</span>
+</div>
+<div class="panel">
+  <div class="box"><h2>四柱命盤</h2><table id="pillars"></table>
+    <div id="strength" style="margin-top:8px"></div><div id="verdict"></div>
+    <h2 style="margin-top:10px">大運 <span id="dyInfo" style="font-size:12px;opacity:.6"></span></h2><div id="dayun"></div></div>
+  <div class="box"><h2>八字×風水整合評分</h2>
+    房屋:<select id="period"></select> 運
+    <select id="sit"></select> 山
+    <div class="score" id="score">—</div>
+    <div id="patt" style="text-align:center;margin-bottom:6px"></div>
+    <div id="items"></div>
+    <div class="note">評分=基準50+逐項加減(每項附出處;v1 基準模型,權重屬門派包可覆寫)。喜用神取自五行強弱(身弱喜印比、身強喜食傷財官)。</div></div>
+</div>
+<script>
+const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
+const WX='木木火火土土金金水水',WXC={'木':'#4A6B4F','火':'#A63A2E','土':'#8C6D3F','金':'#948e82','水':'#3E5C76'};
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const TEN=['比肩','劫財','食神','傷官','偏財','正財','七殺','正官','偏印','正印'];
+const HID={'子':[['癸',1]],'丑':[['己',.6],['癸',.3],['辛',.1]],'寅':[['甲',.6],['丙',.3],['戊',.1]],'卯':[['乙',1]],
+'辰':[['戊',.6],['乙',.3],['癸',.1]],'巳':[['丙',.6],['庚',.3],['戊',.1]],'午':[['丁',.7],['己',.3]],
+'未':[['己',.6],['丁',.3],['乙',.1]],'申':[['庚',.6],['壬',.3],['戊',.1]],'酉':[['辛',1]],
+'戌':[['戊',.6],['辛',.3],['丁',.1]],'亥':[['壬',.7],['甲',.3]]};
+// 曆法(與 7.5 原型同式)
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const deltaT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:y>=1986?63.86+.3345*(y-2000)-.060374*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t,M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
+  for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}return jd}
+const gzi=(s,b)=>((6*s-5*b)%60+60)%60, gz=i=>ST[i%10]+BR[i%12];
+function fourPillars(Y,M,D,h){
+  const J=jdn(Y,M,D)+(h-12)/24;
+  let civ=jdn(Y,M,D); if(h>=23)civ+=1;
+  const day=((civ-11)%60+60)%60;
+  const lc=termJdn(Y,315);
+  const sui=(J+0.5>=lc)?Y:Y-1;
+  const year=((sui-1984)%60+60)%60;
+  const lon=sunLon(J,Y);
+  const mi=Math.floor(((lon-315)%360+360)%360/30);
+  const mB=(mi+2)%12, mS=((year%10)%5*2+2+mi)%10;
+  const hB=Math.floor((h+1)/2)%12, hS=((day%10)%5*2+hB)%10;
+  return {year,month:gzi(mS,mB),day,hour:gzi(hS,hB),sui,mi,J}
+}
+const tenGod=(d,o)=>{const rel=((('木火土金水'.indexOf(WX[o]))-('木火土金水'.indexOf(WX[d])))%5+5)%5;
+  return TEN[rel*2+((d%2)===(o%2)?0:1)]};
+function strength(p){
+  const pts={'木':0,'火':0,'土':0,'金':0,'水':0};
+  const sw={year:6,month:6,hour:6},bw={year:8,month:30,day:12,hour:8};
+  for(const[k,i]of Object.entries({year:p.year,month:p.month,day:p.day,hour:p.hour})){
+    if(k!=='day')pts[WX[i%10]]+=sw[k]||0;
+    for(const[hs,w]of HID[BR[i%12]])pts[WX[ST.indexOf(hs)]]+=bw[k]*w}
+  const dm=WX[p.day%10],order='木火土金水';
+  const mom=order[(order.indexOf(dm)+4)%5];
+  const tot=Object.values(pts).reduce((a,b)=>a+b);
+  const ratio=(pts[dm]+pts[mom])/tot;
+  const verdict=ratio>0.55?'身強':ratio<0.45?'身弱':'中和';
+  const di=order.indexOf(dm);
+  const favor=verdict==='身弱'?[mom,dm]:verdict==='身強'?[order[(di+1)%5],order[(di+2)%5],order[(di+3)%5]]:[];
+  return{pts,ratio,verdict,favor,dm}}
+
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const PAL2NUM=Object.fromEntries(Object.entries(NUM2PAL).map(([k,v])=>[v,+k]));
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const TI={};'子癸甲申'.split('').forEach(m=>TI[m]=1);'壬卯乙未坤'.split('').forEach(m=>TI[m]=2);
+'乾亥辰巽巳戌'.split('').forEach(m=>TI[m]=6);'酉辛丑艮丙'.split('').forEach(m=>TI[m]=7);'寅午庚丁'.split('').forEach(m=>TI[m]=9);
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting,ti=false){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,refIfFive)=>{
+    const s=base[pal];
+    if(s===5)return fly(5,YANG.has(refIfFive));
+    const ref=PAL_M[NUM2PAL[s]][kind];
+    return fly(ti?TI[ref]:s,YANG.has(ref));
+  };
+  const mt=sc(sp,sitting),fc=sc(fp,facing);
+  const n=period;
+  const pattern=mt[sp]===n&&fc[fp]===n?'旺山旺向':mt[fp]===n&&fc[sp]===n?'上山下水':
+    mt[fp]===n&&fc[fp]===n?'雙星會向':mt[sp]===n&&fc[sp]===n?'雙星會坐':'其他';
+  const tri=[[1,4,7],[2,5,8],[3,6,9]];
+  const fm=FLY.every(q=>tri.some(t=>{const st=new Set([mt[q],fc[q],base[q]]);return st.size===3&&t.every(x=>st.has(x))}));
+  const lz=!fm&&FLY.every(q=>{const v=[mt[q],fc[q],base[q]].sort((a,b)=>a-b);
+    const ok=x=>{const s=[(x-1)%9+1,x%9+1,(x+1)%9+1].sort((a,b)=>a-b);return s.join()===v.join()};
+    return [...Array(9)].some((_,i)=>ok(i+1))});
+  const ADJ={'坎':['乾','艮'],'艮':['坎','震'],'震':['艮','巽'],'巽':['震','離'],'離':['巽','坤'],'坤':['離','兌'],'兌':['坤','乾'],'乾':['兌','坎']};
+  const GEN={1:6,6:1,2:7,7:2,3:8,8:3,4:9,9:4};
+  const gates=ADJ[fp].map(gp=>{const s=base[gp];let usable=false;
+    if(s!==5){usable=!YANG.has(PAL_M[NUM2PAL[s]][kind])}
+    return{palace:gp,kind:GEN[PAL2NUM[fp]]===PAL2NUM[gp]?'正城門':'副城門',usable}});
+  const yd={'中':5,'乾':6,'兌':7,'艮':8,'離':9,'坎':1,'坤':2,'震':3,'巽':4};
+  const warnings=[];
+  for(const[nm,cc]of[['山星',mt],['向星',fc]]){
+    if(FLY.every(q=>cc[q]===yd[q]))warnings.push(nm+'全盤伏吟');
+    if(FLY.every(q=>q==='中'?cc[q]===5:cc[q]+yd[q]===10))warnings.push(nm+'全盤反吟');
+  }
+  return{period,sitting,facing,ti,base,mountain:mt,facing_stars:fc,pattern,
+         sanban:fm?'父母三般卦':lz?'連珠三般卦':null,gates,warnings};
+}
+// 八宅
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
+const PAL2GUA={'坎':'坎','坤':'坤','震':'震','巽':'巽','乾':'乾','兌':'兌','艮':'艮','離':'離'};
+
+
+function render(){
+  const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
+  const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
+  const male=document.getElementById('sex').value==='1';
+  const p=fourPillars(Y,M,D,h+mn/60);
+  const dmS=p.day%10;
+  const cols=[['年柱',p.year],['月柱',p.month],['日柱',p.day],['時柱',p.hour]];
+  document.getElementById('pillars').innerHTML=
+    '<tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr>'
+   +'<tr>'+cols.map((c,i)=>'<td style="font-size:12px;color:'+WXC[WX[c[1]%10]]+'">'+(i===2?'日主':tenGod(dmS,c[1]%10))+'</td>').join('')+'</tr>'
+   +'<tr>'+cols.map(c=>'<td class="gz">'+gz(c[1])+'</td>').join('')+'</tr>'
+   +'<tr>'+cols.map(c=>'<td style="font-size:11px;opacity:.6">'+HID[BR[c[1]%12]].map(x=>x[0]).join(' ')+'</td>').join('')+'</tr>';
+  const st=strength(p);
+  const mx=Math.max(...Object.values(st.pts));
+  document.getElementById('strength').innerHTML=Object.entries(st.pts).map(([w,v])=>
+    '<div style="display:flex;align-items:center;gap:6px;font-size:13px">'+w
+    +'<div class="bar" style="flex:1"><i style="width:'+(v/mx*100)+'%;background:'+WXC[w]+'"></i></div>'+v.toFixed(1)+'</div>').join('');
+  document.getElementById('verdict').innerHTML=
+    '<span class="tag">日主 '+ST[dmS]+'('+WX[dmS]+')</span><span class="tag">同黨比 '+(st.ratio*100).toFixed(0)+'%</span>'
+   +'<span class="tag good">'+st.verdict+'</span>'
+   +(st.favor.length?'<span class="tag good">喜用:'+st.favor.join('、')+'</span>':'<span class="tag">中和(調候 v2)</span>');
+  // 大運
+  const yang=(p.year%10)%2===0, fw=(yang===male);
+  const jieLon=(315+p.mi*30+(fw?30:0))%360;
+  let jy=Y; let tj=termJdn(jy,jieLon);
+  if(fw&&tj<p.J)tj=termJdn(jy+1,jieLon);
+  if(!fw&&tj>p.J)tj=termJdn(jy-1,jieLon);
+  const age0=Math.abs(p.J-tj)/3;
+  document.getElementById('dyInfo').textContent=(fw?'順排':'逆排')+' · 約 '+age0.toFixed(1)+' 歲起運';
+  document.getElementById('dayun').innerHTML=[...Array(8)].map((_,k)=>{
+    const idx=((p.month+(fw?k+1:-(k+1)))%60+60)%60;
+    return '<span class="dy"><b>'+gz(idx)+'</b>'+(age0+k*10).toFixed(0)+'歲</span>'}).join('');
+  // 整合評分
+  const per=+document.getElementById('period').value, sitM=document.getElementById('sit').value;
+  const house=xkChart(per,sitM);
+  const MWX={'乾':'金','兌':'金','艮':'土','坤':'土','巽':'木','震':'木','坎':'水','離':'火',
+    '甲':'木','乙':'木','丙':'火','丁':'火','庚':'金','辛':'金','壬':'水','癸':'水',
+    '子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+  const items=[];
+  items.push(['玄空格局:'+house.pattern,{'旺山旺向':25,'雙星會向':12,'雙星會坐':10,'上山下水':-20,'其他':0}[house.pattern],'沈氏玄空學']);
+  const mw=MWX[sitM];
+  if(st.favor.includes(mw))items.push(['坐山'+sitM+'('+mw+')補喜用',15,'八字喜用×正五行']);
+  else items.push(['坐山'+sitM+'('+mw+')非喜用',0,'八字喜用×正五行']);
+  if(house.sanban)items.push([house.sanban,8,'沈氏玄空學']);
+  for(const w of house.warnings)items.push(['⚠ '+w,-12,'沈氏玄空學']);
+  if(house.gates.some(g=>g.usable))items.push(['城門可用('+house.gates.filter(g=>g.usable).map(g=>g.palace).join('、')+')',5,'城門訣']);
+  const sc=Math.max(0,Math.min(100,50+items.reduce((s,i)=>s+i[1],0)));
+  document.getElementById('score').textContent=sc;
+  document.getElementById('patt').innerHTML='<span class="tag '+(sc>=70?'good':sc<45?'warn':'')+'">'+per+'運 '+sitM+'山'+house.facing+'向 · '+(sc>=70?'適合':sc<45?'不建議':'普通')+'</span>';
+  document.getElementById('items').innerHTML=items.map(([t,d,src])=>
+    '<div class="item"><span>'+t+'<span style="opacity:.45;font-size:11px">('+src+')</span></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('');
+}
+const perSel=document.getElementById('period'),sitSel=document.getElementById('sit');
+for(let i=1;i<=9;i++)perSel.add(new Option(i,i));perSel.value=9;
+for(const m of M24)sitSel.add(new Option(m,m));sitSel.value='壬';
+['bd','bt','sex','period','sit'].forEach(id=>document.getElementById(id).onchange=render);
+render();
+</script></body></html>

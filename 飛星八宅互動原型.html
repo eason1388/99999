@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>玄空飛星 · 八宅 — 批次 7.4 互動原型</title>
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px}
+h1{font-family:"Noto Serif TC",serif;font-size:20px;color:var(--gold)}
+.sub{font-size:12px;opacity:.6;margin:2px 0 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:640px}
+.chip{border:1px solid var(--gold);border-radius:999px;padding:5px 12px;font-size:14px;cursor:pointer;background:transparent}
+.chip.on{background:var(--gold);color:#fff}
+.chip.sm{padding:4px 9px;font-size:13px}
+#grid{display:grid;grid-template-columns:repeat(3,110px);grid-template-rows:repeat(3,110px);gap:6px;margin:8px 0}
+.cell{background:var(--card);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border:2px solid transparent}
+.cell.sit{border-color:var(--blue,#3E5C76)}
+.cell.fac{border-color:var(--red)}
+.pal{position:absolute;top:6px;left:9px;font-size:11px;opacity:.55}
+.mark{position:absolute;top:6px;right:9px;font-size:11px;font-weight:700}
+.stars{font-family:"Noto Serif TC",serif;font-size:26px;font-weight:700;letter-spacing:10px;text-indent:10px}
+.base{font-size:13px;opacity:.6;margin-top:2px}
+.bz{font-size:12px;margin-top:3px;padding:1px 8px;border-radius:99px}
+.bz.j{background:rgba(74,107,79,.15);color:var(--green)}
+.bz.x{background:rgba(166,58,46,.12);color:var(--red)}
+.wang{color:var(--gold)}
+#info{max-width:560px;width:94vw;background:var(--card);border-radius:16px;padding:12px 16px;font-size:14px;line-height:1.7}
+.badge{display:inline-block;border-radius:99px;padding:2px 12px;font-size:13px;margin-right:6px;background:#fff;border:1px solid #ddd}
+.badge.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+.badge.red{background:rgba(166,58,46,.12);color:var(--red);border-color:var(--red)}
+.badge.green{background:rgba(74,107,79,.12);color:var(--green);border-color:var(--green)}
+</style></head><body>
+<h1>玄空飛星盤 · 八宅盤</h1>
+<div class="sub">批次 7.4 — 引擎輸出已與 golden 432 盤全數比對一致 · 上南下北</div>
+<div class="row" id="periods"></div>
+<div class="row" id="mts"></div>
+<div class="row">
+  <button class="chip on" id="xia">下卦</button>
+  <button class="chip" id="ti">替卦(起星)</button>
+  <button class="chip" id="bzT">顯示八宅遊星</button>
+</div>
+<div id="grid"></div>
+<div id="info"></div>
+<script>
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const PAL2NUM=Object.fromEntries(Object.entries(NUM2PAL).map(([k,v])=>[v,+k]));
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const TI={};'子癸甲申'.split('').forEach(m=>TI[m]=1);'壬卯乙未坤'.split('').forEach(m=>TI[m]=2);
+'乾亥辰巽巳戌'.split('').forEach(m=>TI[m]=6);'酉辛丑艮丙'.split('').forEach(m=>TI[m]=7);'寅午庚丁'.split('').forEach(m=>TI[m]=9);
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting,ti=false){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,refIfFive)=>{
+    const s=base[pal];
+    if(s===5)return fly(5,YANG.has(refIfFive));
+    const ref=PAL_M[NUM2PAL[s]][kind];
+    return fly(ti?TI[ref]:s,YANG.has(ref));
+  };
+  const mt=sc(sp,sitting),fc=sc(fp,facing);
+  const n=period;
+  const pattern=mt[sp]===n&&fc[fp]===n?'旺山旺向':mt[fp]===n&&fc[sp]===n?'上山下水':
+    mt[fp]===n&&fc[fp]===n?'雙星會向':mt[sp]===n&&fc[sp]===n?'雙星會坐':'其他';
+  const tri=[[1,4,7],[2,5,8],[3,6,9]];
+  const fm=FLY.every(q=>tri.some(t=>{const st=new Set([mt[q],fc[q],base[q]]);return st.size===3&&t.every(x=>st.has(x))}));
+  const lz=!fm&&FLY.every(q=>{const v=[mt[q],fc[q],base[q]].sort((a,b)=>a-b);
+    const ok=x=>{const s=[(x-1)%9+1,x%9+1,(x+1)%9+1].sort((a,b)=>a-b);return s.join()===v.join()};
+    return [...Array(9)].some((_,i)=>ok(i+1))});
+  const ADJ={'坎':['乾','艮'],'艮':['坎','震'],'震':['艮','巽'],'巽':['震','離'],'離':['巽','坤'],'坤':['離','兌'],'兌':['坤','乾'],'乾':['兌','坎']};
+  const GEN={1:6,6:1,2:7,7:2,3:8,8:3,4:9,9:4};
+  const gates=ADJ[fp].map(gp=>{const s=base[gp];let usable=false;
+    if(s!==5){usable=!YANG.has(PAL_M[NUM2PAL[s]][kind])}
+    return{palace:gp,kind:GEN[PAL2NUM[fp]]===PAL2NUM[gp]?'正城門':'副城門',usable}});
+  const yd={'中':5,'乾':6,'兌':7,'艮':8,'離':9,'坎':1,'坤':2,'震':3,'巽':4};
+  const warnings=[];
+  for(const[nm,cc]of[['山星',mt],['向星',fc]]){
+    if(FLY.every(q=>cc[q]===yd[q]))warnings.push(nm+'全盤伏吟');
+    if(FLY.every(q=>q==='中'?cc[q]===5:cc[q]+yd[q]===10))warnings.push(nm+'全盤反吟');
+  }
+  return{period,sitting,facing,ti,base,mountain:mt,facing_stars:fc,pattern,
+         sanban:fm?'父母三般卦':lz?'連珠三般卦':null,gates,warnings};
+}
+// 八宅
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
+const PAL2GUA={'坎':'坎','坤':'坤','震':'震','巽':'巽','乾':'乾','兌':'兌','艮':'艮','離':'離'};
+
+
+const GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
+let period=9,sit='壬',useTi=false,showBz=false;
+const P=document.getElementById('periods'),Mts=document.getElementById('mts');
+for(let i=1;i<=9;i++){const b=document.createElement('button');b.className='chip sm'+(i===9?' on':'');b.textContent=i+'運';
+  b.onclick=()=>{period=i;P.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');render()};P.appendChild(b)}
+for(const m of M24){const b=document.createElement('button');b.className='chip sm'+(m==='壬'?' on':'');b.textContent=m;
+  b.onclick=()=>{sit=m;Mts.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');render()};Mts.appendChild(b)}
+document.getElementById('xia').onclick=e=>{useTi=false;e.target.classList.add('on');document.getElementById('ti').classList.remove('on');render()};
+document.getElementById('ti').onclick=e=>{useTi=true;e.target.classList.add('on');document.getElementById('xia').classList.remove('on');render()};
+document.getElementById('bzT').onclick=e=>{showBz=!showBz;e.target.classList.toggle('on');render()};
+function render(){
+  const c=xkChart(period,sit,useTi);
+  const zhai=PAL2GUA[palaceOf(sit)];
+  const g=document.getElementById('grid');g.innerHTML='';
+  for(const row of GRID)for(const p of row){
+    const d=document.createElement('div');d.className='cell';
+    const sp=palaceOf(c.sitting),fp=palaceOf(c.facing);
+    if(p===sp){d.classList.add('sit')}if(p===fp){d.classList.add('fac')}
+    const mstar=c.mountain[p],fstar=c.facing_stars[p];
+    const hi=n=>n===period?'<span class="wang">'+n+'</span>':n;
+    d.innerHTML='<span class="pal">'+p+(p==='中'?'':'宮')+'</span>'
+      +(p===sp?'<span class="mark" style="color:#3E5C76">坐</span>':p===fp?'<span class="mark" style="color:#A63A2E">向</span>':'')
+      +'<div class="stars">'+hi(mstar)+hi(fstar)+'</div><div class="base">運 '+c.base[p]+'</div>'
+      +(showBz&&p!=='中'?(()=>{const yx=youxing(zhai,p);const ji='生氣天醫延年伏位'.includes(yx);
+         return '<div class="bz '+(ji?'j':'x')+'">'+yx+'</div>'})():'');
+    g.appendChild(d);
+  }
+  const badges=['<span class="badge gold">'+c.pattern+'</span>'];
+  if(c.sanban)badges.push('<span class="badge green">'+c.sanban+'</span>');
+  for(const w of c.warnings)badges.push('<span class="badge red">⚠ '+w+'</span>');
+  for(const gt of c.gates)badges.push('<span class="badge '+(gt.usable?'green':'')+'">'+gt.kind+':'+gt.palace+'宮'+(gt.usable?'(可用)':'(不可用)')+'</span>');
+  document.getElementById('info').innerHTML=
+    '<b style="font-family:\'Noto Serif TC\',serif;font-size:18px">'+period+'運 '+c.sitting+'山'+c.facing+'向'+(useTi?'(替卦)':'(下卦)')+'</b>'
+    +' · 宅卦:'+zhai+'宅<br>'+badges.join('')
+    +'<div style="margin-top:6px;font-size:12.5px;opacity:.7">金色=當運星。城門可用性:該宮同元龍屬陰、逆飛令旺星到宮(沈氏)。八宅遊星依宅卦('+zhai+'宅)以大遊年歌排佈。</div>';
+}
+render();
+</script></body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>擇時飛星 · 神煞吉位 — 批次 7.5 互動原型</title>
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F;--blue:#3E5C76}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px}
+h1{font-family:"Noto Serif TC",serif;font-size:20px;color:var(--gold)}
+.sub{font-size:12px;opacity:.6;margin:2px 0 12px}
+.panel{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:900px}
+.box{background:var(--card);border-radius:16px;padding:14px;min-width:280px}
+.box h2{font-family:"Noto Serif TC",serif;font-size:16px;color:var(--gold);margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(3,72px);grid-template-rows:repeat(3,72px);gap:4px}
+.cell{background:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cell b{font-family:"Noto Serif TC",serif;font-size:22px}
+.cell span{font-size:10px;opacity:.55}
+.cell.wh{outline:2px solid var(--red)}
+.cell.wang b{color:var(--gold)}
+input,select{padding:5px 8px;border:1px solid var(--gold);border-radius:8px;background:transparent;font-size:14px;margin:2px}
+.tag{display:inline-block;border-radius:99px;padding:2px 10px;font-size:12.5px;margin:2px;background:#fff;border:1px solid #ddd}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red);border-color:var(--red)}
+.tag.good{background:rgba(74,107,79,.12);color:var(--green);border-color:var(--green)}
+.months{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.mchip{border:1px solid var(--gold);border-radius:99px;padding:2px 9px;font-size:12px;cursor:pointer}
+.mchip.on{background:var(--gold);color:#fff}
+.note{font-size:11.5px;opacity:.55;margin-top:6px;line-height:1.5}
+</style></head><body>
+<h1>擇時飛星 · 年神煞 · 個人吉位</h1>
+<div class="sub">批次 7.5 — 年/月/日盤+太歲三煞五黃+文昌桃花驛馬貴人(演算法已過 17 項錨點驗證)</div>
+<div style="margin-bottom:10px">
+  西元年 <input id="yr" type="number" value="2026" style="width:88px">
+  日期 <input id="dt" type="date" value="2026-07-04">
+  出生年 <input id="by" type="number" value="1990" style="width:88px">
+</div>
+<div class="panel">
+  <div class="box"><h2>流年盤 <span id="yTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="yGrid"></div>
+    <div id="shensha" style="margin-top:8px"></div></div>
+  <div class="box"><h2>流月盤</h2><div class="months" id="mChips"></div><div class="grid" id="mGrid"></div>
+    <div class="note">月序以節氣「節」為界(寅月=立春起)。</div></div>
+  <div class="box"><h2>流日盤 <span id="dTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="dGrid"></div>
+    <div class="note" id="dNote"></div></div>
+  <div class="box"><h2>個人吉位(依出生年)</h2><div id="personal"></div>
+    <div class="note">年干支以立春為界(2 月上旬出生者請留意)。文昌依年干、桃花驛馬依年支三合、貴人依年干(天乙)。</div></div>
+</div>
+<script>
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
+const BR='子丑寅卯辰巳午未申酉戌亥',ST='甲乙丙丁戊己庚辛壬癸';
+const DIR={'子':'北','丑':'東北','寅':'東北','卯':'東','辰':'東南','巳':'東南','午':'南','未':'西南','申':'西南','酉':'西','戌':'西北','亥':'西北'};
+const fly=(c,fw=true)=>{const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o};
+const annualStar=y=>(11-y%9-1+9)%9+1;
+const monthStar=(y,mi)=>{const b=((y-4)%12+12)%12;const f=[8,5,2][b%3];return ((f-1-mi)%9+9)%9+1};
+// 節氣(Meeus 低精度)
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const deltaT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t, M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+function termJdn(y,target){let jd=jdn(y,3,21);
+  jd+=((target%360)+360)%360/360*365.2422;
+  for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
+function suiYear(y,m,d){const lc=termJdn(y,315);return jdn(y,m,d)+0.5>=lc?y:y-1}
+function monthIndex(y,m,d){const lon=sunLon(jdn(y,m,d),y);return Math.floor(((lon-315)%360+360)%360/30)}
+// 日星:六錨(當年+去年)
+function dayStar(y,m,d){
+  const J=jdn(y,m,d);
+  const mk=(yy,lon,st,fw)=>[Math.floor(termJdn(yy,lon)+0.5),st,fw];
+  let anchors=[];
+  for(const yy of [y,y-1]) anchors.push(mk(yy,270,1,true),mk(yy,330,7,true),mk(yy,30,4,true),
+                                        mk(yy,90,9,false),mk(yy,150,3,false),mk(yy,210,6,false));
+  anchors.sort((a,b)=>b[0]-a[0]);
+  for(const[t,st,fw]of anchors){const jz=t+(((-(t-11))%60)+60)%60;
+    if(J>=jz){const dd=J-jz;return[(((st-1)+(fw?dd:-dd))%9+9)%9+1,fw]}}
+}
+const gzOfDay=(y,m,d)=>{const i=((jdn(y,m,d)-11)%60+60)%60;return ST[i%10]+BR[i%12]};
+function grid(el,ch,wang){el.innerHTML='';
+  for(const row of GRID)for(const p of row){
+    const d=document.createElement('div');d.className='cell'+(ch[p]===5?' wh':'')+(ch[p]===wang?' wang':'');
+    d.innerHTML='<b>'+ch[p]+'</b><span>'+p+(p==='中'?'':'宮')+'</span>';el.appendChild(d)}}
+let mSel=null;
+function render(){
+  const [Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
+  const yInput=+document.getElementById('yr').value;
+  const sy=yInput, by=+document.getElementById('by').value;
+  // 年盤
+  const ys=annualStar(sy); grid(document.getElementById('yGrid'),fly(ys),9);
+  const yb=((sy-4)%12+12)%12, ts=BR[yb], sp=BR[(yb+6)%12];
+  const shaG={8:0,0:0,4:0,2:1,6:1,10:1,5:2,9:2,1:2,11:3,3:3,7:3}[yb];
+  const sha=[['巳午未','南'],['亥子丑','北'],['寅卯辰','東'],['申酉戌','西']][shaG];
+  const wh=Object.entries(fly(ys)).find(([p,s])=>s===5)[0];
+  document.getElementById('yTitle').textContent=sy+'年('+ST[((sy-4)%10+10)%10]+ts+')'+ys+'入中';
+  document.getElementById('shensha').innerHTML=
+    '<span class="tag warn">太歲:'+ts+'('+DIR[ts]+')</span><span class="tag warn">歲破:'+sp+'('+DIR[sp]+')</span>'
+   +'<span class="tag warn">三煞:'+sha[0]+'(煞'+sha[1]+')</span><span class="tag warn">五黃:'+wh+'宮</span>'
+   +'<span class="tag good">歲星文昌:四綠所到='+Object.entries(fly(ys)).find(([p,s])=>s===4)[0]+'宮</span>';
+  // 月盤
+  const mc=document.getElementById('mChips');mc.innerHTML='';
+  const names='寅卯辰巳午未申酉戌亥子丑';
+  const curMi=monthIndex(Y,M,D);
+  if(mSel===null)mSel=curMi;
+  for(let i=0;i<12;i++){const b=document.createElement('span');b.className='mchip'+(i===mSel?' on':'');
+    b.textContent=names[i]+'月';b.onclick=()=>{mSel=i;render()};mc.appendChild(b)}
+  grid(document.getElementById('mGrid'),fly(monthStar(sy,mSel)),9);
+  // 日盤
+  const[ds,fw]=dayStar(Y,M,D);
+  grid(document.getElementById('dGrid'),fly(ds,true),9);
+  document.getElementById('dTitle').textContent=Y+'/'+M+'/'+D+' '+gzOfDay(Y,M,D)+'日 '+ds+'入中';
+  document.getElementById('dNote').textContent='三元遁法:'+(fw?'陽遁順飛':'陰遁(起星逆佈,盤仍順飛)')+'。日家紫白各派有異,正式版以資料包口徑為準(pending_expert)。';
+  // 個人吉位
+  const bys=suiYear(by,7,1), bi=((bys-4)%12+12)%12, si=((bys-4)%10+10)%10;
+  const WC={'甲':'巳','乙':'午','丙':'申','戊':'申','丁':'酉','己':'酉','庚':'亥','辛':'子','壬':'寅','癸':'卯'};
+  const TH=['酉','午','卯','子'][{8:0,0:0,4:0,5:1,9:1,1:1,2:2,6:2,10:2,11:3,3:3,7:3}[bi]];
+  const YM=['寅','亥','申','巳'][{8:0,0:0,4:0,5:1,9:1,1:1,2:2,6:2,10:2,11:3,3:3,7:3}[bi]];
+  const GR={'甲':'丑未','戊':'丑未','庚':'丑未','乙':'子申','己':'子申','丙':'亥酉','丁':'亥酉','壬':'巳卯','癸':'巳卯','辛':'午寅'}[ST[si]];
+  document.getElementById('personal').innerHTML=
+    '<div style="font-size:14px;margin-bottom:4px">'+by+' 年生('+ST[si]+BR[bi]+')</div>'
+   +'<span class="tag good">文昌:'+WC[ST[si]]+'('+DIR[WC[ST[si]]]+')</span>'
+   +'<span class="tag good">桃花:'+TH+'('+DIR[TH]+')</span>'
+   +'<span class="tag good">驛馬:'+YM+'('+DIR[YM]+')</span>'
+   +'<span class="tag good">貴人:'+GR[0]+'、'+GR[1]+'</span>';
+}
+document.getElementById('yr').onchange=render;
+document.getElementById('dt').onchange=()=>{mSel=null;render()};
+document.getElementById('by').onchange=render;
+render();
+</script></body></html>

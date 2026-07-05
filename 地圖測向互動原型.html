@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地圖測向 · 畫房立極 — 批次 7.6 互動原型</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:12px}
+h1{font-family:"Noto Serif TC",serif;font-size:19px;color:var(--gold)}
+.sub{font-size:12px;opacity:.6;margin:2px 0 8px}
+#map{width:min(860px,96vw);height:56vh;border-radius:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.chip{border:1px solid var(--gold);border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;background:transparent}
+.chip.on{background:var(--gold);color:#fff}
+#bar{width:min(860px,96vw);background:var(--card);border-radius:16px;padding:10px 16px}
+#big{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:700}
+.tag{display:inline-block;border-radius:99px;padding:2px 10px;font-size:12.5px;margin:2px;background:#fff;border:1px solid #ddd}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red);border-color:var(--red)}
+.note{font-size:11.5px;opacity:.55;margin-top:4px;line-height:1.5}
+</style></head><body>
+<h1>地圖測向 · 畫房輪廓 · 自動立極</h1>
+<div class="sub">批次 7.6 — 兩點測向/畫房形心立極/24山扇形疊加(演算法與 fsc_sensors 同式,已驗證)</div>
+<div class="row">
+  <button class="chip on" data-t="bearing">兩點測向</button>
+  <button class="chip" data-t="house">畫房輪廓</button>
+  <button class="chip" data-t="clear">清除</button>
+  <button class="chip" id="satBtn">衛星圖</button>
+  <span style="font-size:13px;align-self:center">磁偏角 <input id="dec" type="number" value="-4.5" step="0.1" style="width:64px;border:1px solid var(--gold);border-radius:8px;background:transparent;padding:3px">°(台灣約 -4.5,西偏)</span>
+</div>
+<div id="map"></div>
+<div id="bar"><div id="big">請在地圖上點兩點測向,或切換「畫房輪廓」圈出建物。</div><div id="tags"></div>
+<div class="note">地圖方位=真北。「磁針讀數」欄位為換算後之磁北讀數(真北−磁偏角)。畫房:逐點點擊,雙擊收尾;形心=立極點(可拖曳微調),自動疊 24 山扇形;再點一點設「向」。</div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const map=L.map('map').setView([25.0330,121.5654],17);
+const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri'});
+osm.addTo(map);
+let satOn=false;
+document.getElementById('satBtn').onclick=e=>{satOn=!satOn;e.target.classList.toggle('on');
+  if(satOn){map.removeLayer(osm);sat.addTo(map)}else{map.removeLayer(sat);osm.addTo(map)}};
+const R=d=>d*Math.PI/180, D=r=>r*180/Math.PI;
+function bearing(a,b){const f1=R(a.lat),f2=R(b.lat),dl=R(b.lng-a.lng);
+  const y=Math.sin(dl)*Math.cos(f2),x=Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl);
+  return (D(Math.atan2(y,x))+360)%360}
+function dest(p,brg,m){const dr=m/6371000,t=R(brg),f1=R(p.lat),l1=R(p.lng);
+  const f2=Math.asin(Math.sin(f1)*Math.cos(dr)+Math.cos(f1)*Math.sin(dr)*Math.cos(t));
+  const l2=l1+Math.atan2(Math.sin(t)*Math.sin(dr)*Math.cos(f1),Math.cos(dr)-Math.sin(f1)*Math.sin(f2));
+  return L.latLng(D(f2),D(l2))}
+function centroid(pts){const k=Math.cos(R(pts[0].lat));
+  const xy=pts.map(p=>({x:p.lng*k,y:p.lat}));let a=0,cx=0,cy=0;
+  for(let i=0;i<xy.length;i++){const p=xy[i],q=xy[(i+1)%xy.length];const cr=p.x*q.y-q.x*p.y;a+=cr;cx+=(p.x+q.x)*cr;cy+=(p.y+q.y)*cr}
+  a/=2;if(Math.abs(a)<1e-12)return pts[0];
+  return L.latLng(cy/(6*a),cx/(6*a)/k)}
+function interp(deg){const i=Math.floor(((deg-337.5)%360+360)%360/15);
+  const m=M24[i],opp=M24[(i+12)%24];
+  const center=(337.5+i*15+7.5)%360;let lean=deg-center;if(lean>180)lean-=360;if(lean<-180)lean+=360;
+  const toB=Math.min(((deg-337.5)%15+15)%15,15-(((deg-337.5)%15+15)%15));
+  return{m,opp,lean,toB}}
+let tool='bearing',pts=[],layer=L.layerGroup().addTo(map),housePts=[],houseLayer=L.layerGroup().addTo(map),jiji=null,facingPt=null;
+document.querySelectorAll('.chip[data-t]').forEach(b=>b.onclick=()=>{
+  const t=b.dataset.t;
+  if(t==='clear'){pts=[];housePts=[];layer.clearLayers();houseLayer.clearLayers();jiji=null;facingPt=null;
+    document.getElementById('big').textContent='已清除。';document.getElementById('tags').innerHTML='';return}
+  tool=t;document.querySelectorAll('.chip[data-t]').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+function show(deg,label){
+  const dec=+document.getElementById('dec').value;
+  const r=interp(deg);
+  document.getElementById('big').textContent=label+':'+deg.toFixed(1)+'°(真北) → '+r.m+'山'+r.opp+'向';
+  const t=[];
+  t.push(['磁針讀數 '+(((deg-dec)%360+360)%360).toFixed(1)+'°','']);
+  t.push([Math.abs(r.lean)<=3?'正向':'兼 '+Math.abs(r.lean).toFixed(1)+'°'+(Math.abs(r.lean)>4.5?'(須替卦)':''),Math.abs(r.lean)>4.5?'warn':'']);
+  if(r.toB<1)t.push(['⚠ 騎縫線','warn']);
+  document.getElementById('tags').innerHTML=t.map(([s,c])=>`<span class="tag ${c}">${s}</span>`).join('');
+}
+function drawSectors(c,sittingDeg){
+  houseLayer.eachLayer(l=>{if(l._sector)houseLayer.removeLayer(l)});
+  for(let i=0;i<24;i++){
+    const a0=337.5+i*15,poly=[c];
+    for(let a=a0;a<=a0+15.001;a+=3)poly.push(dest(c,a%360,60));
+    const isSit=sittingDeg!=null&&Math.floor(((sittingDeg-337.5)%360+360)%360/15)===i;
+    const isFac=sittingDeg!=null&&Math.floor((((sittingDeg+180)-337.5)%360+360)%360/15)===i;
+    const p=L.polygon(poly,{color:'#8C6D3F',weight:.8,fillOpacity:isSit?.35:isFac?.3:.06,
+      fillColor:isSit?'#3E5C76':isFac?'#A63A2E':'#8C6D3F'});
+    p._sector=true;p.addTo(houseLayer);
+    const mid=dest(c,(a0+7.5)%360,72);
+    const lb=L.marker(mid,{icon:L.divIcon({className:'',html:'<div style="font-family:\'Noto Serif TC\',serif;font-size:13px;color:#5b4a2f;font-weight:700">'+M24[i]+'</div>',iconSize:[16,16]})});
+    lb._sector=true;lb.addTo(houseLayer);
+  }
+}
+map.on('click',e=>{
+  if(tool==='bearing'){
+    pts.push(e.latlng);
+    L.circleMarker(e.latlng,{radius:5,color:'#A63A2E'}).addTo(layer);
+    if(pts.length===2){
+      L.polyline(pts,{color:'#A63A2E',weight:2.5,dashArray:'6 4'}).addTo(layer);
+      show(bearing(pts[0],pts[1]),'測向');
+      pts=[];
+    }
+  }else if(tool==='house'){
+    if(jiji&&!facingPt){ // 已立極 → 此點設向
+      facingPt=e.latlng;
+      const d=bearing(jiji.getLatLng(),facingPt);
+      const sit=(d+180)%360;
+      L.polyline([jiji.getLatLng(),dest(jiji.getLatLng(),d,80)],{color:'#A63A2E',weight:2.5}).addTo(houseLayer);
+      drawSectors(jiji.getLatLng(),sit);
+      show(sit,'坐山(向線反推)');
+      return;
+    }
+    housePts.push(e.latlng);
+    L.circleMarker(e.latlng,{radius:4,color:'#3E5C76'}).addTo(houseLayer);
+    if(housePts.length>1)L.polyline(housePts.slice(-2),{color:'#3E5C76',weight:2}).addTo(houseLayer);
+  }
+});
+map.on('dblclick',e=>{
+  if(tool==='house'&&housePts.length>=3){
+    L.polygon(housePts,{color:'#3E5C76',weight:2,fillOpacity:.12}).addTo(houseLayer);
+    const c=centroid(housePts);
+    jiji=L.marker(c,{draggable:true,title:'立極點(可拖曳)'}).addTo(houseLayer);
+    drawSectors(c,null);
+    jiji.on('drag',()=>drawSectors(jiji.getLatLng(),facingPt?((bearing(jiji.getLatLng(),facingPt)+180)%360):null));
+    document.getElementById('big').textContent='立極點已定(形心)。再點一點設「向」,或拖曳立極點微調。';
+    housePts=[];
+  }
+});
+map.doubleClickZoom.disable();
+</script></body></html>

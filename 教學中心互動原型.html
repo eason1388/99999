@@ -1,0 +1,524 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>教學中心 · 名詞庫 — 批次 7.9 互動原型</title>
+<style>
+:root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",sans-serif;display:flex;flex-direction:column;align-items:center;padding:14px}
+h1{font-family:"Noto Serif TC",serif;font-size:20px;color:var(--gold)}
+.sub{font-size:12px;opacity:.6;margin:2px 0 10px}
+#search{width:min(680px,94vw);padding:10px 16px;border:1.5px solid var(--gold);border-radius:99px;background:#fff;font-size:15px}
+#results{width:min(680px,94vw)}
+.hit{background:var(--card);border-radius:12px;padding:10px 14px;margin:8px 0;cursor:pointer}
+.hit b{font-family:"Noto Serif TC",serif;color:var(--gold)}
+.hit .src{font-size:11px;opacity:.5}
+.panel{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:980px;margin-top:12px}
+.box{background:var(--card);border-radius:16px;padding:14px;width:min(460px,94vw)}
+.box h2{font-family:"Noto Serif TC",serif;font-size:16px;color:var(--gold);margin-bottom:8px}
+.lvl{margin-bottom:6px}
+.lvl>b{cursor:pointer;display:block;padding:7px 10px;background:#fff;border-radius:10px;font-size:14.5px}
+.lesson{padding:8px 12px;font-size:13.5px;border-bottom:1px dashed #ddd;cursor:pointer}
+.lesson:hover{background:rgba(140,109,63,.07)}
+.lesson .sum{display:none;font-size:12.5px;opacity:.7;margin-top:4px;line-height:1.6}
+.lesson.open .sum{display:block}
+.prog{font-size:11px;opacity:.5}
+.term{color:var(--gold);border-bottom:1px dashed var(--gold);cursor:pointer}
+#pop{position:fixed;left:50%;bottom:-100%;transform:translateX(-50%);width:min(520px,94vw);background:var(--card);border-radius:20px 20px 0 0;padding:18px 22px;box-shadow:0 -4px 24px rgba(0,0,0,.18);transition:bottom .28s;z-index:9}
+#pop.show{bottom:0}
+#pop h3{font-family:"Noto Serif TC",serif;color:var(--gold);margin-bottom:6px}
+#pop p{font-size:14px;line-height:1.7}
+#pop .src{font-size:11px;opacity:.5;margin-top:6px}
+#pop .rel{margin-top:8px}
+#pop .rel span{display:inline-block;border:1px solid var(--gold);border-radius:99px;padding:2px 10px;font-size:12px;margin:2px;cursor:pointer}
+#pop button{margin-top:10px;border:none;background:var(--gold);color:#fff;border-radius:99px;padding:7px 16px;cursor:pointer}
+.chip{display:inline-block;border:1px solid var(--gold);border-radius:99px;padding:3px 12px;font-size:13px;margin:2px;cursor:pointer}
+.chip.on{background:var(--gold);color:#fff}
+</style></head><body>
+<h1>教學中心 · 名詞庫</h1>
+<div class="sub">批次 7.9 — 34 詞條(皆附出處)+ 24 課學習路徑 · 任何名詞即搜即答</div>
+<input id="search" placeholder="搜尋任何名詞,例:什麼叫騎縫線?">
+<div id="results"></div>
+<div class="panel">
+  <div class="box"><h2>學習路徑</h2><div id="path"></div></div>
+  <div class="box"><h2>名詞庫瀏覽</h2><div id="glossaryList" style="max-height:420px;overflow:auto"></div></div>
+</div>
+<div id="pop"><h3 id="pTitle"></h3><p id="pDef"></p><div class="src" id="pSrc"></div><div class="rel" id="pRel"></div><button onclick="pop.classList.remove('show')">關閉</button></div>
+<script>
+const DATA={
+ "glossary": [
+  {
+   "term": "二十四山",
+   "definition": "羅盤將360°分為24格,每格15°,由八天干、十二地支、四維卦組成,是立向與判位的基本單位。",
+   "source_ref": "通行羅經解",
+   "related": [
+    "三元龍",
+    "兼向"
+   ]
+  },
+  {
+   "term": "三元龍",
+   "definition": "二十四山依地元、天元、人元分為三組,每卦宮各一;玄空挨星之順逆即由所屬元龍之陰陽決定。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "二十四山",
+    "替卦"
+   ]
+  },
+  {
+   "term": "兼向",
+   "definition": "坐向偏離山之中線超過約3°稱兼,兼左或兼右;超過約4.5°玄空須改用替卦起星。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "替卦",
+    "騎縫線"
+   ]
+  },
+  {
+   "term": "騎縫線",
+   "definition": "讀數正壓兩山交界之線,主氣雜不清,立向大忌;本系統距山界1°內即警告。",
+   "source_ref": "通行羅經解",
+   "related": [
+    "空亡",
+    "兼向"
+   ]
+  },
+  {
+   "term": "空亡",
+   "definition": "泛指落於卦交界或戊己分金等無氣可乘之線位;立向逢之主敗,須微調避開。",
+   "source_ref": "通行羅經解",
+   "related": [
+    "分金",
+    "騎縫線"
+   ]
+  },
+  {
+   "term": "分金",
+   "definition": "一百二十分金每格3°,每山五格;口訣「丙丁旺、庚辛相」為可用珠寶,「甲乙孤、壬癸虛」差錯,「戊己」龜甲空亡。",
+   "source_ref": "三合通行口訣",
+   "related": [
+    "空亡",
+    "二十四山"
+   ]
+  },
+  {
+   "term": "穿山七十二龍",
+   "definition": "每格5°,六十甲子加十二空亡格,察來龍入首之氣,以納音論生剋。",
+   "source_ref": "通行羅經解",
+   "related": [
+    "透地六十龍",
+    "納音"
+   ]
+  },
+  {
+   "term": "透地六十龍",
+   "definition": "每支宮五龍各6°,甲子起於壬,察入首束氣定穴,與穿山龍互參。",
+   "source_ref": "通行羅經解",
+   "related": [
+    "穿山七十二龍",
+    "分金"
+   ]
+  },
+  {
+   "term": "納音",
+   "definition": "六十甲子每兩柱配一五行名(如甲子乙丑海中金),用於龍法與命理。",
+   "source_ref": "三命通會",
+   "related": [
+    "穿山七十二龍"
+   ]
+  },
+  {
+   "term": "玄空飛星",
+   "definition": "以元運與坐向排出九宮山、向、運三星,論宅吉凶旺衰的主流理氣派。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "山星",
+    "向星",
+    "運星"
+   ]
+  },
+  {
+   "term": "山星",
+   "definition": "管人丁健康之星,坐宮見當運山星為「到山」,主旺丁。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "向星",
+    "旺山旺向"
+   ]
+  },
+  {
+   "term": "向星",
+   "definition": "管財祿之星,向宮見當運向星為「到向」,主旺財。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "山星",
+    "旺山旺向"
+   ]
+  },
+  {
+   "term": "運星",
+   "definition": "元運星入中順飛所得之基礎盤,山向星皆由此起。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "玄空飛星"
+   ]
+  },
+  {
+   "term": "旺山旺向",
+   "definition": "當運山星到坐、向星到向,丁財兩旺之最吉格局。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "上山下水",
+    "雙星會向"
+   ]
+  },
+  {
+   "term": "上山下水",
+   "definition": "山星下水、向星上山,丁財兩損之格局,須以巒頭補救。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "旺山旺向"
+   ]
+  },
+  {
+   "term": "雙星會向",
+   "definition": "山向二星同會向首,旺財而丁稍遜,向前有水後有山可解。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "雙星會坐"
+   ]
+  },
+  {
+   "term": "雙星會坐",
+   "definition": "山向二星同會坐山,旺丁而財稍遜,坐後有水放光可解。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "雙星會向"
+   ]
+  },
+  {
+   "term": "替卦",
+   "definition": "兼向過度時改以口訣替星入中(子癸甲申貪狼、壬卯乙未坤巨門…),又稱起星。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "兼向",
+    "三元龍"
+   ]
+  },
+  {
+   "term": "城門訣",
+   "definition": "向首左右兩宮,合生成之數者為正城門;該宮同元龍屬陰者可用,開門納氣可催旺。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "向星"
+   ]
+  },
+  {
+   "term": "父母三般卦",
+   "definition": "九宮山向運三星皆成147、258、369之組合,通乘三元之氣,大吉之局。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "玄空飛星"
+   ]
+  },
+  {
+   "term": "伏吟",
+   "definition": "飛星盤與洛書元旦盤相同,氣伏不動主凶;反吟為合十相沖,亦凶。",
+   "source_ref": "沈氏玄空學",
+   "related": [
+    "玄空飛星"
+   ]
+  },
+  {
+   "term": "八宅",
+   "definition": "以宅卦(坐山所屬卦)排八方遊星:生氣、延年、天醫、伏位四吉,五鬼、六煞、禍害、絕命四凶。",
+   "source_ref": "八宅明鏡",
+   "related": [
+    "遊星",
+    "東四西四"
+   ]
+  },
+  {
+   "term": "遊星",
+   "definition": "八宅之八星:生氣貪狼最吉,天醫巨門主健康,延年武曲主壽,伏位輔弼;絕命破軍最凶。",
+   "source_ref": "八宅明鏡",
+   "related": [
+    "八宅"
+   ]
+  },
+  {
+   "term": "東四西四",
+   "definition": "坎離震巽為東四,乾坤艮兌為西四;宅命相配同組為吉。",
+   "source_ref": "八宅明鏡",
+   "related": [
+    "命卦",
+    "八宅"
+   ]
+  },
+  {
+   "term": "命卦",
+   "definition": "由出生年(立春界)與性別推得之本命卦,決定個人吉凶方位。",
+   "source_ref": "八宅明鏡",
+   "related": [
+    "東四西四"
+   ]
+  },
+  {
+   "term": "紫白飛星",
+   "definition": "年月日時各有飛星入中,九星輪轉;一白六白八白九紫為吉,二黑五黃為凶。",
+   "source_ref": "紫白訣",
+   "related": [
+    "五黃",
+    "玄空飛星"
+   ]
+  },
+  {
+   "term": "五黃",
+   "definition": "廉貞大煞,所到之方忌動土修造;以金洩之(如金屬鐘鈴)。",
+   "source_ref": "紫白訣",
+   "related": [
+    "紫白飛星",
+    "三煞"
+   ]
+  },
+  {
+   "term": "太歲",
+   "definition": "年支所在方位,「太歲頭上不動土」,忌坐忌沖。",
+   "source_ref": "通書通例",
+   "related": [
+    "歲破",
+    "三煞"
+   ]
+  },
+  {
+   "term": "歲破",
+   "definition": "太歲對沖之方,動輒破財損丁,修造尤忌。",
+   "source_ref": "通書通例",
+   "related": [
+    "太歲"
+   ]
+  },
+  {
+   "term": "三煞",
+   "definition": "依年支三合局而定之劫煞災煞歲煞三方(如午年煞北),忌坐不忌向。",
+   "source_ref": "通書通例",
+   "related": [
+    "太歲",
+    "五黃"
+   ]
+  },
+  {
+   "term": "文昌位",
+   "definition": "利讀書考試之方;本命文昌依年干(甲巳乙午…),流年文昌為四綠所到宮。",
+   "source_ref": "通行命理口訣",
+   "related": [
+    "桃花位"
+   ]
+  },
+  {
+   "term": "桃花位",
+   "definition": "咸池之方,依年支三合(申子辰在酉…),主人緣姻緣。",
+   "source_ref": "通行命理口訣",
+   "related": [
+    "文昌位"
+   ]
+  },
+  {
+   "term": "立極點",
+   "definition": "宅之中心點,九宮與二十四山皆由此展開;本系統以建物輪廓形心自動求得,可手動微調。",
+   "source_ref": "近代陽宅通例",
+   "related": [
+    "二十四山"
+   ]
+  },
+  {
+   "term": "磁偏角",
+   "definition": "磁北與真北之夾角,隨地點與年份變化;本系統依 WMM 模型自動修正,判向一律以真北為準。",
+   "source_ref": "WMM 世界磁場模型",
+   "related": [
+    "立極點"
+   ]
+  }
+ ],
+ "lessons": [
+  {
+   "level": "入門",
+   "items": [
+    {
+     "title": "認識羅盤:天池、內盤、外盤",
+     "summary": "羅盤三大件:天池(指針)居中定磁北;內盤刻各圈層可轉;外盤方形有天心十字線。電子羅盤將這些數位化,天心線即畫面紅十字。",
+     "level": 1
+    },
+    {
+     "title": "什麼是二十四山",
+     "summary": "見名詞庫「二十四山」;本課帶你在羅盤上逐一認識八干四維十二支的位置與五行。",
+     "level": 1
+    },
+    {
+     "title": "第一次量坐向",
+     "summary": "背貼牆面、手機水平、遠離金屬,讀數穩定後看判讀列:系統自動告訴你「某山某向」,不必換算。",
+     "level": 1
+    },
+    {
+     "title": "坐與向:別搞反了",
+     "summary": "坐=建物背靠方,向=面朝方,兩者相差180°。量測前先在系統選定你讀的是坐還是向。",
+     "level": 1
+    },
+    {
+     "title": "看懂判讀列警告",
+     "summary": "騎縫、空亡、差錯三種紅色警告代表線位不可用,微調幾度避開即可,本課示範。",
+     "level": 1
+    },
+    {
+     "title": "什麼是元運",
+     "summary": "三元九運每運20年,2024起入九運;元運決定當旺之星,是玄空論吉凶的時間座標。",
+     "level": 1
+    },
+    {
+     "title": "新手看飛星盤",
+     "summary": "九宮每宮三個數字:左山星管丁、右向星管財、下運星為底;金色=當運旺星。",
+     "level": 1
+    },
+    {
+     "title": "我的命卦與吉方",
+     "summary": "輸入出生年性別得命卦,系統自動顯示你的四吉方;床頭書桌朝吉方的簡單應用。",
+     "level": 1
+    }
+   ]
+  },
+  {
+   "level": "進階",
+   "items": [
+    {
+     "title": "飛星排盤原理:入中與順逆",
+     "summary": "運星入中順飛;山向星依元龍陰陽定順逆,本課手排一盤與系統對照。",
+     "level": 2
+    },
+    {
+     "title": "四大格局",
+     "summary": "旺山旺向、上山下水、雙星會向、雙星會坐的成因與趨避。",
+     "level": 2
+    },
+    {
+     "title": "兼向與替卦",
+     "summary": "超過4.5°用替卦口訣起星,本課解析口訣與無替可尋。",
+     "level": 2
+    },
+    {
+     "title": "城門訣催旺",
+     "summary": "正副城門判法與可用條件,開門開窗納氣實務。",
+     "level": 2
+    },
+    {
+     "title": "流年飛星疊宅盤",
+     "summary": "年星加臨宅盤的吉凶加減,五黃二黑到門到房的處理。",
+     "level": 2
+    },
+    {
+     "title": "八宅與玄空並用",
+     "summary": "宅卦遊星與飛星盤矛盾時如何取捨:各派並列、以事驗證。",
+     "level": 2
+    },
+    {
+     "title": "分金納音進階",
+     "summary": "珠寶分金之外,納音與坐山生剋的取捨。",
+     "level": 2
+    },
+    {
+     "title": "擇時基礎:月日飛星",
+     "summary": "月家日家紫白的排法與動工擇日應用。",
+     "level": 2
+    }
+   ]
+  },
+  {
+   "level": "專業",
+   "items": [
+    {
+     "title": "三般卦專論",
+     "summary": "父母三般與連珠三般的識別、真假與運用。",
+     "level": 3
+    },
+    {
+     "title": "伏吟反吟與化解",
+     "summary": "全盤與單宮伏反吟的層次與救應。",
+     "level": 3
+    },
+    {
+     "title": "穿山透地與分金聯用",
+     "summary": "龍、穴、向三合一的立向工作流。",
+     "level": 3
+    },
+    {
+     "title": "陰宅立向實務",
+     "summary": "消砂納水、收山出煞在電子羅盤上的操作。",
+     "level": 3
+    },
+    {
+     "title": "七十二龍空亡格研究",
+     "summary": "空亡格諸派異說與實務取捨(pending_expert)。",
+     "level": 3
+    },
+    {
+     "title": "門派引擎與自訂規則",
+     "summary": "用規則編輯器把師承口訣寫成可執行規則包。",
+     "level": 3
+    },
+    {
+     "title": "八字喜用與宅配",
+     "summary": "由強弱定喜用、由喜用配坐向樓層顏色的完整鏈路。",
+     "level": 3
+    },
+    {
+     "title": "案例復盤方法",
+     "summary": "用系統快照重現舊案,對照事後應驗修正判斷。",
+     "level": 3
+    }
+   ]
+  }
+ ]
+};
+const pop=document.getElementById('pop');
+const byTerm=Object.fromEntries(DATA.glossary.map(g=>[g.term,g]));
+// bigram TF-IDF(與 fsc_ai LocalRetriever 同式)
+const docs=DATA.glossary.map(g=>g.term+g.definition).concat(
+  DATA.lessons.flatMap(l=>l.items.map(i=>i.title+i.summary)));
+const meta=DATA.glossary.map(g=>({kind:'詞條',title:g.term,text:g.definition,src:g.source_ref,g}))
+ .concat(DATA.lessons.flatMap(l=>l.items.map(i=>({kind:l.level+'課程',title:i.title,text:i.summary,src:'教學中心'}))));
+const grams=s=>{const t=s.replace(/\s/g,''),o={};for(let i=0;i+1<t.length;i++){const g=t.slice(i,i+2);o[g]=(o[g]||0)+1}return o};
+const idx=docs.map(grams),df={};
+idx.forEach(d=>Object.keys(d).forEach(g=>df[g]=(df[g]||0)+1));
+function search(q,k=6){const qg=grams(q),n=docs.length,out=[];
+  idx.forEach((d,i)=>{let s=0;for(const g in qg){if(d[g])s+=qg[g]*d[g]*Math.log(n/(df[g]||1)+1)}
+    if(s>0&&q.includes(meta[i].title))s+=100; // 標題精確命中加權
+    if(s>0)out.push([s,i])});
+  out.sort((a,b)=>b[0]-a[0]);return out.slice(0,k).map(([s,i])=>meta[i])}
+function showTerm(t){const g=byTerm[t];if(!g)return;
+  document.getElementById('pTitle').textContent=g.term;
+  document.getElementById('pDef').textContent=g.definition;
+  document.getElementById('pSrc').textContent='出處:'+g.source_ref;
+  document.getElementById('pRel').innerHTML='相關:'+g.related.map(r=>'<span onclick="showTerm(\''+r+'\')">'+r+'</span>').join('');
+  pop.classList.add('show')}
+document.getElementById('search').oninput=e=>{
+  const q=e.target.value.trim(),R=document.getElementById('results');
+  if(q.length<2){R.innerHTML='';return}
+  R.innerHTML=search(q).map(m=>'<div class="hit" onclick="'+(m.g?'showTerm(\''+m.title+'\')':'')+'"><b>'+m.title+'</b> <span style="font-size:11px;opacity:.5">'+m.kind+'</span><br><span style="font-size:13px">'+m.text.slice(0,60)+'…</span><div class="src">'+m.src+'</div></div>').join('')||'<div class="hit">查無結果——問 AI 顧問(V2 接入)</div>'}
+// 學習路徑
+const path=document.getElementById('path');
+DATA.lessons.forEach((lv,li)=>{
+  const d=document.createElement('div');d.className='lvl';
+  d.innerHTML='<b>'+lv.level+'('+lv.items.length+' 課)'+(li===0?' — 建議從這裡開始':'')+'</b>';
+  const wrap=document.createElement('div');wrap.style.display=li===0?'block':'none';
+  lv.items.forEach((it,k)=>{const l=document.createElement('div');l.className='lesson';
+    l.innerHTML='<span class="prog">'+ (k+1) +'</span> '+linkTerms(it.title)+'<div class="sum">'+linkTerms(it.summary)+'</div>';
+    l.onclick=e=>{if(e.target.classList.contains('term'))return;l.classList.toggle('open')};wrap.appendChild(l)});
+  d.querySelector('b').onclick=()=>wrap.style.display=wrap.style.display==='none'?'block':'none';
+  d.appendChild(wrap);path.appendChild(d)});
+// 名詞自動高亮
+function linkTerms(s){let out=s;
+  for(const t of Object.keys(byTerm).sort((a,b)=>b.length-a.length))
+    out=out.split(t).join(''+t+'');
+  return out.replace(//g,'<span class="term" onclick="showTerm(this.textContent)">').replace(//g,'</span>')}
+// 名詞庫瀏覽
+document.getElementById('glossaryList').innerHTML=DATA.glossary.map(g=>
+ '<div class="lesson" onclick="showTerm(\''+g.term+'\')"><b style="font-family:\'Noto Serif TC\',serif">'+g.term+'</b> <span style="font-size:12px;opacity:.6">'+g.definition.slice(0,28)+'…</span></div>').join('');
+</script></body></html>
