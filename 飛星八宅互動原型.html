@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>玄空飛星 · 八宅 — 批次 7.4 互動原型</title>
+<title>玄空飛星 · 八宅 — 互動原型</title>
 <style>
 :root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F}
 *{box-sizing:border-box;margin:0}
@@ -28,9 +28,19 @@ h1{font-family:"Noto Serif TC",serif;font-size:20px;color:var(--gold)}
 .badge.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
 .badge.red{background:rgba(166,58,46,.12);color:var(--red);border-color:var(--red)}
 .badge.green{background:rgba(74,107,79,.12);color:var(--green);border-color:var(--green)}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet"><style>
+*{-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;padding:22px 14px 44px}
+h1{font-family:'Noto Serif TC',serif !important;font-size:21px;letter-spacing:.06em;font-weight:900}
+.sub{letter-spacing:.03em;margin:4px 0 16px !important}
+.chip{transition:all .15s;font-weight:500}
+.chip.on{box-shadow:0 2px 10px rgba(140,109,63,.35)}
+.box,#bar,#panel,#info,#results .hit{box-shadow:0 2px 16px rgba(43,38,32,.07);border:1px solid rgba(140,109,63,.15)}
+input,select{background:#fff !important}
+button{font-family:inherit}
 </style></head><body>
-<h1>玄空飛星盤 · 八宅盤</h1>
-<div class="sub">批次 7.4 — 引擎輸出已與 golden 432 盤全數比對一致 · 上南下北</div>
+<h1>玄空飛星・八宅</h1>
+<div class="sub">九運二十四山|下卦/替卦|格局・城門・三般卦</div>
 <div class="row" id="periods"></div>
 <div class="row" id="mts"></div>
 <div class="row">

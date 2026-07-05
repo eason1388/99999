@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>八字命盤 · 八字×風水整合評分 — 批次 7.7 互動原型</title>
+<title>八字命盤 · 八字×風水整合評分 — 互動原型</title>
 <style>
 :root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F;--blue:#3E5C76}
 *{box-sizing:border-box;margin:0}
@@ -25,9 +25,19 @@ td.gz{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:700}
 .note{font-size:11.5px;opacity:.55;margin-top:6px;line-height:1.5}
 .dy{display:inline-block;text-align:center;margin:3px;padding:5px 8px;background:#fff;border-radius:10px;font-size:13px}
 .dy b{font-family:"Noto Serif TC",serif;display:block;font-size:17px}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet"><style>
+*{-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;padding:22px 14px 44px}
+h1{font-family:'Noto Serif TC',serif !important;font-size:21px;letter-spacing:.06em;font-weight:900}
+.sub{letter-spacing:.03em;margin:4px 0 16px !important}
+.chip{transition:all .15s;font-weight:500}
+.chip.on{box-shadow:0 2px 10px rgba(140,109,63,.35)}
+.box,#bar,#panel,#info,#results .hit{box-shadow:0 2px 16px rgba(43,38,32,.07);border:1px solid rgba(140,109,63,.15)}
+input,select{background:#fff !important}
+button{font-family:inherit}
 </style></head><body>
-<h1>八字命盤 · 八字×風水整合評分</h1>
-<div class="sub">批次 7.7 — 四柱/十神/五行強弱/大運 + 玄空整合評分(演算法已過 10 項驗證;引擎輸出與 golden 一致)</div>
+<h1>八字命盤・宅命整合</h1>
+<div class="sub">四柱十神・五行強弱・大運|房屋適配評分</div>
 <div style="margin-bottom:8px">
   出生 <input id="bd" type="date" value="1990-08-15"> <input id="bt" type="time" value="14:30">
   <select id="sex"><option value="1">男</option><option value="0">女</option></select>

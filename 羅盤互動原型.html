@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Master Feng Shui Compass — 批次 7.3 互動原型</title>
+<title>Master Feng Shui Compass — 互動原型</title>
 <style>
 :root{--paper:#FAF7F2;--card:#F1ECE2;--gold:#8C6D3F;--ink:#2B2620;--red:#A63A2E;--green:#4A6B4F;--blue:#3E5C76}
 *{box-sizing:border-box;margin:0}
@@ -28,9 +28,19 @@ input[type=number]{width:80px;padding:4px;border:1px solid var(--gold);border-ra
 #card .lbl{color:var(--gold);font-weight:600}
 #card button{margin-top:10px;border:none;background:var(--gold);color:#fff;border-radius:999px;padding:8px 18px;font-size:14px;cursor:pointer}
 .hint{font-size:12px;opacity:.55;margin-top:8px}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet"><style>
+*{-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;padding:22px 14px 44px}
+h1{font-family:'Noto Serif TC',serif !important;font-size:21px;letter-spacing:.06em;font-weight:900}
+.sub{letter-spacing:.03em;margin:4px 0 16px !important}
+.chip{transition:all .15s;font-weight:500}
+.chip.on{box-shadow:0 2px 10px rgba(140,109,63,.35)}
+.box,#bar,#panel,#info,#results .hit{box-shadow:0 2px 16px rgba(43,38,32,.07);border:1px solid rgba(140,109,63,.15)}
+input,select{background:#fff !important}
+button{font-family:inherit}
 </style></head><body>
-<h1>全能玄學羅盤 · 互動原型</h1>
-<div class="sub">批次 7.3 — 三合盤圈層(真實資料包渲染)· 拖曳旋轉 · 點擊任一格查詳解</div>
+<h1>全能玄學羅盤</h1>
+<div class="sub">三合羅盤・即時判讀:山向、兼向、騎縫、分金</div>
 <div class="chips" id="modes">
 <button class="chip" data-m="beginner">新手(3圈)</button>
 <button class="chip on" data-m="sanhe">三合盤</button>
