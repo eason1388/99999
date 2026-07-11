@@ -74,7 +74,11 @@ function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
   const O=(125.04-1934.136*t)*Math.PI/180;
   return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
 function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
-  for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}return jd}
+  for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-0.5)jd-=365.2422; // 年份錨定:立春等歲首節氣會誤收斂到隔年,拉回本年
+  if(jd<jdn(y,1,1)-0.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
 const gzi=(s,b)=>((6*s-5*b)%60+60)%60, gz=i=>ST[i%10]+BR[i%12];
 function fourPillars(Y,M,D,h){
   const J=jdn(Y,M,D)+(h-12)/24-8/24; // 當地(+8)→UTC:節氣判界須用世界時

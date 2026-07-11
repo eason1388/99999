@@ -69,9 +69,11 @@ function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
   const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
   const O=(125.04-1934.136*t)*Math.PI/180;
   return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
-function termJdn(y,target){let jd=jdn(y,3,21);
-  jd+=((target%360)+360)%360/360*365.2422;
+function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
   for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-0.5)jd-=365.2422; // 年份錨定:立春等歲首節氣會誤收斂到隔年,拉回本年
+  if(jd<jdn(y,1,1)-0.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
   return jd}
 function suiYear(y,m,d){const lc=termJdn(y,315);return jdn(y,m,d)-8/24>=lc?y:y-1} // 當地正午→UTC
 function monthIndex(y,m,d){const lon=sunLon(jdn(y,m,d)-8/24,y);return Math.floor(((lon-315)%360+360)%360/30)}
