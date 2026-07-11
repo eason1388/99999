@@ -88,8 +88,12 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
   <select id="sex"><option value="1">男</option><option value="0">女</option></select>
   <div class="seg"><button id="byHouse" class="on">吉凶依宅卦</button><button id="byMing">依我的命卦</button></div>
 </div>
-</div><div id="colR"><div class="panel"><h2>玄空飛星盤</h2><div class="grid9" id="g9"></div><div class="note" id="pattNote"></div></div>
+</div><div id="colR"><div class="panel"><h2>玄空飛星盤</h2><div class="grid9" id="g9"></div><div class="note" id="pattNote"></div><div class="note">點任一宮 → 山向星組合斷語與化解</div></div>
 <div class="panel"><h2>八宅吉凶方位</h2><div class="dirs" id="dirs"></div><div class="note">綠=吉方(宜門、房、桌);紅=凶方(宜廁、儲藏,忌久坐)。依宅卦排大遊年。</div></div>
+<div class="panel"><h2>房間佈局檢核</h2>
+<div id="roomSel"></div>
+<button id="roomChk" class="mchip" style="font-size:14.5px;margin-top:6px">檢核佈局</button>
+<div id="roomOut" class="note" style="font-size:14px"></div></div>
 <div class="panel"><h2>進階判讀</h2><div id="adv"></div><div class="note" id="yearNote"></div></div>
 <div class="panel"><h2>量測紀錄</h2>
 <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -279,10 +283,11 @@ function update(){
   const sp=palaceOf(sit),fp=palaceOf(fac),zhai=palaceOf(sit);
   const hi=n=>n===period?'<span class="w">'+n+'</span>':n;
   const annStar=(11-flowYear%9-1+9)%9+1, ann=fly(annStar);
+  window._g9={c,ann,zhai};
   document.getElementById('g9').innerHTML=GRID.flat().map(p=>{
     const yx=p==='中'?'':youxing(zhai,p);const ji=yx&&'生氣天醫延年伏位'.includes(yx);
     const a=ann[p], bad=(a===5||a===2)&&p!=='中';
-    return `<div class="cell ${p===sp?'sit':p===fp?'fac':''}"><div class="pn">${p}${p==='中'?'宮':'・'+(DIRZH[p]||'')}
+    return `<div class="cell ${p===sp?'sit':p===fp?'fac':''}" onclick="comboCard('${p}')" style="cursor:pointer"><div class="pn">${p}${p==='中'?'宮':'・'+(DIRZH[p]||'')}
     <span style="float:right;font-size:11px;color:${bad?'var(--red)':'var(--dim)'}" title="流年星">年${a}${a===5?'⚠':''}</span></div>
     <div class="st">${hi(c.mountain[p])}${hi(c.facing_stars[p])}</div>
     ${yx?`<div class="bz ${ji?'j':'x'}">${yx}</div>`:''}</div>`}).join('');
@@ -303,6 +308,8 @@ function update(){
     <span style="color:var(--dim)">${DIRZH[g]}</span><b style="color:${ji?'var(--green)':'var(--red)'}">${yx}</b></div>`}).join('');
   document.getElementById('adv').innerHTML=
     `<div class="row2"><span>宅卦</span><b>${zhai}宅(${'坎離震巽'.includes(zhai)?'東四宅':'西四宅'})</b></div>
+     <div class="row2"><span>人盤中針(消砂)</span><b>${M24S[Math.floor((((heading+7.5)-337.5)%360+360)%360/15)]}山</b></div>
+     <div class="row2"><span>天盤縫針(納水)</span><b>${M24S[Math.floor((((heading-7.5)-337.5)%360+360)%360/15)]}山</b></div>
      <div class="row2"><span>穿山七十二龍</span><b>${r.d72.name?r.d72.name+'(納音'+r.d72.nayin+')':'空亡格 ⚠'}</b></div>
      <div class="row2"><span>透地六十龍</span><b>${r.d60.name}(納音${r.d60.nayin})</b></div>
      <div class="row2"><span>旺財方(向星${period})</span><b>${DIRZH[Object.keys(c.facing_stars).find(p=>p!=='中'&&c.facing_stars[p]===period)]||'—'}</b></div>
@@ -490,6 +497,96 @@ function askQA(){const q=document.getElementById('qaIn').value.trim();if(!q)retu
   document.getElementById('qaOut').innerHTML='<div style="color:var(--gold);margin-bottom:4px">Q:'+q+'</div><div style="color:var(--ink)">'+qa(q)+'</div>';}
 document.getElementById('qaBtn').onclick=askQA;
 document.getElementById('qaIn').addEventListener('keydown',e=>{if(e.key==='Enter')askQA()});
+const COMBO={
+'11':['文貴桃花,利名聲智慧',1,'當令發科名;失令防漂泊酒色'],
+'12':['土水相剋:腸胃病、婦人病',-1,'以金通關(銅器、金屬圓物)'],
+'13':['水木相生:長男得志、利遷動創業',1,''],
+'14':['一四同宮,準發科名,文昌第一',2,'此方安書桌文房四寶'],
+'15':['土剋水:耳腎泌尿之疾、陰病',-2,'以金洩土生水'],
+'16':['金水相生:文武全才、利官貴',2,''],
+'17':['金水多情:桃花人緣、出門有利',1,'失令防酒色破財'],
+'18':['土剋水:耳腎之疾、兄弟不和',-1,'以金通關'],
+'19':['水火既濟:聰明喜慶',0,'失令防目疾心病'],
+'22':['病符疊至:疾病纏綿、田產是非',-2,'重金屬洩之(銅鈴、六帝錢)'],
+'23':['鬥牛煞:是非官訟、口舌不斷',-2,'以火通關,忌再見木'],
+'24':['風行地上:婆媳不和、腹疾',-1,''],
+'25':['二五交加必損主,重病災厄',-2,'大凶!忌臥忌門,重金洩之'],
+'26':['土金相生:置業進財、利醫卜',1,''],
+'27':['二七合先天火:進財亦防火災',0,'慎用明火,忌紅色堆聚'],
+'28':['二八合十:田產之富',1,''],
+'29':['火土相生:田產婦貴',0,'失令防目疾'],
+'33':['蚩尤疊至:官訟盜劫、是非',-2,'以火洩木化之'],
+'34':['風雷相薄:昧事無常、性乖僻',-1,''],
+'35':['木剋土:窮困、足疾肝膽之疾',-2,'以火通關'],
+'36':['金剋木:長男傷、防車禍刀傷',-2,'以水通關'],
+'37':['穿心煞:劫盜官非',-2,'以水通關'],
+'38':['木剋土:損小口、少男之災',-1,'以火通關'],
+'39':['木火通明:聰明科甲',2,''],
+'44':['文曲重逢:科名亦主風流',1,''],
+'45':['木剋土:瘟病、乳疾',-2,'以火通關'],
+'46':['金剋木:長女病、股疾',-1,'以水通關'],
+'47':['金剋木:桃花刀傷、閨幃不睦',-1,''],
+'48':['木剋土:小口損傷',-1,'以火通關'],
+'49':['木火通明:文明喜慶',1,''],
+'55':['五黃疊至:大凶,災病連連',-2,'此方宜靜不宜動,重金洩之'],
+'56':['土金相生:置業,防孤',0,''],
+'57':['土金:口舌毒害之虞',-2,''],
+'58':['土疊:骨節之病、少男災',-1,'以金洩'],
+'59':['火毒攻心? 災晦目疾',-2,''],
+'66':['乾金疊:權威武貴,亦主孤剋',1,''],
+'67':['交劍煞:刀兵劫掠、口角',-2,'以水通關'],
+'68':['土金相生:武貴進財、置產大利',2,''],
+'69':['火燒天門:長房血症肺疾、忤逆',-2,'以土通關'],
+'77':['破軍疊:口舌盜劫',-1,''],
+'78':['土金相生:進財、少男得利',1,''],
+'79':['火剋金:回祿之災(防火)、口舌',-2,'以土通關'],
+'88':['八白疊臨:田產大旺,當運極吉',2,''],
+'89':['火土相生:喜慶婚喜、文明進財',2,''],
+'99':['九紫疊:喜慶文明',1,'過旺防目疾血症']};
+function comboCard(pal){
+  const g=window._g9; if(!g)return;
+  if(pal==='中'){document.getElementById('cT').textContent='中宮';
+    document.getElementById('cB').innerHTML='<p>中宮為立極之處,山向星'+g.c.mountain['中']+'/'+g.c.facing_stars['中']+'入中,不論方位吉凶,乃全盤之樞紐。</p>';
+    card.classList.add('show');return}
+  const m=g.c.mountain[pal],f=g.c.facing_stars[pal];
+  const key=[Math.min(m,f),Math.max(m,f)].join('');
+  const e=COMBO[key]||['組合待考',0,''];
+  const dang=(m===period||f===period);
+  const a=g.ann[pal];
+  const jzh=e[1]>=2?'大吉':e[1]===1?'吉':e[1]===0?'平':e[1]===-1?'小凶':'凶';
+  document.getElementById('cT').textContent=pal+'宮('+(DIRZH[pal]||'')+')山'+m+'向'+f;
+  document.getElementById('cB').innerHTML=
+    '<p><span class="lbl">斷語:</span>'+e[0]+'(<b style="color:'+(e[1]>0?'var(--green)':e[1]<0?'var(--red)':'var(--gold)')+'">'+jzh+'</b>)</p>'
+   +'<p><span class="lbl">當運:</span>'+(dang?period+'運旺星到宮,吉者更吉、凶者減力。':'非當運之星,'+(e[1]<0?'凶性須防。':'吉不全力。'))+'</p>'
+   +(e[2]?'<p><span class="lbl">化解/用法:</span>'+e[2]+'</p>':'')
+   +'<p><span class="lbl">流年:</span>'+flowYear+'年年星'+a+'到宮'+((a===5||a===2)?',二黑五黃加臨,今年此方尤須謹慎!':'。')+'</p>'
+   +'<p style="font-size:12px;color:var(--dim)">山星主人丁健康、向星主財祿;斷語為玄機賦/紫白訣通行口徑,僅供參考。</p>';
+  card.classList.add('show');
+}
+// ── 房間佈局檢核 ──
+const ROOMS=['—','大門','主臥','廚房','書桌','廁所','神位'];
+const GONGS=['坎','艮','震','巽','離','坤','兌','乾'];
+document.getElementById('roomSel').innerHTML=GONGS.map(g=>
+  `<div class="row2"><span>${DIRZH[g]}方(${g}宮)</span><select data-g="${g}" style="padding:6px 10px;font-size:14px">`+
+  ROOMS.map(r=>`<option>${r}</option>`).join('')+`</select></div>`).join('');
+document.getElementById('roomChk').onclick=()=>{
+  const g=window._g9; if(!g)return;
+  const out=[];
+  document.querySelectorAll('#roomSel select').forEach(sel=>{
+    const gong=sel.dataset.g, t=sel.value; if(t==='—')return;
+    const yx=youxing(g.zhai,gong), ji='生氣天醫延年伏位'.includes(yx);
+    const pal=gong, m=g.c.mountain[pal], f=g.c.facing_stars[pal], a=g.ann[pal];
+    let v='',ok=true;
+    if(t==='大門'){ok=ji||f===period;v=ok?'納'+(f===period?'當運向星':'吉方')+'之氣,吉':'開門於'+yx+'方且向星失運,宜設玄關化解'}
+    else if(t==='主臥'){ok=ji&&m!==2&&m!==5;v=ok?'吉方安床,山星無病符,佳':(ji?'吉方但山星'+m+'到,防病星,床頭避開':'臥於'+yx+'凶方,宜換房或床頭朝自身吉方')}
+    else if(t==='廚房'){ok=!ji;v=ok?'火燒'+yx+'凶方,壓煞,合局':'廚房壓'+yx+'吉方,可惜,爐向朝吉方補救'}
+    else if(t==='書桌'){ok=(m===4||f===4||m===1||f===1);v=ok?'一四文昌之氣到宮,大利學業':'非文昌位,可用但不加分(文昌另尋)'}
+    else if(t==='廁所'){ok=!ji;v=ok?'汙穢壓'+yx+'凶方,反吉':'廁占'+yx+'吉方,洩吉氣,保持乾燥常閉門'}
+    else if(t==='神位'){ok=ji&&a!==5;v=ok?'安於吉方,妥':(a===5?'流年五黃到,今年不宜安神位於此':'神位宜遷吉方')}
+    if((a===5||a===2)&&t!=='廁所')v+='(⚠ 流年'+(a===5?'五黃':'二黑')+'加臨,今年留意)';
+    out.push('<div class="row2"><span>'+DIRZH[gong]+'方・'+t+'</span><b style="color:'+(ok?'var(--green)':'var(--red)')+'">'+(ok?'✓ ':'⚠ ')+v+'</b></div>')});
+  document.getElementById('roomOut').innerHTML=out.join('')||'請先為至少一個方位選擇房間類型。';
+};
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
 ps.onchange=e=>{period=+e.target.value;draw()};
