@@ -77,11 +77,11 @@ function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.242
   for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}return jd}
 const gzi=(s,b)=>((6*s-5*b)%60+60)%60, gz=i=>ST[i%10]+BR[i%12];
 function fourPillars(Y,M,D,h){
-  const J=jdn(Y,M,D)+(h-12)/24;
+  const J=jdn(Y,M,D)+(h-12)/24-8/24; // 當地(+8)→UTC:節氣判界須用世界時
   let civ=jdn(Y,M,D); if(h>=23)civ+=1;
   const day=((civ-11)%60+60)%60;
   const lc=termJdn(Y,315);
-  const sui=(J+0.5>=lc)?Y:Y-1;
+  const sui=(J>=lc)?Y:Y-1;
   const year=((sui-1984)%60+60)%60;
   const lon=sunLon(J,Y);
   const mi=Math.floor(((lon-315)%360+360)%360/30);

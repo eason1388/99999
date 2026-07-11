@@ -73,12 +73,12 @@ function termJdn(y,target){let jd=jdn(y,3,21);
   jd+=((target%360)+360)%360/360*365.2422;
   for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
   return jd}
-function suiYear(y,m,d){const lc=termJdn(y,315);return jdn(y,m,d)+0.5>=lc?y:y-1}
-function monthIndex(y,m,d){const lon=sunLon(jdn(y,m,d),y);return Math.floor(((lon-315)%360+360)%360/30)}
+function suiYear(y,m,d){const lc=termJdn(y,315);return jdn(y,m,d)-8/24>=lc?y:y-1} // 當地正午→UTC
+function monthIndex(y,m,d){const lon=sunLon(jdn(y,m,d)-8/24,y);return Math.floor(((lon-315)%360+360)%360/30)}
 // 日星:六錨(當年+去年)
 function dayStar(y,m,d){
   const J=jdn(y,m,d);
-  const mk=(yy,lon,st,fw)=>[Math.floor(termJdn(yy,lon)+0.5),st,fw];
+  const mk=(yy,lon,st,fw)=>[Math.floor(termJdn(yy,lon)+8/24+0.5),st,fw]; // 節氣取當地日期
   let anchors=[];
   for(const yy of [y,y-1]) anchors.push(mk(yy,270,1,true),mk(yy,330,7,true),mk(yy,30,4,true),
                                         mk(yy,90,9,false),mk(yy,150,3,false),mk(yy,210,6,false));
