@@ -57,6 +57,13 @@ button{font-family:inherit}
 <button class="mchip" id="pickBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">掃描吉日</button>
 <div id="pickOut" style="margin-top:8px"></div>
 <div class="note">規則(v1 簡化版):避沖你的年支、避沖宅坐山、動土避五黃入中日,一六八九紫白日加分。未含建除十二神與黃黑道,正式版補全;重大事項仍請專業擇日師複核。</div></div>
+<div class="box" style="max-width:560px"><h2>奇門遁甲時盤(Beta)</h2>
+時辰 <select id="qmH"></select>
+<button class="mchip" id="qmBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">起局</button>
+<div id="qmInfo" style="margin:8px 0;font-size:14px"></div>
+<div class="grid" id="qmGrid" style="grid-template-columns:repeat(3,86px);grid-template-rows:repeat(3,86px)"></div>
+<div id="qmLuck" style="margin-top:8px"></div>
+<div class="note">時家奇門・拆補法・轉盤。開/休/生為三吉門,宜出行辦事朝該方;白虎、玄武方慎行。Beta:核心結構已通過 600 局自動掃描,惟置閏法與各派細節有異,重大用事請專業老師複核。</div></div>
 </div>
 <script>
 const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
@@ -136,6 +143,79 @@ function pickDays(){
     +'<div class="note">已排除 '+skip+' 個沖煞日。'+(sitB<0&&sitM!=='-1'?'(干維山無支,不作沖山判斷)':'')+'</div>';
 }
 document.getElementById('pickBtn').onclick=pickDays;
+// ── 時家奇門(拆補法・轉盤)──
+// 局數歌訣(節氣黃經→上中下元局數;陽遁270°~75°、陰遁90°~255°)
+const QM_JU={270:[1,7,4],285:[2,8,5],300:[3,9,6],315:[8,5,2],330:[9,6,3],345:[1,7,4],
+0:[3,9,6],15:[4,1,7],30:[5,2,8],45:[4,1,7],60:[5,2,8],75:[6,3,9],
+90:[9,3,6],105:[8,2,5],120:[7,1,4],135:[2,5,8],150:[1,4,7],165:[9,3,6],
+180:[7,1,4],195:[6,9,3],210:[5,8,2],225:[6,9,3],240:[5,8,2],255:[4,7,1]};
+const QRING=[1,8,3,4,9,2,7,6]; // 轉盤宮環:坎艮震巽離坤兌乾(順時針)
+const QSTAR={1:'天蓬',8:'天任',3:'天沖',4:'天輔',9:'天英',2:'天芮',7:'天柱',6:'天心'};
+const QDOOR={1:'休',8:'生',3:'傷',4:'杜',9:'景',2:'死',7:'驚',6:'開'};
+const QGOD=['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天'];
+const QYI='戊己庚辛壬癸丁丙乙';
+const QXUN={0:'戊',10:'己',20:'庚',30:'辛',40:'壬',50:'癸'}; // 旬首→六儀
+function qimenCore(dayI,hI,seg){
+  const yang=(seg>=270||seg<90);
+  const ju3=QM_JU[seg];
+  const fb=(dayI-dayI%5)%12; // 符頭支
+  const yuan=[0,6,3,9].includes(fb)?0:[2,8,5,11].includes(fb)?1:2; // 上中下元
+  const ju=ju3[yuan];
+  // 地盤:六儀三奇,陽順陰逆佈九宮
+  const earth={};
+  for(let k=0;k<9;k++){const g=yang?((ju-1+k)%9)+1:(((ju-1-k)%9)+9)%9+1;earth[g]=QYI[k];}
+  // 旬首與值符宮
+  const xy=QXUN[hI-hI%10];
+  const zfGong=+Object.keys(earth).find(g=>earth[g]===xy);
+  // 時干落宮(甲時用旬首儀);中5寄坤2
+  const hs=hI%10, hstem='甲乙丙丁戊己庚辛壬癸'[hs];
+  const tgYi=hs===0?xy:hstem;
+  let tg=+Object.keys(earth).find(g=>earth[g]===tgYi); if(tg===5)tg=2;
+  // 星轉盤:值符星(值符宮本位星;中5=天禽寄芮)轉至時干宮
+  const homeG=zfGong===5?2:zfGong;
+  const hi_=QRING.indexOf(homeG), ti=QRING.indexOf(tg), rot=(ti-hi_+8)%8;
+  const stars={};QRING.forEach((g,i)=>{stars[QRING[(i+rot)%8]]=QSTAR[g]+(g===2?'(禽)':'')});
+  // 值使門:自值符宮起,依旬內時序陽順陰逆移宮;中5寄坤2
+  const off=hI%10;
+  let shiG=yang?((zfGong-1+off)%9)+1:(((zfGong-1-off)%9)+9)%9+1;
+  const shiPlace=shiG===5?2:shiG;
+  const di=QRING.indexOf(shiPlace), drot=(di-hi_+8)%8;
+  const doors={};QRING.forEach((g,i)=>{doors[QRING[(i+drot)%8]]=QDOOR[g]});
+  // 八神:值符隨值符星宮,陽順陰逆
+  const gods={};QRING.forEach((_,i)=>{const g=QRING[((ti+(yang?i:-i))%8+8)%8];gods[g]=QGOD[i]});
+  return {yang,ju,yuan,earth,zfGong,zfStar:zfGong===5?'天禽':QSTAR[zfGong],
+          shiDoor:QDOOR[homeG],tg,shiPlace,stars,doors,gods,xy};
+}
+
+const QDIR={1:'北',8:'東北',3:'東',4:'東南',9:'南',2:'西南',7:'西',6:'西北'};
+const QGRIDP=[[4,9,2],[3,5,7],[8,1,6]];
+const qmSel=document.getElementById('qmH');
+'子丑寅卯辰巳午未申酉戌亥'.split('').forEach((b,i)=>qmSel.add(new Option(b+'時('+((i*2+23)%24)+'-'+((i*2+1))+'點)',i)));
+document.getElementById('qmBtn').onclick=()=>{
+  const[Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
+  const hb=+qmSel.value;
+  const J=jdn(Y,M,D),dayI=((J-11)%60+60)%60;
+  const hI=gzi(((dayI%10)%5*2+hb)%10,hb);
+  const lon=sunLon(J+((hb===0?0:hb*2)-12)/24-8/24,Y);
+  const seg=Math.floor(lon/15)*15%360;
+  const q=qimenCore(dayI,hI,seg);
+  document.getElementById('qmInfo').innerHTML=
+    '<b style="color:var(--gold)">'+(q.yang?'陽':'陰')+'遁'+q.ju+'局('+['上','中','下'][q.yuan]+'元)</b> · '
+    +gz(dayI)+'日 '+gz(hI)+'時 · 旬首'+q.xy+' · 值符<b>'+q.zfStar+'</b>落'+QDIR[q.tg]+' · 值使<b>'+q.shiDoor+'門</b>落'+QDIR[q.shiPlace];
+  document.getElementById('qmGrid').innerHTML=QGRIDP.flat().map(g=>{
+    if(g===5)return '<div class="cell"><span style="font-size:11px;opacity:.5">中宮</span><b style="font-size:15px">'+q.earth[5]+'</b></div>';
+    const dj='開休生'.includes(q.doors[g]),dx='白虎玄武'.includes(q.gods[g])&&q.gods[g].length===2;
+    return '<div class="cell" style="'+(dj?'outline:2px solid rgba(74,107,79,.55);':'')+'">'
+      +'<span style="font-size:10px;opacity:.5">'+QDIR[g]+'</span>'
+      +'<b style="font-size:14px;color:'+(dj?'var(--green)':'inherit')+'">'+q.doors[g]+'門</b>'
+      +'<span style="font-size:11px">'+q.stars[g]+'</span>'
+      +'<span style="font-size:10.5px;color:'+(q.gods[g]==='白虎'||q.gods[g]==='玄武'?'var(--red)':'#888')+'">'+q.gods[g]+'・'+q.earth[g]+'</span></div>'}).join('');
+  const goods=[1,8,3,4,9,2,7,6].filter(g=>'開休生'.includes(q.doors[g]));
+  const bads=[1,8,3,4,9,2,7,6].filter(g=>q.gods[g]==='白虎'||q.gods[g]==='玄武');
+  document.getElementById('qmLuck').innerHTML=
+    '<span class="tag good">吉方:'+goods.map(g=>QDIR[g]+'('+q.doors[g]+'門)').join('、')+'</span> '
+   +'<span class="tag warn">慎行:'+bads.map(g=>QDIR[g]+'('+q.gods[g]+')').join('、')+'</span>';
+};
 function render(){
   const [Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
   const yInput=+document.getElementById('yr').value;
