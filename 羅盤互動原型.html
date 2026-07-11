@@ -61,6 +61,10 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <div id="big">—</div><div id="title">—</div>
 <div id="tags"></div>
 <div id="ctrl">
+  <button id="live" class="mchip" style="font-size:15px">📡 即時量測(用手機感測器)</button>
+  <span style="font-size:13px;color:var(--dim)">磁偏角 <input id="dec" type="number" value="-4.5" step="0.1" style="width:64px;padding:5px;font-size:14px">°</span>
+</div>
+<div id="ctrl">
   <input id="num" type="number" min="0" max="360" step="0.1" value="138">°
   <div class="seg"><button id="mFac" class="on">我面向屋外(向)</button><button id="mSit">我背對大門(坐)</button></div>
   <select id="period"></select>
@@ -284,6 +288,33 @@ document.getElementById('mFac').onclick=e=>{isFacing=true;e.target.classList.add
 document.getElementById('mSit').onclick=e=>{isFacing=false;e.target.classList.add('on');document.getElementById('mFac').classList.remove('on');draw()};
 document.querySelectorAll('.mchip').forEach(b=>b.onclick=()=>{mode=b.dataset.m;
   document.querySelectorAll('.mchip').forEach(x=>x.classList.remove('on'));b.classList.add('on');draw()});
+// ── 即時感測(手機) ──
+let liveOn=false,lastLive=null;
+function onOrient(e){
+  let h=null;
+  if(typeof e.webkitCompassHeading==='number')h=e.webkitCompassHeading;
+  else if(typeof e.alpha==='number')h=(360-e.alpha)%360;
+  if(h===null)return;
+  h=((h+ +document.getElementById('dec').value)%360+360)%360;
+  if(lastLive!==null){let d=(h-lastLive+540)%360-180;h=(lastLive+d*0.25+360)%360;}
+  lastLive=h;heading=h;draw();
+}
+async function toggleLive(){
+  const btn=document.getElementById('live');
+  if(liveOn){window.removeEventListener('deviceorientation',onOrient);
+    window.removeEventListener('deviceorientationabsolute',onOrient);
+    liveOn=false;lastLive=null;btn.classList.remove('on');btn.textContent='📡 即時量測(用手機感測器)';return}
+  try{
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+      const st=await DeviceOrientationEvent.requestPermission();
+      if(st!=='granted'){alert('需要允許「動作與方向」權限才能即時量測');return}}
+    window.addEventListener('deviceorientationabsolute',onOrient);
+    window.addEventListener('deviceorientation',onOrient);
+    liveOn=true;btn.classList.add('on');btn.textContent='⏸ 停止即時量測(手機保持水平)';
+    setTimeout(()=>{if(lastLive===null&&liveOn){alert('未偵測到方向感測器——電腦瀏覽器無羅盤,請改用手機開啟,或手動輸入度數。');toggleLive()}},2500);
+  }catch(err){alert('此裝置不支援方向感測:'+err)}
+}
+document.getElementById('live').onclick=toggleLive;
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
 ps.onchange=e=>{period=+e.target.value;draw()};
