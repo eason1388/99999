@@ -47,7 +47,7 @@ button{font-family:inherit}
     <div id="shensha" style="margin-top:8px"></div></div>
   <div class="box"><h2>流月盤</h2><div class="months" id="mChips"></div><div class="grid" id="mGrid"></div>
     <div class="note">月序以節氣「節」為界(寅月=立春起)。</div></div>
-  <div class="box"><h2>流日盤 <span id="dTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="dGrid"></div>
+  <div class="box"><h2>流日盤 <span id="dTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="dGrid"></div><div id="dLuck" style="margin-top:8px"></div>
     <div class="note" id="dNote"></div></div>
   <div class="box"><h2>個人吉位(依出生年)</h2><div id="personal"></div>
     <div class="note">年干支以立春為界(2 月上旬出生者請留意)。文昌依年干、桃花驛馬依年支三合、貴人依年干(天乙)。</div></div>
@@ -119,6 +119,13 @@ function render(){
   const[ds,fw]=dayStar(Y,M,D);
   grid(document.getElementById('dGrid'),fly(ds,true),9);
   document.getElementById('dTitle').textContent=Y+'/'+M+'/'+D+' '+gzOfDay(Y,M,D)+'日 '+ds+'入中';
+  const DIR8={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+  const dch=fly(ds,true);
+  const good=Object.entries(dch).filter(([p,v])=>p!=='中'&&[1,8,9].includes(v)).map(([p,v])=>DIR8[p]+'('+v+'白紫)');
+  const bad=Object.entries(dch).filter(([p,v])=>p!=='中'&&[2,5].includes(v)).map(([p,v])=>DIR8[p]+'('+(v===5?'五黃':'二黑')+')');
+  document.getElementById('dLuck').innerHTML=
+    '<span class="tag good">今日吉方:'+good.join('、')+'</span> <span class="tag warn">今日慎用:'+bad.join('、')+'</span>'
+    +'<div class="note">吉方宜辦要事、簽約、出行;慎用方忌動土、修造、久坐。以一白六白八白九紫為吉、二黑五黃為凶(紫白訣)。</div>';
   document.getElementById('dNote').textContent='三元遁法:'+(fw?'陽遁順飛':'陰遁(起星逆佈,盤仍順飛)')+'。日家紫白各派有異,正式版以資料包口徑為準(pending_expert)。';
   // 個人吉位
   const bys=suiYear(by,7,1), bi=((bys-4)%12+12)%12, si=((bys-4)%10+10)%10;
