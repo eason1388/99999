@@ -46,6 +46,7 @@ button{font-family:inherit}
 <div class="row">
   <button class="chip on" id="xia">下卦</button>
   <button class="chip" id="ti">替卦(起星)</button>
+<button class="chip" id="cmp">下卦↔替卦對照</button>
   <button class="chip" id="bzT">顯示八宅遊星</button>
 </div>
 <div id="grid"></div>
@@ -111,8 +112,36 @@ for(const m of M24){const b=document.createElement('button');b.className='chip s
   b.onclick=()=>{sit=m;Mts.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');render()};Mts.appendChild(b)}
 document.getElementById('xia').onclick=e=>{useTi=false;e.target.classList.add('on');document.getElementById('ti').classList.remove('on');render()};
 document.getElementById('ti').onclick=e=>{useTi=true;e.target.classList.add('on');document.getElementById('xia').classList.remove('on');render()};
+let cmpOn=false;
+document.getElementById('cmp').onclick=e=>{cmpOn=!cmpOn;e.target.classList.toggle('on');render()};
 document.getElementById('bzT').onclick=e=>{showBz=!showBz;e.target.classList.toggle('on');render()};
+function gridHtml(c,other){
+  const sp=palaceOf(c.sitting),fp=palaceOf(c.facing);
+  const hi=n=>n===period?'<b class="w" style="color:var(--gold)">'+n+'</b>':n;
+  return '<div style="display:grid;grid-template-columns:repeat(3,96px);grid-template-rows:repeat(3,86px);gap:5px;justify-content:center">'+
+    GRID.flat().map(p=>{
+      const diff=other&&(c.mountain[p]!==other.mountain[p]||c.facing_stars[p]!==other.facing_stars[p]);
+      return '<div class="cell '+(p===sp?'sit':p===fp?'fac':'')+'" style="'+(diff?'outline:2px dashed var(--gold);':'')+'">'
+        +'<span class="pal">'+p+(p==='中'?'':'宮')+'</span>'
+        +'<div class="stars" style="font-size:22px">'+hi(c.mountain[p])+hi(c.facing_stars[p])+'</div>'
+        +'<div class="base">運 '+c.base[p]+'</div></div>'}).join('')+'</div>';
+}
 function render(){
+  if(cmpOn){
+    const cx=xkChart(period,sit,false),ct=xkChart(period,sit,true);
+    const same=JSON.stringify(cx.mountain)===JSON.stringify(ct.mountain)&&JSON.stringify(cx.facing_stars)===JSON.stringify(ct.facing_stars);
+    document.getElementById('grid').style.display='block';
+    document.getElementById('grid').innerHTML=
+      '<div style="text-align:center;font-family:\'Noto Serif TC\',serif;color:var(--gold);margin:4px 0">下卦('+cx.pattern+')</div>'+gridHtml(cx,ct)
+     +'<div style="text-align:center;font-family:\'Noto Serif TC\',serif;color:var(--gold);margin:10px 0 4px">替卦('+ct.pattern+')</div>'+gridHtml(ct,cx);
+    document.getElementById('info').innerHTML=
+      '<b style="font-family:\'Noto Serif TC\',serif;font-size:18px">'+period+'運 '+cx.sitting+'山'+cx.facing+'向 · 下卦替卦對照</b><br>'
+      +(same?'<span class="badge green">本局替卦與下卦全同(無替可尋)</span>'
+        :'<span class="badge gold">金框虛線=兩盤相異之宮</span> <span class="badge">下卦:'+cx.pattern+'</span><span class="badge">替卦:'+ct.pattern+'</span>')
+      +'<div style="margin-top:6px;font-size:12.5px;opacity:.7">兼向超過約4.5°時用替卦(起星);對照可見星盤與格局差異,擇優立向。</div>';
+    return;
+  }
+  document.getElementById('grid').style.display='grid';
   const c=xkChart(period,sit,useTi);
   const zhai=PAL2GUA[palaceOf(sit)];
   const g=document.getElementById('grid');g.innerHTML='';

@@ -179,13 +179,22 @@ cv.style.width=cv.style.height=W+'px';ctx.scale(devicePixelRatio,devicePixelRati
 let heading=138,isFacing=true,period=9,mode='simple';
 const cellAt=(cells,anchor,span,d)=>cells[Math.floor((((d-anchor)%360)+360)%360/span)];
 // 佈局:兩種模式的半徑帶
+// 先天六十四卦圓圖:左旋復→乾(陽半),右旋姤→坤(陰半);復起於子中(0°)。
+// 排列慣例各派有異(pending_expert),本層供玄空大卦定位參考。
+const HEX64=(()=>{
+  const Y=['復','頤','屯','益','震','噬嗑','隨','無妄','明夷','賁','既濟','家人','豐','離','革','同人','臨','損','節','中孚','歸妹','睽','兌','履','泰','大畜','需','小畜','大壯','大有','夬','乾'];
+  const N=['姤','大過','鼎','恆','巽','井','蠱','升','訟','困','未濟','解','渙','坎','蒙','師','遯','咸','旅','小過','漸','蹇','艮','謙','否','萃','晉','豫','觀','比','剝','坤'];
+  return [...Y,...N].map((n,k)=>({name:n,full:n,idx:k+1,
+    start_deg:+(k*5.625).toFixed(4),end_deg:+(((k+1)*5.625)%360).toFixed(4)}));
+})();
 function layout(){
   if(mode==='simple')return{bagua:.47,m24:[.56,.775],rings:[],tick:[.86,.945],deg:.79,m24font:.085};
-  return{bagua:.30,m24:[.36,.53],rings:[
-    {key:'fenjin',cells:DATA.fenjin,anchor:337.5,span:3,r:[.53,.645],q:1},
-    {key:'d72',cells:DATA.d72,anchor:345,span:5,r:[.645,.755]},
-    {key:'d60',cells:DATA.d60,anchor:345,span:6,r:[.755,.862]}],
-    tick:[.885,.95],deg:.80,m24font:.062};
+  return{bagua:.27,m24:[.33,.49],rings:[
+    {key:'fenjin',cells:DATA.fenjin,anchor:337.5,span:3,r:[.49,.585],q:1},
+    {key:'d72',cells:DATA.d72,anchor:345,span:5,r:[.585,.675]},
+    {key:'d60',cells:DATA.d60,anchor:345,span:6,r:[.675,.762]},
+    {key:'hex64',cells:HEX64,anchor:0,span:5.625,r:[.762,.868]}],
+    tick:[.885,.95],deg:0,m24font:.058};
 }
 let TC=ctx;
 function radialText(txt,midDeg,rRatio,R,font,color,vertical,h0){
@@ -212,7 +221,7 @@ function bake(){
     c.strokeStyle=lg?'#C9A96A':md?'rgba(237,231,218,.75)':'rgba(237,231,218,.28)';
     c.lineWidth=lg?2:1;
     c.beginPath();c.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);c.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);c.stroke();}
-  for(let d=0;d<360;d+=30){c.save();c.rotate(d*Math.PI/180);
+  if(L.deg)for(let d=0;d<360;d+=30){c.save();c.rotate(d*Math.PI/180);
     c.fillStyle='rgba(237,231,218,.9)';c.textAlign='center';c.textBaseline='middle';
     c.font=R*0.045+'px "Noto Sans TC"';c.fillText(d,0,-R*L.deg);c.restore();}
   for(const ring of L.rings){
@@ -330,7 +339,8 @@ const EX={
  bagua:n=>['後天八卦「'+n+'」宮,轄四十五度。','此宮位於'+DIRZH[n]+'方。','八宅與飛星皆以八宮為分析框架。','本宮吉凶見下方八宅方位卡。','將重要功能(門、房、桌)安於吉宮。'],
  fenjin:c=>['一百二十分金,每格三度:'+c.name+'(納音'+c.nayin+'),屬'+c.mountain+'山。','口訣:丙丁旺、庚辛相為珠寶可用;甲乙孤、壬癸虛為差錯;戊己為龜甲空亡。','本格屬「'+QZH[c.quality]+'」。',(c.usable?'可用,吉。':'不可用,立向須避開此線。'),'微調幾度取同山可用分金即可。'],
  d72:c=>['穿山七十二龍(六十甲子+十二空亡格),每格五度,察來龍入首之氣。',c.name?('此格為'+c.name+'龍,納音'+c.nayin+'。'):'此格為空亡格,主氣雜不清。','以納音五行論龍氣與坐山生剋。','吉凶依門派口訣而定,詳見風水學堂。','與透地六十龍互參後定分金。'],
- d60:c=>['透地六十龍,每支宮五龍各六度,甲子起於壬,察入首束氣。','此格為'+c.name+'龍,納音'+c.nayin+'。','以納音配穴場論氣脈。','珠寶火坑之分各派不同,本版不判。','與穿山龍互參,再定分金。']};
+ d60:c=>['透地六十龍,每支宮五龍各六度,甲子起於壬,察入首束氣。','此格為'+c.name+'龍,納音'+c.nayin+'。','以納音配穴場論氣脈。','珠寶火坑之分各派不同,本版不判。','與穿山龍互參,再定分金。'],
+ hex64:c=>['先天六十四卦圓圖第'+c.idx+'卦「'+c.full+'」,每卦5.625°,玄空大卦以此定卦線。','您點選的方位落在'+c.full+'卦範圍。','大卦立向講究「卦氣卦運」與抽爻換象,線位極細,差一線即換卦。','卦運與吉凶須配元運與來去水論,屬大卦專業範疇(本版不判)。','此層排列各派略異,僅供定位;正式論斷請以師承口徑為準。']};
 function showCard(kind,arg){
   const rows=EX[kind](arg),lbl=['① 這是什麼','② 現在情況','③ 代表什麼','④ 吉凶如何','⑤ 下一步'];
   document.getElementById('cT').textContent=(typeof arg==='string')?arg:(arg.name||'空亡格');
@@ -559,10 +569,20 @@ function comboCard(pal){
   const dang=(m===period||f===period);
   const a=g.ann[pal];
   const jzh=e[1]>=2?'大吉':e[1]===1?'吉':e[1]===0?'平':e[1]===-1?'小凶':'凶';
+  const SN={1:['一白貪狼(水)','腎、耳、泌尿、智慧'],2:['二黑病符(土)','脾胃、腹疾、老母'],3:['三碧蚩尤(木)','肝膽、手足、長男是非'],4:['四綠文昌(木)','股、風疾、長女、文書'],5:['五黃廉貞(土)','重症瘡毒、災煞'],6:['六白武曲(金)','肺、頭、老父、官貴'],7:['七赤破軍(金)','口齒、少女、口舌'],8:['八白左輔(土)','手、脾、少男、財山'],9:['九紫右弼(火)','目、心、血、中女、喜慶']};
+  const PALN={'坎':1,'坤':2,'震':3,'巽':4,'中':5,'乾':6,'兌':7,'艮':8,'離':9};
+  const pn=PALN[pal];
+  let extra='<p><span class="lbl">有序細分:</span>山'+m+'='+SN[m][0]+',人丁健康面應在「'+SN[m][1]+'」;向'+f+'='+SN[f][0]+',財祿面帶其性'
+    +(m!==f?'。若互換為山'+f+'向'+m+',則丁財所應對調,斷語側重不同。':'(山向同星)。')+'</p>';
+  if(m===pn||f===pn)extra+='<p><span class="lbl">⚠ 單宮伏吟:</span>'+(m===pn?'山星':'向星')+'與元旦盤同數,氣伏不動,主舊事纏綿、宜靜守。</p>';
+  if(m+pn===10||f+pn===10)extra+='<p><span class="lbl">⚠ 單宮反吟:</span>'+(m+pn===10?'山星':'向星')+'與元旦盤合十相沖,主動盪反覆、進退不定。</p>';
+  const bs=g.c.base[pal];
+  if(m===bs||f===bs)extra+='<p><span class="lbl">與運星伏吟:</span>'+(m===bs?'山星':'向星')+'疊運星,吉凶之性加倍,當運吉、失運凶。</p>';
   document.getElementById('cT').textContent=pal+'宮('+(DIRZH[pal]||'')+')山'+m+'向'+f;
   document.getElementById('cB').innerHTML=
     '<p><span class="lbl">斷語:</span>'+e[0]+'(<b style="color:'+(e[1]>0?'var(--green)':e[1]<0?'var(--red)':'var(--gold)')+'">'+jzh+'</b>)</p>'
    +'<p><span class="lbl">當運:</span>'+(dang?period+'運旺星到宮,吉者更吉、凶者減力。':'非當運之星,'+(e[1]<0?'凶性須防。':'吉不全力。'))+'</p>'
+   +extra
    +(e[2]?'<p><span class="lbl">化解/用法:</span>'+e[2]+'</p>':'')
    +'<p><span class="lbl">流年:</span>'+flowYear+'年年星'+a+'到宮'+((a===5||a===2)?',二黑五黃加臨,今年此方尤須謹慎!':'。')+'</p>'
    +'<p style="font-size:12px;color:var(--dim)">山星主人丁健康、向星主財祿;斷語為玄機賦/紫白訣通行口徑,僅供參考。</p>';
