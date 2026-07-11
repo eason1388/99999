@@ -83,6 +83,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
   <input type="range" id="slider" min="0" max="359.9" step="0.1" value="138">
 </div>
 <div id="ctrl" style="margin-top:2px">
+  <span style="font-size:13px;color:var(--dim)">建造/入住年 <input id="cy" type="number" placeholder="如1998" style="width:86px;padding:6px;font-size:15px"></span>
   <span style="font-size:13px;color:var(--dim)">流年 <input id="fy" type="number" value="2026" style="width:78px;padding:6px;font-size:15px"></span>
   <span style="font-size:13px;color:var(--dim)">出生年 <input id="by" type="number" value="1990" style="width:78px;padding:6px;font-size:15px"></span>
   <select id="sex"><option value="1">男</option><option value="0">女</option></select>
@@ -95,12 +96,16 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <button id="roomChk" class="mchip" style="font-size:14.5px;margin-top:6px">檢核佈局</button>
 <div id="roomOut" class="note" style="font-size:14px"></div></div>
 <div class="panel"><h2>進階判讀</h2><div id="adv"></div><div class="note" id="yearNote"></div></div>
+<div class="panel" id="zyPanel" style="display:none"><h2>宅運時間軸</h2>
+<div id="zyBar" style="display:flex;gap:3px;margin:6px 0"></div>
+<div id="zyTxt" class="note" style="font-size:14px"></div></div>
 <div class="panel"><h2>量測紀錄</h2>
 <div style="display:flex;gap:8px;margin-bottom:8px">
   <input id="recNote" placeholder="備註(如:自宅大門)" style="flex:1;padding:9px;border:1.5px solid var(--gold2);border-radius:12px;background:var(--card);color:var(--ink);font-size:14.5px">
   <button id="recSave" class="mchip" style="font-size:14px">＋儲存</button>
   <button id="recPrint" class="mchip" style="font-size:14px">🖨 報告</button>
   <button id="recCmp" class="mchip" style="font-size:14px">⚖ 比較</button>
+  <button id="recShare" class="mchip" style="font-size:14px">📤 分享卡</button>
 </div>
 <div id="recList" class="note">尚無紀錄。紀錄只存在你的手機/瀏覽器,不會上傳。</div></div>
 <div class="panel"><h2>智慧問答(離線)</h2>
@@ -586,6 +591,57 @@ document.getElementById('roomChk').onclick=()=>{
     if((a===5||a===2)&&t!=='廁所')v+='(⚠ 流年'+(a===5?'五黃':'二黑')+'加臨,今年留意)';
     out.push('<div class="row2"><span>'+DIRZH[gong]+'方・'+t+'</span><b style="color:'+(ok?'var(--green)':'var(--red)')+'">'+(ok?'✓ ':'⚠ ')+v+'</b></div>')});
   document.getElementById('roomOut').innerHTML=out.join('')||'請先為至少一個方位選擇房間類型。';
+};
+// ── 宅運時間軸 ──
+const perOf=y=>(((y-1864)%180+180)%180)/20|0;
+document.getElementById('cy').onchange=e=>{
+  const y=+e.target.value; if(!y||y<1864||y>2100){document.getElementById('zyPanel').style.display='none';return}
+  const bi=perOf(y);
+  period=bi+1;document.getElementById('period').value=period;
+  const startY=y-(((y-1864)%20+20)%20);
+  const now=new Date().getFullYear(),ci=perOf(now);
+  const diff=(ci-bi+9)%9;
+  let bar='',names=['正當旺','次運(平)','退氣','再退','衰','衰','衰','衰','衰'];
+  for(let k=0;k<5;k++){
+    const y0=startY+k*20, run=((bi+k)%9)+1;
+    const cur=now>=y0&&now<y0+20;
+    const col=k===0?'var(--green)':k===1?'var(--gold)':'var(--red)';
+    bar+='<div style="flex:1;text-align:center;padding:8px 2px;border-radius:10px;background:#221E19;border:2px solid '+(cur?'#fff':'transparent')+'">'
+      +'<b style="font-family:\'Noto Serif TC\',serif;color:'+col+'">'+run+'運</b>'
+      +'<div style="font-size:10.5px;color:var(--dim)">'+y0+'-'+(y0+19)+'</div>'
+      +'<div style="font-size:11px;color:'+col+'">'+names[k]+'</div></div>';
+  }
+  document.getElementById('zyBar').innerHTML=bar;
+  document.getElementById('zyTxt').innerHTML='本宅為 <b>'+(bi+1)+'運宅</b>('+startY+'–'+(startY+19)+'建造/入住),現值'+(ci+1)+'運,'
+    +(diff===0?'<b style="color:var(--green)">正當旺運</b>,大利。':diff===1?'退為次運,平穩,可佈局延旺。':'<b style="color:var(--red)">已退運 '+diff+' 步</b>——可考慮擇吉大修「換天心」以現運重立宅盤。')
+    +' 白框=現在所處階段。飛星盤已自動改用'+(bi+1)+'運排盤。';
+  document.getElementById('zyPanel').style.display='block';
+  draw();
+};
+// ── 分享卡 ──
+document.getElementById('recShare').onclick=()=>{
+  const c2=document.createElement('canvas');c2.width=1080;c2.height=1400;
+  const g=c2.getContext('2d');
+  g.fillStyle='#0D0B09';g.fillRect(0,0,1080,1400);
+  g.textAlign='center';
+  g.fillStyle='#C9A96A';g.font='900 58px "Noto Serif TC",serif';g.fillText('全能玄學羅盤',540,105);
+  g.fillStyle='rgba(237,231,218,.45)';g.font='23px "Noto Sans TC"';g.fillText('M A S T E R   F E N G   S H U I   C O M P A S S',540,150);
+  g.save();g.translate(540,620);g.rotate(-heading*Math.PI/180);
+  g.drawImage(dial,-390,-390,780,780);g.restore();
+  g.fillStyle='#E07A6A';g.beginPath();g.moveTo(540,225);g.lineTo(524,258);g.lineTo(556,258);g.closePath();g.fill();
+  g.fillStyle='#fff';g.font='900 92px "Noto Serif TC",serif';g.fillText(heading.toFixed(1)+'°',540,1105);
+  g.fillStyle='#C9A96A';g.font='900 82px "Noto Serif TC",serif';g.fillText(document.getElementById('title').textContent,540,1205);
+  const sres=scoreOf(heading,period);
+  g.fillStyle='rgba(237,231,218,.85)';g.font='38px "Noto Sans TC"';
+  g.fillText(period+'運 · '+sres.pattern+' · 綜合 '+sres.sc+' 分',540,1275);
+  g.fillStyle='rgba(237,231,218,.35)';g.font='26px "Noto Sans TC"';
+  g.fillText(new Date().toLocaleDateString('zh-TW')+' · eason1388.github.io/99999',540,1345);
+  c2.toBlob(async b=>{
+    const f=new File([b],'luopan.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      try{await navigator.share({files:[f],title:'風水判讀'});return}catch(e){}}
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='羅盤判讀.png';a.click();
+  },'image/png');
 };
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;

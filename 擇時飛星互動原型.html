@@ -51,6 +51,12 @@ button{font-family:inherit}
     <div class="note" id="dNote"></div></div>
   <div class="box"><h2>個人吉位(依出生年)</h2><div id="personal"></div>
     <div class="note">年干支以立春為界(2 月上旬出生者請留意)。文昌依年干、桃花驛馬依年支三合、貴人依年干(天乙)。</div></div>
+<div class="box" style="max-width:560px"><h2>智慧擇日(未來 30 天)</h2>
+事項 <select id="evt"><option>動土</option><option>搬家</option><option>開市</option><option>嫁娶</option><option>簽約</option></select>
+宅坐山 <select id="sitSel2"><option value="-1">不指定</option></select>
+<button class="mchip" id="pickBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">掃描吉日</button>
+<div id="pickOut" style="margin-top:8px"></div>
+<div class="note">規則(v1 簡化版):避沖你的年支、避沖宅坐山、動土避五黃入中日,一六八九紫白日加分。未含建除十二神與黃黑道,正式版補全;重大事項仍請專業擇日師複核。</div></div>
 </div>
 <script>
 const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
@@ -94,6 +100,42 @@ function grid(el,ch,wang){el.innerHTML='';
     const d=document.createElement('div');d.className='cell'+(ch[p]===5?' wh':'')+(ch[p]===wang?' wang':'');
     d.innerHTML='<b>'+ch[p]+'</b><span>'+p+(p==='中'?'':'宮')+'</span>';el.appendChild(d)}}
 let mSel=null;
+const M24Z='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const s2=document.getElementById('sitSel2');
+for(const m of M24Z)s2.add(new Option(m+'山',m));
+function pickDays(){
+  const ev=document.getElementById('evt').value;
+  const sitM=s2.value;
+  const sitB=sitM==='-1'?-1:BR.indexOf(sitM); // 地支山才有支;干維山=-1
+  const by=+document.getElementById('by').value||1990;
+  const ob=((suiYear(by,7,1)-4)%12+12)%12;
+  const[Y0,M0,D0]=document.getElementById('dt').value.split('-').map(Number);
+  const base=Date.UTC(Y0,M0-1,D0);
+  const rows=[];
+  for(let k=1;k<=30;k++){
+    const d=new Date(base+k*86400000);
+    const Y=d.getUTCFullYear(),M=d.getUTCMonth()+1,D=d.getUTCDate();
+    const J=jdn(Y,M,D),gi=((J-11)%60+60)%60,db=gi%12;
+    const[ds]=dayStar(Y,M,D);
+    let sc=60;const tags=[];
+    if((db+6)%12===ob){sc-=100;tags.push(['沖你的年支','warn'])}
+    if(sitB>=0&&(db+6)%12===sitB){sc-=(ev==='動土'||ev==='搬家')?100:20;tags.push(['沖宅坐山','warn'])}
+    if(ds===5){sc-=(ev==='動土')?100:15;tags.push(['五黃入中','warn'])}
+    else if(ds===2){sc-=10;tags.push(['二黑入中','warn'])}
+    else if([1,6,8,9].includes(ds)){sc+=15;tags.push([ds+' 紫白吉星','good'])}
+    rows.push({Y,M,D,gz:gzOfDay(Y,M,D),ds,sc,tags,dow:'日一二三四五六'[d.getUTCDay()]});
+  }
+  const good=rows.filter(r=>r.sc>=60).sort((a,b)=>b.sc-a.sc).slice(0,8);
+  const skip=rows.length-rows.filter(r=>r.sc>=60).length;
+  document.getElementById('pickOut').innerHTML=(good.length?good.map(r=>
+    '<div style="display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px dashed #ddd;font-size:14px">'
+    +'<span><b>'+r.M+'/'+r.D+'(週'+r.dow+')</b> '+r.gz+'日・'+r.ds+'入中</span>'
+    +'<span>'+r.tags.map(([t,c])=>'<span class="tag '+c+'" style="font-size:11.5px;padding:1px 8px">'+t+'</span>').join('')
+    +' <b style="color:'+(r.sc>=75?'var(--green)':'inherit')+'">'+r.sc+'</b></span></div>').join('')
+    :'<div class="tag warn">未來30天無合適吉日,建議放寬條件或延後。</div>')
+    +'<div class="note">已排除 '+skip+' 個沖煞日。'+(sitB<0&&sitM!=='-1'?'(干維山無支,不作沖山判斷)':'')+'</div>';
+}
+document.getElementById('pickBtn').onclick=pickDays;
 function render(){
   const [Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
   const yInput=+document.getElementById('yr').value;
