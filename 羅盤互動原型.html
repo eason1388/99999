@@ -66,6 +66,11 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 .hinttap{font-size:12.5px;color:var(--dim);text-align:center;margin-top:6px}
 </style></head><body>
 <div class="steps"><b>三步看懂你的房子:</b>① 打開手機內建「指南針」,人站屋內、面向大門外 ② 把顯示的度數輸入下方(如 138°) ③ 立即顯示全宅判讀。可拖轉羅盤、可點任一格看詳解。</div>
+<div class="panel" style="margin-top:0;margin-bottom:10px"><h2>🧭 現場即斷(新手推薦)</h2>
+<div id="instFace" style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:900;text-align:center;margin:4px 0 8px;color:#fff">按下方按鈕,手機轉一圈即知八方吉凶</div>
+<button id="instBtn" class="mchip on" style="width:100%;font-size:16px;padding:11px">開始現場即斷</button>
+<div class="dirs" id="instGrid" style="margin-top:10px"></div>
+<div class="note">依「流年飛星+太歲三煞+你的命卦」判定,走到哪都能用,不需先量坐向;綠=吉、黃=平、紅=慎。要含本宅飛星斷,請再照下方三步量大門。</div></div>
 <div class="modes"><button class="mchip on" data-m="simple">簡明(新手)</button><button class="mchip" data-m="pro">專業(全圈層)</button></div>
 <div id="cols"><div id="colL">
 <div id="wrap"><canvas id="cv"></canvas></div>
@@ -264,6 +269,7 @@ function drawFast(){
   ctx.restore();
 }
 function updateLight(){
+  if(document.getElementById('instBtn').style.display==='none')instFaceUpdate();
   const r=interp(heading);const sit=isFacing?r.opp:r.m,fac=isFacing?r.m:r.opp;
   document.getElementById('big').textContent=heading.toFixed(1)+'°';
   document.getElementById('title').textContent=sit+'山'+fac+'向';
@@ -662,6 +668,59 @@ document.getElementById('recShare').onclick=()=>{
       try{await navigator.share({files:[f],title:'風水判讀'});return}catch(e){}}
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='羅盤判讀.png';a.click();
   },'image/png');
+};
+// ── 現場即斷 ──
+const GONG8=['坎','艮','震','巽','離','坤','兌','乾'];
+const BR2G={0:'坎',1:'艮',2:'艮',3:'震',4:'巽',5:'巽',6:'離',7:'坤',8:'坤',9:'兌',10:'乾',11:'乾'};
+function instantVerdicts(){
+  const annS=(11-flowYear%9-1+9)%9+1, ann=fly(annS);
+  const yb=((flowYear-4)%12+12)%12;
+  const ts=BR2G[yb], sp=BR2G[(yb+6)%12];
+  const shaG={8:0,0:0,4:0,2:1,6:1,10:1,5:2,9:2,1:2,11:3,3:3,7:3}[yb];
+  const shaB=[[5,6,7],[11,0,1],[2,3,4],[8,9,10]][shaG].map(b=>BR2G[b]);
+  const N2G={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+  const ds=n=>n<10?n:ds(Math.floor(n/10)+n%10);
+  let mg=null;
+  if(birthYear){let sd=ds(birthYear);let g=isMale?ds((11-sd)===0?9:11-sd):ds(sd+4);if(g===5)g=isMale?2:8;mg=N2G[g];}
+  return GONG8.map(g=>{
+    let sc=0;const rs=[];
+    const a=ann[g];
+    if(a===5){sc-=3;rs.push('流年五黃,忌動土')}
+    else if(a===2){sc-=2;rs.push('流年病符')}
+    else if(a===8){sc+=2;rs.push('流年財星')}
+    else if(a===9){sc+=2;rs.push('流年喜慶')}
+    else if(a===1){sc+=1;rs.push('流年貴氣')}
+    else if(a===4){sc+=1;rs.push('流年文昌')}
+    else if(a===3){sc-=1;rs.push('流年是非')}
+    else if(a===7){sc-=1;rs.push('流年破耗')}
+    if(g===ts){sc-=1;rs.push('太歲方宜靜')}
+    if(g===sp){sc-=2;rs.push('歲破方')}
+    if(shaB.includes(g)){sc-=2;rs.push('三煞方')}
+    if(mg){const yx=youxing(mg,g);const ji='生氣天醫延年伏位'.includes(yx);
+      sc+=ji?2:-2;rs.push('你的'+yx+'位')}
+    const lv=sc>=3?['大吉','var(--green)']:sc>=1?['吉','var(--green)']:sc===0?['平','var(--gold)']:sc>=-2?['慎','#c9944a']:['凶','var(--red)'];
+    return{g,sc,rs,lv};
+  });
+}
+function renderInstant(){
+  const v=instantVerdicts();
+  document.getElementById('instGrid').innerHTML=v.map(x=>
+    `<div class="dir" style="border:1.5px solid ${x.lv[1]}"><span style="color:var(--dim)">${DIRZH[x.g]}</span>
+     <b style="color:${x.lv[1]}">${x.lv[0]}</b>
+     <span style="font-size:10.5px;color:var(--dim)">${x.rs.slice(0,2).join('・')||'無特別神煞'}</span></div>`).join('');
+}
+function instFaceUpdate(){
+  const v=instantVerdicts();
+  const g=GONG8[Math.floor((((heading+22.5)%360))/45)];
+  const x=v.find(t=>t.g===g);
+  document.getElementById('instFace').innerHTML=
+    '你面向:<span style="color:'+x.lv[1]+'">'+DIRZH[g]+'('+g+')・'+x.lv[0]+'</span>'
+    +'<div style="font-size:13px;font-weight:400;color:var(--dim);font-family:\'Noto Sans TC\'">'+(x.rs.join('、')||'此方無特別神煞')+'</div>';
+}
+document.getElementById('instBtn').onclick=()=>{
+  renderInstant();instFaceUpdate();
+  document.getElementById('instBtn').style.display='none';
+  if(!liveOn)toggleLive();
 };
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
