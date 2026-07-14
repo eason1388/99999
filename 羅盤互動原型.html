@@ -109,7 +109,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <div class="panel"><h2>房間佈局檢核</h2>
 <div id="roomSel"></div>
 <button id="roomChk" class="mchip" style="font-size:14.5px;margin-top:6px">檢核佈局</button>
-<div id="roomOut" class="note" style="font-size:14px"></div></div>
+<div id="roomOut" class="note" style="font-size:14px"></div><div id="roomMap" style="margin-top:10px"></div></div>
 <div class="panel"><h2>進階判讀</h2><div id="adv"></div><div class="note" id="yearNote"></div></div>
 <div class="panel" id="zyPanel" style="display:none"><h2>宅運時間軸</h2>
 <div id="zyBar" style="display:flex;gap:3px;margin:6px 0"></div>
@@ -611,7 +611,7 @@ document.getElementById('roomSel').innerHTML=GONGS.map(g=>
   ROOMS.map(r=>`<option>${r}</option>`).join('')+`</select></div>`).join('');
 document.getElementById('roomChk').onclick=()=>{
   const g=window._g9; if(!g)return;
-  const out=[];
+  const out=[];const info={};
   document.querySelectorAll('#roomSel select').forEach(sel=>{
     const gong=sel.dataset.g, t=sel.value; if(t==='—')return;
     const yx=youxing(g.zhai,gong), ji='生氣天醫延年伏位'.includes(yx);
@@ -624,8 +624,24 @@ document.getElementById('roomChk').onclick=()=>{
     else if(t==='廁所'){ok=!ji;v=ok?'汙穢壓'+yx+'凶方,反吉':'廁占'+yx+'吉方,洩吉氣,保持乾燥常閉門'}
     else if(t==='神位'){ok=ji&&a!==5;v=ok?'安於吉方,妥':(a===5?'流年五黃到,今年不宜安神位於此':'神位宜遷吉方')}
     if((a===5||a===2)&&t!=='廁所')v+='(⚠ 流年'+(a===5?'五黃':'二黑')+'加臨,今年留意)';
+    info[gong]={t,ok};
     out.push('<div class="row2"><span>'+DIRZH[gong]+'方・'+t+'</span><b style="color:'+(ok?'var(--green)':'var(--red)')+'">'+(ok?'✓ ':'⚠ ')+v+'</b></div>')});
   document.getElementById('roomOut').innerHTML=out.join('')||'請先為至少一個方位選擇房間類型。';
+  // ── 格局圖(上=北,固定地圖視角) ──
+  const EMO={'大門':'🚪','主臥':'🛏','廚房':'🍳','書桌':'📖','廁所':'🚽','神位':'🕯'};
+  const LAY=[['乾','坎','艮'],['兌','中','震'],['坤','離','巽']];
+  const r0=interp(heading);const sit=isFacing?r0.opp:r0.m;
+  document.getElementById('roomMap').innerHTML=
+   '<div style="font-size:12.5px;color:var(--gold);margin:2px 0 6px;text-align:center">─ 格局圖(上=北)─</div>'
+   +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:420px;margin:0 auto">'
+   +LAY.flat().map(gn=>{
+     if(gn==='中')return '<div style="aspect-ratio:1;border:1.5px dashed rgba(201,169,106,.6);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#221C15"><span style="font-size:17px">🧭</span><b style="font-family:\'Noto Serif TC\',serif;color:var(--gold);font-size:13.5px">'+sit+'山'+M24S[(M24S.indexOf(sit)+12)%24]+'向</b><span style="font-size:10px;color:var(--dim)">'+(window._bzGua||'')+'宅</span></div>';
+     const inf=info[gn];const yx=youxing(g.zhai,gn);
+     const col=inf?(inf.ok?'var(--green)':'var(--red)'):'rgba(201,169,106,.25)';
+     return '<div style="aspect-ratio:1;border:1.5px solid '+col+';border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:#191512">'
+      +'<span style="font-size:10px;color:var(--dim)">'+DIRZH[gn]+'・'+gn+'</span>'
+      +(inf?'<span style="font-size:19px">'+(EMO[inf.t]||'')+'</span><b style="font-size:12.5px;color:'+col+'">'+inf.t+' '+(inf.ok?'✓':'⚠')+'</b>':'<span style="font-size:15px;color:var(--dim)">—</span>')
+      +'<span style="font-size:9.5px;color:var(--dim)">'+yx+'</span></div>'}).join('')+'</div>';
 };
 // ── 宅運時間軸 ──
 const perOf=y=>(((y-1864)%180+180)%180)/20|0;
