@@ -60,6 +60,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 .bg8{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px;margin:10px auto 0}
 .oct{aspect-ratio:1;clip-path:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%);padding:2px}
 .oct>div{width:100%;height:100%;clip-path:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%);background:#191512;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.oct .rel{font-size:9.5px;color:var(--gold);letter-spacing:.1em}
 .oct .tri{font-size:15px;line-height:1;opacity:.85}
 .oct .gn{font-family:'Noto Serif TC',serif;font-weight:900;font-size:17px;line-height:1.1}
 .oct .dr{font-size:10.5px;color:var(--dim)}
@@ -79,7 +80,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <div id="instFace" style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:900;text-align:center;margin:4px 0 8px;color:#fff">按下方按鈕,手機轉一圈即知八方吉凶</div>
 <button id="instBtn" class="mchip on" style="width:100%;font-size:16px;padding:11px">開始現場即斷</button>
 <div class="bg8" id="instGrid"></div>
-<div class="note">依「流年飛星+太歲三煞+你的命卦」判定,走到哪都能用,不需先量坐向;綠=吉、黃=平、紅=慎。要含本宅飛星斷,請再照下方三步量大門。</div></div>
+<div class="note"><b style="color:var(--gold)">八卦陣跟著你旋轉:最上格=你的正前方</b>,前後左右一目了然。依「流年飛星+太歲三煞+你的命卦」判定,走到哪都能用;綠=吉、黃=平、紅=慎。要含本宅飛星斷,請再照下方三步量大門。</div></div>
 <div class="modes"><button class="mchip on" data-m="simple">簡明(新手)</button><button class="mchip" data-m="pro">專業(全圈層)</button></div>
 <div id="cols"><div id="colL">
 <div id="wrap"><canvas id="cv"></canvas></div>
@@ -712,24 +713,36 @@ function instantVerdicts(){
   });
 }
 const TRIG={'乾':'☰','兌':'☱','離':'☲','震':'☳','巽':'☴','坎':'☵','艮':'☶','坤':'☷'};
-const BGLAY=[['乾','坎','艮'],['兌','中','震'],['坤','離','巽']]; // 上北下南(地圖視角)
+let instLastOct=-1;
+const RELPOS=[[0,1,'前'],[0,2,'右前'],[1,2,'右'],[2,2,'右後'],[2,1,'後'],[2,0,'左後'],[1,0,'左'],[0,0,'左前']];
 function renderInstant(){
   const v=Object.fromEntries(instantVerdicts().map(x=>[x.g,x]));
-  document.getElementById('instGrid').innerHTML=BGLAY.flat().map(g=>{
-    if(g==='中'){
-      return `<div class="oct octC" style="background:rgba(201,169,106,.65)"><div id="instC">
-        <span class="tri">☯</span><span class="gn" style="color:var(--gold)">面向</span>
-        <span class="dr">按住手機轉動</span></div></div>`}
+  const cells=[[0,0,0],[0,0,0],[0,0,0]];
+  RELPOS.forEach(([r,c,rel],k)=>{
+    const b=(heading+k*45)%360;
+    const g=GONG8[Math.floor(((b+22.5)%360)/45)%8];
     const x=v[g];
-    return `<div class="oct" style="background:${x.lv[1]}"><div>
+    cells[r][c]=`<div class="oct" style="background:${x.lv[1]}"><div>
+      <span class="rel">${rel}</span>
       <span class="tri" style="color:${x.lv[1]}">${TRIG[g]}</span>
       <span class="gn">${DIRZH[x.g]}<small style="font-size:10px;color:var(--dim)"> ${g}</small></span>
       <span class="vd" style="color:${x.lv[1]}">${x.lv[0]}</span>
-      <span class="rs">${x.rs.slice(0,2).join('・')||'無特別神煞'}</span></div></div>`}).join('');
+      <span class="rs">${x.rs.slice(0,2).join('・')||'無特別神煞'}</span></div></div>`;
+  });
+  cells[1][1]=`<div class="oct octC" style="background:rgba(201,169,106,.65)"><div id="instC">
+    <span class="tri">☯</span><span class="gn" style="color:var(--gold)">面向</span>
+    <span class="dr">手機轉動即更新</span></div></div>`;
+  document.getElementById('instGrid').innerHTML=cells.flat().join('');
+  instLastOct=Math.floor(((heading+22.5)%360)/45)%8;
+  const cg=GONG8[instLastOct];const cx=instantVerdicts().find(t=>t.g===cg);
+  const c0=document.getElementById('instC');
+  if(c0)c0.innerHTML='<span class="tri">'+TRIG[cg]+'</span><span class="gn" style="color:'+cx.lv[1]+'">'+DIRZH[cg]+'</span><span class="vd" style="color:'+cx.lv[1]+'">'+cx.lv[0]+'</span>';
 }
 function instFaceUpdate(){
+  const oct=Math.floor(((heading+22.5)%360)/45)%8;
+  if(oct!==instLastOct&&document.getElementById('instBtn').style.display==='none')renderInstant();
   const v=instantVerdicts();
-  const g=GONG8[Math.floor((((heading+22.5)%360))/45)];
+  const g=GONG8[oct];
   const x=v.find(t=>t.g===g);
   document.getElementById('instFace').innerHTML=
     '你面向:<span style="color:'+x.lv[1]+'">'+DIRZH[g]+'('+g+')・'+x.lv[0]+'</span>'
