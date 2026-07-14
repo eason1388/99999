@@ -1,5 +1,5 @@
 {
-  "name": "全能玄學羅盤 Master Feng Shui Compass",
+  "name": "全能玄學羅盤・隨緣堂",
   "short_name": "玄學羅盤",
   "description": "專業級電子羅盤與智慧風水分析",
   "start_url": "./index.html",
@@ -9,7 +9,16 @@
   "background_color": "#12100D",
   "theme_color": "#12100D",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

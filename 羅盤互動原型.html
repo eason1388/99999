@@ -105,7 +105,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
   <div class="seg"><button id="byHouse" class="on">吉凶依宅卦</button><button id="byMing">依我的命卦</button></div>
 </div>
 </div><div id="colR"><div class="panel"><h2>玄空飛星盤</h2><div class="grid9" id="g9"></div><div class="note" id="pattNote"></div><div class="note">點任一宮 → 山向星組合斷語與化解</div></div>
-<div class="panel"><h2>八宅吉凶方位</h2><div class="dirs" id="dirs"></div><div class="note">綠=吉方(宜門、房、桌);紅=凶方(宜廁、儲藏,忌久坐)。依宅卦排大遊年。</div></div>
+<div class="panel"><h2>八宅吉凶方位</h2><div class="bg8" id="dirs"></div><div class="note"><b style="color:var(--gold)">最上格=你的正前方</b>,隨面向旋轉。綠=吉方(宜門、房、桌);紅=凶方(宜廁、儲藏,忌久坐)。</div></div>
 <div class="panel"><h2>房間佈局檢核</h2>
 <div id="roomSel"></div>
 <button id="roomChk" class="mchip" style="font-size:14.5px;margin-top:6px">檢核佈局</button>
@@ -279,6 +279,8 @@ function drawFast(){
   ctx.restore();
 }
 function updateLight(){
+  const _oct=Math.floor(((heading+22.5)%360)/45)%8;
+  if(_oct!==window._bzOct){window._bzOct=_oct;if(window._bzGua)renderBazhaiDirs();}
   if(document.getElementById('instBtn').style.display==='none')instFaceUpdate();
   const r=interp(heading);const sit=isFacing?r.opp:r.m,fac=isFacing?r.m:r.opp;
   document.getElementById('big').textContent=heading.toFixed(1)+'°';
@@ -332,10 +334,7 @@ function update(){
   document.querySelector('#dirs').previousElementSibling.innerHTML='八宅吉凶方位 <span style="font-size:12px;color:var(--dim)">('
     +(useMing?('依命卦:'+mg+'命・'+(east.includes(mg)?'東四命':'西四命')):('依宅卦:'+zhai+'宅'))
     +(useMing?((east.includes(mg)===east.includes(zhai))?'・與此宅相配 ✓':'・與此宅不同組 ⚠'):'')+')</span>';
-  document.getElementById('dirs').innerHTML=order.map(g=>{
-    const yx=youxing(guaSel,g);const ji='生氣天醫延年伏位'.includes(yx);
-    return `<div class="dir" style="border:1px solid ${ji?'rgba(143,196,154,.35)':'rgba(224,122,106,.3)'}">
-    <span style="color:var(--dim)">${DIRZH[g]}</span><b style="color:${ji?'var(--green)':'var(--red)'}">${yx}</b></div>`}).join('');
+  window._bzGua=guaSel;renderBazhaiDirs();
   document.getElementById('adv').innerHTML=
     `<div class="row2"><span>宅卦</span><b>${zhai}宅(${'坎離震巽'.includes(zhai)?'東四宅':'西四宅'})</b></div>
      <div class="row2"><span>人盤中針(消砂)</span><b>${M24S[Math.floor((((heading+7.5)-337.5)%360+360)%360/15)]}山</b></div>
@@ -661,7 +660,8 @@ document.getElementById('recShare').onclick=()=>{
   g.fillStyle='#0D0B09';g.fillRect(0,0,1080,1400);
   g.textAlign='center';
   g.fillStyle='#C9A96A';g.font='900 58px "Noto Serif TC",serif';g.fillText('全能玄學羅盤',540,105);
-  g.fillStyle='rgba(237,231,218,.45)';g.font='23px "Noto Sans TC"';g.fillText('M A S T E R   F E N G   S H U I   C O M P A S S',540,150);
+  g.fillStyle='#E6C87E';g.font='700 30px "Noto Serif TC",serif';g.fillText('隨 緣 堂',540,150);
+  g.fillStyle='rgba(237,231,218,.45)';g.font='21px "Noto Sans TC"';g.fillText('M A S T E R   F E N G   S H U I   C O M P A S S',540,186);
   g.save();g.translate(540,620);g.rotate(-heading*Math.PI/180);
   g.drawImage(dial,-390,-390,780,780);g.restore();
   g.fillStyle='#E07A6A';g.beginPath();g.moveTo(540,225);g.lineTo(524,258);g.lineTo(556,258);g.closePath();g.fill();
@@ -713,6 +713,25 @@ function instantVerdicts(){
   });
 }
 const TRIG={'乾':'☰','兌':'☱','離':'☲','震':'☳','巽':'☴','坎':'☵','艮':'☶','坤':'☷'};
+function renderBazhaiDirs(){
+  const gua=window._bzGua;if(!gua)return;
+  const cells=[[0,0,0],[0,0,0],[0,0,0]];
+  RELPOS.forEach(([r,c,rel],k)=>{
+    const b=(heading+k*45)%360;
+    const g=GONG8[Math.floor(((b+22.5)%360)/45)%8];
+    const yx=youxing(gua,g);const ji='生氣天醫延年伏位'.includes(yx);
+    const col=ji?'var(--green)':'var(--red)';
+    cells[r][c]=`<div class="oct" style="background:${col}"><div>
+      <span class="rel">${rel}</span>
+      <span class="tri" style="color:${col}">${TRIG[g]}</span>
+      <span class="gn">${DIRZH[g]}<small style="font-size:10px;color:var(--dim)"> ${g}</small></span>
+      <span class="vd" style="color:${col}">${yx}</span></div></div>`;
+  });
+  cells[1][1]=`<div class="oct octC" style="background:rgba(201,169,106,.65)"><div>
+    <span class="tri">☯</span><span class="gn" style="color:var(--gold)">${gua}宅</span>
+    <span class="dr">上=面向</span></div></div>`;
+  document.getElementById('dirs').innerHTML=cells.flat().join('');
+}
 let instLastOct=-1;
 const RELPOS=[[0,1,'前'],[0,2,'右前'],[1,2,'右'],[2,2,'右後'],[2,1,'後'],[2,0,'左後'],[1,0,'左'],[0,0,'左前']];
 function renderInstant(){
