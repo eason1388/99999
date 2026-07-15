@@ -796,7 +796,6 @@ function renderInstant(){
   document.getElementById('instGrid').innerHTML=cells.flat().join('');
   instLastOct=Math.floor(((heading+22.5)%360)/45)%8;
   const cg=GONG8[instLastOct];const cx=instantVerdicts().find(t=>t.g===cg);
-  if(oct!==window._spOct){window._spOct=oct;speak('面向'+DIRZH[g]+','+x.lv[0]+'。'+(x.rs.join('。')||''));}
   const c0=document.getElementById('instC');
   if(c0)c0.innerHTML='<span class="tri">'+TRIG[cg]+'</span><span class="gn" style="color:'+cx.lv[1]+'">'+DIRZH[cg]+'</span><span class="vd" style="color:'+cx.lv[1]+'">'+cx.lv[0]+'</span>';
 }
@@ -809,11 +808,12 @@ function instFaceUpdate(){
   document.getElementById('instFace').innerHTML=
     '你面向:<span style="color:'+x.lv[1]+'">'+DIRZH[g]+'('+g+')・'+x.lv[0]+'</span>'
     +'<div style="font-size:13px;font-weight:400;color:var(--dim);font-family:\'Noto Sans TC\'">'+(x.rs.join('、')||'此方無特別神煞')+'</div>';
+  if(oct!==window._spOct){window._spOct=oct;speak('面向'+DIRZH[g]+','+x.lv[0]+'。'+(x.rs.join('。')||''));}
   const c0=document.getElementById('instC');
   if(c0)c0.innerHTML='<span class="tri">'+TRIG[g]+'</span><span class="gn" style="color:'+x.lv[1]+'">'+DIRZH[g]+'</span><span class="vd" style="color:'+x.lv[1]+'">'+x.lv[0]+'</span>';
 }
 document.getElementById('instBtn').onclick=()=>{
-  renderInstant();instFaceUpdate();
+  try{renderInstant();instFaceUpdate();}catch(e){console.error(e);}
   document.getElementById('instBtn').style.display='none';
   if(!liveOn)toggleLive();
 };
