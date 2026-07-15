@@ -64,6 +64,9 @@ button{font-family:inherit}
 <div class="grid" id="qmGrid" style="grid-template-columns:repeat(3,86px);grid-template-rows:repeat(3,86px)"></div>
 <div id="qmLuck" style="margin-top:8px"></div>
 <div class="note">時家奇門・拆補法・轉盤。開/休/生為三吉門,宜出行辦事朝該方;白虎、玄武方慎行。Beta:核心結構已通過 600 局自動掃描,惟置閏法與各派細節有異,重大用事請專業老師複核。</div></div>
+<div class="box" style="max-width:560px"><h2>本月個人運勢</h2>
+<div id="mluck"></div>
+<div class="note">依你的命卦 × 本節氣月飛星判定;每逢節氣交月自動更新。改「出生年」或「日期」即重算。</div></div>
 </div>
 <script>
 const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
@@ -251,6 +254,35 @@ function render(){
     '<span class="tag good">今日吉方:'+good.join('、')+'</span> <span class="tag warn">今日慎用:'+bad.join('、')+'</span>'
     +'<div class="note">吉方宜辦要事、簽約、出行;慎用方忌動土、修造、久坐。以一白六白八白九紫為吉、二黑五黃為凶(紫白訣)。</div>';
   document.getElementById('dNote').textContent='三元遁法:'+(fw?'陽遁順飛':'陰遁(起星逆佈,盤仍順飛)')+'。日家紫白各派有異,正式版以資料包口徑為準(pending_expert)。';
+  // 本月個人運勢
+  (function(){
+    const TRIB2={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+    const XS2=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+    const yx2=(z,g)=>XS2[TRIB2[z]^TRIB2[g]];
+    const N2G={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+    const dsum=n=>n<10?n:dsum(Math.floor(n/10)+n%10);
+    const bys2=suiYear(by,7,1);let gN=true?dsum((11-dsum(bys2))===0?9:11-dsum(bys2)):0;
+    // 性別:擇時頁無性別選項,以男性公式為預設並註記
+    if(gN===5)gN=2;
+    const mgua=N2G[gN];
+    const mi2=monthIndex(Y,M,D);
+    const mch=fly(monthStar(sy,mi2));
+    const G8=['坎','艮','震','巽','離','坤','兌','乾'];
+    const goods=[],bads=[];let wc='';
+    for(const g of G8){
+      const st=mch[g],yx=yx2(mgua,g),ji='生氣天醫延年伏位'.includes(yx);
+      if(st===4)wc=DIR8[g];
+      if(ji&&[1,4,6,8,9].includes(st))goods.push(DIR8[g]+'('+yx+'+'+st+'白紫)');
+      if(st===5||st===2)bads.push(DIR8[g]+'('+(st===5?'月五黃':'月二黑')+')');
+      else if(!ji&&[3,7].includes(st))bads.push(DIR8[g]+'('+yx+')');
+    }
+    const names='寅卯辰巳午未申酉戌亥子丑';
+    document.getElementById('mluck').innerHTML=
+      '<div style="font-size:14px;margin-bottom:6px">'+by+' 年生(命卦'+mgua+')・本月:'+names[mi2]+'月</div>'
+      +(goods.length?'<span class="tag good">本月吉方:'+goods.join('、')+'</span> ':'')
+      +(bads.length?'<span class="tag warn">本月慎用:'+bads.join('、')+'</span> ':'')
+      +(wc?'<span class="tag">月文昌:'+wc+'(宜考試、簽約、讀書)</span>':'');
+  })();
   // 個人吉位
   const bys=suiYear(by,7,1), bi=((bys-4)%12+12)%12, si=((bys-4)%10+10)%10;
   const WC={'甲':'巳','乙':'午','丙':'申','戊':'申','丁':'酉','己':'酉','庚':'亥','辛':'子','壬':'寅','癸':'卯'};

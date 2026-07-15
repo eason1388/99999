@@ -79,6 +79,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <div class="panel" style="margin-top:0;margin-bottom:10px"><h2>🧭 現場即斷(新手推薦)</h2>
 <div id="instFace" style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:900;text-align:center;margin:4px 0 8px;color:#fff">按下方按鈕,手機轉一圈即知八方吉凶</div>
 <button id="instBtn" class="mchip on" style="width:100%;font-size:16px;padding:11px">開始現場即斷</button>
+<button id="voiceBtn" class="mchip" style="width:100%;font-size:14px;padding:8px;margin-top:6px">🔊 語音播報:關</button>
 <div class="bg8" id="instGrid"></div>
 <div class="note"><b style="color:var(--gold)">八卦陣跟著你旋轉:最上格=你的正前方</b>,前後左右一目了然。依「流年飛星+太歲三煞+你的命卦」判定,走到哪都能用;綠=吉、黃=平、紅=慎。要含本宅飛星斷,請再照下方三步量大門。</div></div>
 <div class="modes"><button class="mchip on" data-m="simple">簡明(新手)</button><button class="mchip" data-m="pro">專業(全圈層)</button></div>
@@ -120,6 +121,14 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
   <button id="recSave" class="mchip" style="font-size:14px">＋儲存</button>
   <button id="recPrint" class="mchip" style="font-size:14px">🖨 報告</button>
   <button id="recCmp" class="mchip" style="font-size:14px">⚖ 比較</button>
+  <button id="recCam" class="mchip" style="font-size:14px">📷</button>
+  <input type="file" accept="image/*" capture="environment" id="recPhotoIn" hidden>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:8px">
+  <span id="photoHint" class="note" style="flex:1;margin:0;align-self:center"></span>
+  <button id="recBk" class="mchip" style="font-size:13px">⬇ 備份</button>
+  <button id="recRs" class="mchip" style="font-size:13px">⬆ 還原</button>
+  <input type="file" accept="application/json" id="recRsIn" hidden>
   <button id="recShare" class="mchip" style="font-size:14px">📤 分享卡</button>
 </div>
 <div id="recList" class="note">尚無紀錄。紀錄只存在你的手機/瀏覽器,不會上傳。</div></div>
@@ -425,17 +434,27 @@ function recRender(){
   if(!a.length){el.textContent='尚無紀錄。紀錄只存在你的手機/瀏覽器,不會上傳。';return}
   el.innerHTML=a.map((r,i)=>`<div class="row2" style="cursor:pointer" onclick="recLoad(${i})">
     <input type="checkbox" class="cmpBox" data-i="${i}" onclick="event.stopPropagation()" style="accent-color:var(--gold);width:17px;height:17px;margin-right:6px">
-    <span>${r.note||'未命名'} <small style="color:var(--dim)">${r.date}</small></span>
+    <span>${r.photo?`<img src="${r.photo}" onclick="event.stopPropagation();recPhoto(${i})" style="width:34px;height:34px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px;border:1px solid var(--gold2)">`:''}${r.note||'未命名'} <small style="color:var(--dim)">${r.date}</small></span>
     <b>${r.deg.toFixed(1)}° ${r.title} <span onclick="event.stopPropagation();recDel(${i})" style="color:var(--red);padding:0 6px">✕</span></b></div>`).join('');
 }
 window.recLoad=i=>{const r=recAll()[i];if(!r)return;heading=r.deg;period=r.period;
   document.getElementById('period').value=r.period;draw();window.scrollTo({top:0,behavior:'smooth'})};
+window.recPhoto=i=>{const r=recAll()[i];if(!r||!r.photo)return;
+  document.getElementById('cT').textContent=r.note||'現場照片';
+  document.getElementById('cB').innerHTML='<img src="'+r.photo+'" style="width:100%;border-radius:14px"><p style="margin-top:8px">'+r.deg.toFixed(1)+'° '+r.title+'('+r.period+'運)・'+r.date+'</p>';
+  card.classList.add('show');};
 window.recDel=i=>{const a=recAll();a.splice(i,1);localStorage.setItem('fsc_records',JSON.stringify(a));recRender()};
 document.getElementById('recSave').onclick=()=>{
   const a=recAll();
   a.unshift({note:document.getElementById('recNote').value.trim(),deg:heading,period,
-    title:document.getElementById('title').textContent,date:new Date().toLocaleDateString('zh-TW')});
-  localStorage.setItem('fsc_records',JSON.stringify(a.slice(0,50)));
+    title:document.getElementById('title').textContent,date:new Date().toLocaleDateString('zh-TW'),
+    photo:pendingPhoto||undefined});
+  pendingPhoto=null;document.getElementById('photoHint').textContent='';
+  let out=a.slice(0,50);
+  while(JSON.stringify(out).length>4500000){ // 容量守門:超限先丟最舊照片
+    const idx=out.map((r,i)=>r.photo?i:-1).filter(i=>i>=0).pop();
+    if(idx===undefined||idx<0)break;delete out[idx].photo;}
+  localStorage.setItem('fsc_records',JSON.stringify(out));
   document.getElementById('recNote').value='';recRender()};
 document.getElementById('recPrint').onclick=()=>{
   const w=window.open('','_blank');
@@ -770,6 +789,7 @@ function renderInstant(){
   document.getElementById('instGrid').innerHTML=cells.flat().join('');
   instLastOct=Math.floor(((heading+22.5)%360)/45)%8;
   const cg=GONG8[instLastOct];const cx=instantVerdicts().find(t=>t.g===cg);
+  if(oct!==window._spOct){window._spOct=oct;speak('面向'+DIRZH[g]+','+x.lv[0]+'。'+(x.rs.join('。')||''));}
   const c0=document.getElementById('instC');
   if(c0)c0.innerHTML='<span class="tri">'+TRIG[cg]+'</span><span class="gn" style="color:'+cx.lv[1]+'">'+DIRZH[cg]+'</span><span class="vd" style="color:'+cx.lv[1]+'">'+cx.lv[0]+'</span>';
 }
@@ -790,6 +810,46 @@ document.getElementById('instBtn').onclick=()=>{
   document.getElementById('instBtn').style.display='none';
   if(!liveOn)toggleLive();
 };
+// ── 語音播報 ──
+let voiceOn=false;
+function speak(t){if(!voiceOn||!window.speechSynthesis)return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=1.05;speechSynthesis.speak(u);}catch(e){}}
+document.getElementById('voiceBtn').onclick=e=>{voiceOn=!voiceOn;
+  e.target.textContent='🔊 語音播報:'+(voiceOn?'開':'關');e.target.classList.toggle('on',voiceOn);
+  if(voiceOn)speak('語音播報已開啟');};
+// ── 拍照紀錄 ──
+let pendingPhoto=null;
+document.getElementById('recCam').onclick=()=>document.getElementById('recPhotoIn').click();
+document.getElementById('recPhotoIn').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const img=new Image();img.onload=()=>{
+    const mx=640,sc=Math.min(1,mx/Math.max(img.width,img.height));
+    const cv2=document.createElement('canvas');cv2.width=img.width*sc;cv2.height=img.height*sc;
+    cv2.getContext('2d').drawImage(img,0,0,cv2.width,cv2.height);
+    pendingPhoto=cv2.toDataURL('image/jpeg',0.6);
+    document.getElementById('photoHint').textContent='📷 已拍照,按「＋儲存」隨紀錄存檔';
+    URL.revokeObjectURL(img.src);};
+  img.src=URL.createObjectURL(f);e.target.value='';};
+// ── 備份/還原 ──
+document.getElementById('recBk').onclick=()=>{
+  const data={v:1,exported:new Date().toISOString(),records:recAll(),
+    settings:{birthYear,isMale,flowYear,dec:+document.getElementById('dec').value}};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download='玄學羅盤備份_'+new Date().toISOString().slice(0,10)+'.json';a.click();};
+document.getElementById('recRs').onclick=()=>document.getElementById('recRsIn').click();
+document.getElementById('recRsIn').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{
+    try{const d=JSON.parse(rd.result);
+      if(!Array.isArray(d.records))throw 0;
+      localStorage.setItem('fsc_records',JSON.stringify(d.records.slice(0,50)));
+      if(d.settings){birthYear=d.settings.birthYear||birthYear;isMale=d.settings.isMale??isMale;
+        document.getElementById('by').value=birthYear;}
+      recRender();update();
+      document.getElementById('photoHint').textContent='✓ 已還原 '+d.records.length+' 筆紀錄';
+    }catch(err){alert('備份檔格式不正確')}};
+  rd.readAsText(f);e.target.value='';};
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
 ps.onchange=e=>{period=+e.target.value;draw()};
