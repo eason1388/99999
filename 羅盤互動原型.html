@@ -396,6 +396,8 @@ document.querySelectorAll('.mchip').forEach(b=>b.onclick=()=>{mode=b.dataset.m;
   document.querySelectorAll('.mchip').forEach(x=>x.classList.remove('on'));b.classList.add('on');draw()});
 // ── 即時感測(手機) ──
 let liveOn=false,lastLive=null;
+window.addEventListener('message',e=>{ // 外層(App殼)轉發的感測資料
+  if(liveOn&&e.data&&typeof e.data.fscH==='number')onOrient({webkitCompassHeading:e.data.fscH});});
 function onOrient(e){
   let h=null;
   if(typeof e.webkitCompassHeading==='number')h=e.webkitCompassHeading;
@@ -403,6 +405,7 @@ function onOrient(e){
   if(h===null)return;
   h=((h+ +document.getElementById('dec').value)%360+360)%360;
   if(lastLive!==null){let d=(h-lastLive+540)%360-180;h=(lastLive+d*0.25+360)%360;}
+  if(lastLive===null){const b=document.getElementById('live');if(liveOn)b.textContent='⏸ 即時量測中 ●(手機保持水平)';}
   lastLive=h;heading=h;drawFast();updateLight();fullDebounce();
 }
 async function toggleLive(){
@@ -416,8 +419,12 @@ async function toggleLive(){
       if(st!=='granted'){alert('需要允許「動作與方向」權限才能即時量測');return}}
     window.addEventListener('deviceorientationabsolute',onOrient);
     window.addEventListener('deviceorientation',onOrient);
-    liveOn=true;btn.classList.add('on');btn.textContent='⏸ 停止即時量測(手機保持水平)';
-    setTimeout(()=>{if(lastLive===null&&liveOn){alert('未偵測到方向感測器——電腦瀏覽器無羅盤,請改用手機開啟,或手動輸入度數。');toggleLive()}},2500);
+    try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}
+    liveOn=true;btn.classList.add('on');btn.textContent='⏸ 即時量測中…(手機保持水平)';
+    setTimeout(()=>{if(lastLive===null&&liveOn){
+      btn.textContent='⚠ 尚未收到感測資料(可繼續等或手動輸入度數)';
+      try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}
+    }},6000);
   }catch(err){alert('此裝置不支援方向感測:'+err)}
 }
 document.getElementById('live').onclick=toggleLive;
