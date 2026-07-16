@@ -60,7 +60,7 @@ button{font-family:inherit}
 <select id="sex2"><option value="0">女</option><option value="1">男</option></select>
 <button class="mchip" id="hhBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">合婚分析</button>
 <div id="hhOut" style="margin-top:8px"></div>
-<div class="note">分析:年柱干支合沖刑害、命卦東西四相配與互見遊星、五行喜用互補。傳統合婚尚有神煞多派之法,本結果供參考,婚嫁大事宜請老師綜合面斷。</div></div>
+<div class="note">本法依子平:年柱(表象緣分)+日柱夫妻宮(核心,權重最高)+日主五合+命卦相配+五行互補。與民間「生肖歌訣」(白馬怕青牛之類)屬不同派別,結果有異屬正常;年柱以立春分界。婚嫁大事仍宜請老師綜合面斷。</div></div>
 </div>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
@@ -199,6 +199,15 @@ function heHun(){
   else items.push(['年支無沖合',0,'平']);
   // 年干
   if(WUHE[sa]===sb){sc+=6;items.push(['年干五合('+ST[sa]+ST[sb]+')',6,'天干相合,緣分深'])}
+  // 日支(夫妻宮)——子平合婚以日柱為重
+  const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+  const dba=pA.day%12,dbb=pB.day%12;
+  if(LIUHE[dba]===dbb){sc+=12;items.push(['日支六合('+BR[dba]+BR[dbb]+')',12,'夫妻宮相合,同心同德(最重指標)'])}
+  else if(SANHE.some(g=>g.includes(dba)&&g.includes(dbb)&&dba!==dbb)){sc+=9;items.push(['日支三合',9,'夫妻宮同局,情投意合'])}
+  else if((dba+6)%12===dbb){sc-=15;items.push(['日支六沖('+BR[dba]+'沖'+BR[dbb]+')',-15,'夫妻宮相沖,易爭執;宜分工互補、各留空間'])}
+  else if(LIUHAI[dba]===dbb){sc-=8;items.push(['日支相害',-8,'夫妻宮相害,坦誠防猜疑'])}
+  else if(XING.some(g=>g.includes(dba)&&g.includes(dbb)&&dba!==dbb)||(dba===dbb&&[4,6,9,11].includes(dba))){sc-=8;items.push(['日支相刑',-8,'夫妻宮相刑,磨合期較長'])}
+  else items.push(['日支(夫妻宮)無沖合',0,'平']);
   // 日主五合(夫妻星)
   const da=pA.day%10,db_=pB.day%10;
   if(WUHE[da]===db_){sc+=8;items.push(['日主天干五合',8,'日柱為夫妻宮,相合大吉'])}
@@ -224,7 +233,9 @@ function heHun(){
   const lv=sc>=85?['天作之合','var(--green)']:sc>=72?['上等婚配','var(--green)']:sc>=58?['中上之配','var(--gold)']:sc>=45?['普通,重經營','#c9944a']:['多有考驗','var(--red)'];
   document.getElementById('hhOut').innerHTML=
     '<div style="text-align:center"><span class="score" style="font-size:38px">'+sc+'</span><span style="opacity:.6">/100</span> <b style="color:'+lv[1]+'">'+lv[0]+'</b></div>'
-   +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">甲:'+gz(pA.year)+'年('+gA+'命) × 乙:'+gz(pB.year)+'年('+gB+'命)</div>'
+   +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">'
+   +'甲:'+gz(pA.year)+'年(屬'+SX[pA.year%12]+')・'+gz(pA.day)+'日・'+gA+'命<br>'
+   +'乙:'+gz(pB.year)+'年(屬'+SX[pB.year%12]+')・'+gz(pB.day)+'日・'+gB+'命</div>'
    +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('');
 }
 document.getElementById('hhBtn').onclick=heHun;
