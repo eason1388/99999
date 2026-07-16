@@ -880,8 +880,13 @@ function arStop(){arOn=false;document.getElementById('arWrap').style.display='no
   if(arStream){arStream.getTracks().forEach(t=>t.stop());arStream=null;}}
 document.getElementById('arBtn').onclick=arStart;
 document.getElementById('arX').onclick=arStop;
+let arT0=0;
 function arDraw(){
   if(!arOn)return;
+  try{arDrawBody();}catch(e){console.error('AR draw:',e);}
+  requestAnimationFrame(arDraw);
+}
+function arDrawBody(){
   const c=document.getElementById('arC'),g=c.getContext('2d');
   const w=innerWidth,h=innerHeight;g.clearRect(0,0,w,h);
   const ppd=w/58; // 約58°視角
@@ -914,8 +919,10 @@ function arDraw(){
   const oct=Math.floor(((heading+22.5)%360)/45)%8;
   const gg=GONG8[oct],x=v.find(t=>t.g===gg);
   const bw=Math.min(340,w-40);
+  const rrect=(x,y,ww,hh,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+ww,y,x+ww,y+hh,r);
+    g.arcTo(x+ww,y+hh,x,y+hh,r);g.arcTo(x,y+hh,x,y,r);g.arcTo(x,y,x+ww,y,r);g.closePath();};
   g.fillStyle='rgba(20,17,16,.78)';
-  g.beginPath();g.roundRect(w/2-bw/2,h-170-((typeof env!=='undefined')?0:0),bw,96,18);g.fill();
+  rrect(w/2-bw/2,h-170,bw,96,18);g.fill();
   g.strokeStyle=x.lv[1].startsWith('var')?'#C9A96A':x.lv[1];
   g.strokeStyle=({'var(--green)':'#8FC49A','var(--gold)':'#C9A96A','var(--red)':'#E07A6A','#c9944a':'#c9944a'})[x.lv[1]]||'#C9A96A';
   g.lineWidth=2;g.stroke();
@@ -925,8 +932,22 @@ function arDraw(){
   g.fillText((x.rs.slice(0,2).join('・')||'此方無特別神煞'),w/2,h-170+66);
   g.fillStyle='rgba(237,231,218,.45)';g.font='11.5px "Noto Sans TC"';
   g.fillText('對準牆面/門窗即知該方吉凶・讀數為真北',w/2,h-170+86);
-  requestAnimationFrame(arDraw);
+  // 尚未收到方向資料 → 醒目提示
+  if(lastLive===null){
+    if(!arT0)arT0=Date.now();
+    if(Date.now()-arT0>1500){
+      g.fillStyle='rgba(20,17,16,.85)';rrectHint(g,w/2-160,h/2-46,320,92,16);g.fill();
+      g.strokeStyle='#E07A6A';g.lineWidth=2;g.stroke();
+      g.fillStyle='#E07A6A';g.font='700 17px "Noto Sans TC"';
+      g.fillText('尚未收到方向資料',w/2,h/2-12);
+      g.fillStyle='rgba(237,231,218,.85)';g.font='13.5px "Noto Sans TC"';
+      g.fillText('請關閉 AR,先按「開始現場即斷」完成授權',w/2,h/2+12);
+      g.fillText('(畫面轉動需要「動作與方向」權限)',w/2,h/2+32);
+    }
+  }else arT0=0;
 }
+function rrectHint(g,x,y,ww,hh,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+ww,y,x+ww,y+hh,r);
+  g.arcTo(x+ww,y+hh,x,y+hh,r);g.arcTo(x,y+hh,x,y,r);g.arcTo(x,y,x+ww,y,r);g.closePath();}
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
 ps.onchange=e=>{period=+e.target.value;draw()};
