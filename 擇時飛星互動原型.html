@@ -47,7 +47,7 @@ button{font-family:inherit}
     <div id="shensha" style="margin-top:8px"></div></div>
   <div class="box"><h2>流月盤</h2><div class="months" id="mChips"></div><div class="grid" id="mGrid"></div>
     <div class="note">月序以節氣「節」為界(寅月=立春起)。</div></div>
-  <div class="box"><h2>流日盤 <span id="dTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="dGrid"></div><div id="dLuck" style="margin-top:8px"></div>
+  <div class="box"><h2>流日盤 <span id="dTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="dGrid"></div><div id="dLuck" style="margin-top:8px"></div><div id="dAlmanac" style="margin-top:8px;font-size:13.5px;line-height:1.8"></div>
     <div class="note" id="dNote"></div></div>
   <div class="box"><h2>個人吉位(依出生年)</h2><div id="personal"></div>
     <div class="note">年干支以立春為界(2 月上旬出生者請留意)。文昌依年干、桃花驛馬依年支三合、貴人依年干(天乙)。</div></div>
@@ -56,7 +56,7 @@ button{font-family:inherit}
 宅坐山 <select id="sitSel2"><option value="-1">不指定</option></select>
 <button class="mchip" id="pickBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">掃描吉日</button>
 <div id="pickOut" style="margin-top:8px"></div>
-<div class="note">規則(v1 簡化版):避沖你的年支、避沖宅坐山、動土避五黃入中日,一六八九紫白日加分。未含建除十二神與黃黑道,正式版補全;重大事項仍請專業擇日師複核。</div></div>
+<div class="note">規則:建除十二神(破日全避、依事取宜)+彭祖百忌(亥不嫁娶等)+避沖年支/宅坐山+紫白吉星加分。已達通書基本盤;重大事項仍請專業擇日師複核。</div></div>
 <div class="box" style="max-width:560px"><h2>奇門遁甲時盤(Beta)</h2>
 時辰 <select id="qmH"></select>
 <button class="mchip" id="qmBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">起局</button>
@@ -130,6 +130,17 @@ function pickDays(){
     let sc=60;const tags=[];
     if((db+6)%12===ob){sc-=100;tags.push(['沖你的年支','warn'])}
     if(sitB>=0&&(db+6)%12===sitB){sc-=(ev==='動土'||ev==='搬家')?100:20;tags.push(['沖宅坐山','warn'])}
+    const jc=jianChu(Y,M,D);
+    const JYI={'嫁娶':[4,8],'開市':[8,9,10],'動土':[3,4,5],'搬家':[4,8,10],'簽約':[4,8,10]}[ev]||[];
+    if(jc.idx===6){sc-=100;tags.push(['破日,萬事不宜','warn'])}
+    else if(jc.idx===11&&ev!=='動土'){sc-=40;tags.push(['閉日','warn'])}
+    else if(jc.idx===0&&ev==='動土'){sc-=40;tags.push(['建日忌動土','warn'])}
+    else if(JYI.includes(jc.idx)){sc+=12;tags.push([jc.name+'日宜'+ev,'good'])}
+    else tags.push([jc.name+'日','']);
+    if(ev==='嫁娶'&&jc.db===11){sc-=100;tags.push(['亥不嫁娶','warn'])}
+    if(ev==='搬家'&&jc.db===8){sc-=30;tags.push(['申不安床','warn'])}
+    if(ev==='開市'&&jc.ds===0){sc-=20;tags.push(['甲不開倉','warn'])}
+    if(ev==='簽約'&&jc.ds===9){sc-=15;tags.push(['癸不詞訟','warn'])}
     if(ds===5){sc-=(ev==='動土')?100:15;tags.push(['五黃入中','warn'])}
     else if(ds===2){sc-=10;tags.push(['二黑入中','warn'])}
     else if([1,6,8,9].includes(ds)){sc+=15;tags.push([ds+' 紫白吉星','good'])}
@@ -219,6 +230,25 @@ document.getElementById('qmBtn').onclick=()=>{
     '<span class="tag good">吉方:'+goods.map(g=>QDIR[g]+'('+q.doors[g]+'門)').join('、')+'</span> '
    +'<span class="tag warn">慎行:'+bads.map(g=>QDIR[g]+'('+q.gods[g]+')').join('、')+'</span>';
 };
+// ── 黃曆:建除十二神+彭祖百忌 ──
+// 規則:日支=月支(節氣月)為「建」,順數十二神;破日=沖月支(必為第7位)。
+const JIAN12='建除滿平定執破危成收開閉';
+const JIAN_YI=['宜出行、上任、祈福;忌動土、開倉','宜除舊佈新、沐浴、治病;忌上任、遠行',
+'宜祭祀、祈福、開市;忌安葬','宜修屋、築堤、平整;諸事平平','宜嫁娶、安床、開市、簽約;忌訴訟、出行',
+'宜捕捉、修造;忌搬遷、開市','大耗之日,萬事不宜;唯宜拆除、治病','忌登高、冒險、行船;宜安床、安神',
+'宜開業、嫁娶、入宅、簽約,凡事有成;忌訴訟','宜納財、收帳、買賣入倉;忌安葬、開市',
+'宜開市、開工、入學、求職;忌安葬','宜築堤、埋葬、收藏;忌開市、出行、手術'];
+const PZ_G=['甲不開倉,財物耗散','乙不栽植,千株不長','丙不修灶,必見災殃','丁不剃頭,頭必生瘡','戊不受田,田主不祥',
+'己不破券,二比並亡','庚不經絡,織機虛張','辛不合醬,主人不嘗','壬不泱水,更難提防','癸不詞訟,理弱敵強'];
+const PZ_Z=['子不問卜,自惹禍殃','丑不冠帶,主不還鄉','寅不祭祀,神鬼不嘗','卯不穿井,水泉不香','辰不哭泣,必主重喪',
+'巳不遠行,財物伏藏','午不苫蓋,屋主更張','未不服藥,毒氣入腸','申不安床,鬼祟入房','酉不會客,醉坐顛狂',
+'戌不吃犬,作怪上床','亥不嫁娶,不利新郎'];
+function jianChu(Y,M,D){
+  const J=jdn(Y,M,D),di=((J-11)%60+60)%60;
+  const mi=monthIndex(Y,M,D);
+  const idx=((di%12)-((mi+2)%12)+12)%12;
+  return{idx,name:JIAN12[idx],yi:JIAN_YI[idx],di,ds:di%10,db:di%12};
+}
 function render(){
   const [Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
   const yInput=+document.getElementById('yr').value;
@@ -253,7 +283,11 @@ function render(){
   document.getElementById('dLuck').innerHTML=
     '<span class="tag good">今日吉方:'+good.join('、')+'</span> <span class="tag warn">今日慎用:'+bad.join('、')+'</span>'
     +'<div class="note">吉方宜辦要事、簽約、出行;慎用方忌動土、修造、久坐。以一白六白八白九紫為吉、二黑五黃為凶(紫白訣)。</div>';
-  document.getElementById('dNote').textContent='三元遁法:'+(fw?'陽遁順飛':'陰遁(起星逆佈,盤仍順飛)')+'。日家紫白各派有異,正式版以資料包口徑為準(pending_expert)。';
+  (function(){const jc=jianChu(Y,M,D);
+    document.getElementById('dAlmanac').innerHTML=
+      '<span class="tag" style="font-weight:700">'+jc.name+'日</span> '+jc.yi
+      +'<div style="color:#8a8072;font-size:12.5px">彭祖百忌:'+PZ_G[jc.ds]+';'+PZ_Z[jc.db]+'</div>';})();
+  document.getElementById('dNote').textContent='三元遁法:' +(fw?'陽遁順飛':'陰遁(起星逆佈,盤仍順飛)')+'。日家紫白各派有異,正式版以資料包口徑為準(pending_expert)。';
   // 本月個人運勢
   (function(){
     const TRIB2={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};

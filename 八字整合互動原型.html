@@ -54,6 +54,13 @@ button{font-family:inherit}
     <div id="patt" style="text-align:center;margin-bottom:6px"></div>
     <div id="items"></div>
     <div class="note">評分=基準50+逐項加減(每項附出處;v1 基準模型,權重屬門派包可覆寫)。喜用神取自五行強弱(身弱喜印比、身強喜食傷財官)。</div></div>
+<div class="box" style="max-width:440px"><h2>💑 合婚配對</h2>
+<div style="font-size:13px;opacity:.7;margin-bottom:6px">甲方=上方輸入的生日;乙方請輸入:</div>
+出生 <input id="bd2" type="date" value="1978-03-20"> <input id="bt2" type="time" value="10:00">
+<select id="sex2"><option value="0">女</option><option value="1">男</option></select>
+<button class="mchip" id="hhBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">合婚分析</button>
+<div id="hhOut" style="margin-top:8px"></div>
+<div class="note">分析:年柱干支合沖刑害、命卦東西四相配與互見遊星、五行喜用互補。傳統合婚尚有神煞多派之法,本結果供參考,婚嫁大事宜請老師綜合面斷。</div></div>
 </div>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
@@ -160,6 +167,67 @@ const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
 const PAL2GUA={'坎':'坎','坤':'坤','震':'震','巽':'巽','乾':'乾','兌':'兌','艮':'艮','離':'離'};
 
 
+// ── 合婚配對 ──
+const LIUHE={0:1,1:0,2:11,11:2,3:10,10:3,4:9,9:4,5:8,8:5,6:7,7:6};      // 六合
+const SANHE=[[8,0,4],[5,9,1],[2,6,10],[11,3,7]];                        // 三合局
+const LIUHAI={0:7,7:0,1:6,6:1,2:5,5:2,3:4,4:3,8:11,11:8,9:10,10:9};     // 六害
+const XING=[[0,3],[2,5,8],[1,10,7]];                                     // 相刑組
+const WUHE={0:5,5:0,1:6,6:1,2:7,7:2,3:8,8:3,4:9,9:4};                    // 天干五合
+const TRIB3={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XS3=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const yx3=(a,b)=>XS3[TRIB3[a]^TRIB3[b]];
+const N2G3={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const ds3=n=>n<10?n:ds3(Math.floor(n/10)+n%10);
+function mg3(y,male){let g=male?ds3((11-ds3(y))===0?9:11-ds3(y)):ds3(ds3(y)+4);if(g===5)g=male?2:8;return N2G3[g]}
+function heHun(){
+  const[Y1,M1,D1]=document.getElementById('bd').value.split('-').map(Number);
+  const[h1,n1]=document.getElementById('bt').value.split(':').map(Number);
+  const male1=document.getElementById('sex').value==='1';
+  const[Y2,M2,D2]=document.getElementById('bd2').value.split('-').map(Number);
+  const[h2,n2]=document.getElementById('bt2').value.split(':').map(Number);
+  const male2=document.getElementById('sex2').value==='1';
+  const pA=fourPillars(Y1,M1,D1,h1+n1/60),pB=fourPillars(Y2,M2,D2,h2+n2/60);
+  const ya=pA.year,yb=pB.year;
+  const ba=ya%12,bb=yb%12,sa=ya%10,sb=yb%10;
+  const items=[];let sc=60;
+  // 年支
+  if(LIUHE[ba]===bb){sc+=12;items.push(['年支六合('+BR[ba]+BR[bb]+')',12,'地支有情,相處和睦'])}
+  else if(SANHE.some(g=>g.includes(ba)&&g.includes(bb)&&ba!==bb)){sc+=10;items.push(['年支三合',10,'同局相生,志同道合'])}
+  else if((ba+6)%12===bb){sc-=15;items.push(['年支六沖('+BR[ba]+'沖'+BR[bb]+')',-15,'聚少離多之象,宜多包容;可用合化生肖之物調和'])}
+  else if(LIUHAI[ba]===bb){sc-=10;items.push(['年支相害',-10,'易生誤會,溝通為要'])}
+  else if(XING.some(g=>g.includes(ba)&&g.includes(bb)&&ba!==bb)||(ba===bb&&[4,6,9,11].includes(ba))){sc-=8;items.push(['年支相刑',-8,'易有磨擦,退一步海闊天空'])}
+  else items.push(['年支無沖合',0,'平']);
+  // 年干
+  if(WUHE[sa]===sb){sc+=6;items.push(['年干五合('+ST[sa]+ST[sb]+')',6,'天干相合,緣分深'])}
+  // 日主五合(夫妻星)
+  const da=pA.day%10,db_=pB.day%10;
+  if(WUHE[da]===db_){sc+=8;items.push(['日主天干五合',8,'日柱為夫妻宮,相合大吉'])}
+  // 命卦
+  const gA=mg3(pA.sui,male1),gB=mg3(pB.sui,male2);
+  const east='坎離震巽';
+  const same=(east.includes(gA)===east.includes(gB));
+  const y1=yx3(gA,gB);
+  if(same){sc+=8;items.push(['命卦同組('+gA+'×'+gB+','+(east.includes(gA)?'東四':'西四')+')',8,'吉方一致,居家佈局好安排'])}
+  else {sc-=5;items.push(['命卦不同組('+gA+'×'+gB+')',-5,'臥室以一方吉位為主、床頭朝雙方皆可之向'])}
+  if('生氣延年'.includes(y1)){sc+=8;items.push(['互見'+y1,8,y1==='生氣'?'活力互旺':'情義綿長'])}
+  else if('天醫伏位'.includes(y1)){sc+=4;items.push(['互見'+y1,4,'安穩相扶'])}
+  else if('絕命五鬼'.includes(y1)){sc-=8;items.push(['互見'+y1,-8,'意見易左,以吉方臥房化解'])}
+  // 五行互補(以雙方強弱)
+  const stA=strength({year:pA.year,month:pA.month,day:pA.day,hour:pA.hour});
+  const stB=strength({year:pB.year,month:pB.month,day:pB.day,hour:pB.hour});
+  const dmB=WX[pB.day%10],dmA=WX[pA.day%10];
+  let comp=0;
+  if(stA.favor.includes(dmB)){comp+=6;items.push(['乙方日主('+dmB+')為甲方喜用',6,'乙方天然補甲方之不足'])}
+  if(stB.favor.includes(dmA)){comp+=6;items.push(['甲方日主('+dmA+')為乙方喜用',6,'甲方天然補乙方之不足'])}
+  sc+=comp;
+  sc=Math.max(20,Math.min(98,sc));
+  const lv=sc>=85?['天作之合','var(--green)']:sc>=72?['上等婚配','var(--green)']:sc>=58?['中上之配','var(--gold)']:sc>=45?['普通,重經營','#c9944a']:['多有考驗','var(--red)'];
+  document.getElementById('hhOut').innerHTML=
+    '<div style="text-align:center"><span class="score" style="font-size:38px">'+sc+'</span><span style="opacity:.6">/100</span> <b style="color:'+lv[1]+'">'+lv[0]+'</b></div>'
+   +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">甲:'+gz(pA.year)+'年('+gA+'命) × 乙:'+gz(pB.year)+'年('+gB+'命)</div>'
+   +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('');
+}
+document.getElementById('hhBtn').onclick=heHun;
 function render(){
   const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
   const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
