@@ -131,7 +131,7 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
   <input type="file" accept="application/json" id="recRsIn" hidden>
   <button id="recShare" class="mchip" style="font-size:14px">📤 分享卡</button>
 </div>
-<div id="recList" class="note">尚無紀錄。紀錄只存在你的手機/瀏覽器,不會上傳。</div></div>
+<div id="recList" class="note">尚無紀錄。量測紀錄與照片僅儲存在你的手機。</div></div>
 <div class="panel"><h2>智慧問答(離線)</h2>
 <div style="display:flex;gap:8px">
   <input id="qaIn" placeholder="例:財位在哪?今年哪裡不能動土?" style="flex:1;padding:10px;border:1.5px solid var(--gold2);border-radius:12px;background:var(--card);color:var(--ink);font-size:15px">
@@ -443,7 +443,7 @@ document.getElementById('byMing').onclick=e=>{useMing=true;e.target.classList.ad
 function recAll(){try{return JSON.parse(localStorage.getItem('fsc_records')||'[]')}catch(e){return[]}}
 function recRender(){
   const a=recAll(),el=document.getElementById('recList');
-  if(!a.length){el.textContent='尚無紀錄。紀錄只存在你的手機/瀏覽器,不會上傳。';return}
+  if(!a.length){el.textContent='尚無紀錄。量測紀錄與照片僅儲存在你的手機。';return}
   el.innerHTML=a.map((r,i)=>`<div class="row2" style="cursor:pointer" onclick="recLoad(${i})">
     <input type="checkbox" class="cmpBox" data-i="${i}" onclick="event.stopPropagation()" style="accent-color:var(--gold);width:17px;height:17px;margin-right:6px">
     <span>${r.photo?`<img src="${r.photo}" onclick="event.stopPropagation();recPhoto(${i})" style="width:34px;height:34px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px;border:1px solid var(--gold2)">`:''}${r.note||'未命名'} <small style="color:var(--dim)">${r.date}</small></span>
