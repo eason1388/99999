@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>平面圖疊盤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0B09;--card:#1C1915;--gold:#C9A96A;--gold2:#8C6D3F;--ink:#EDE7DA;--dim:#8f887b;--red:#E07A6A;--green:#8FC49A}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC',sans-serif;display:flex;flex-direction:column;align-items:center;padding:14px 12px 60px}
+h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:20px;color:var(--gold);letter-spacing:.1em}
+.sub{font-size:13px;color:var(--dim);margin:4px 0 10px;text-align:center;max-width:560px;line-height:1.7}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:8px;width:min(640px,96vw)}
+.mchip{border:1.5px solid var(--gold2);border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;background:transparent;color:var(--ink);font-family:inherit}
+.mchip.on{background:var(--gold);color:#141110;font-weight:700}
+select,input[type=number]{padding:8px 10px;border:1.5px solid var(--gold2);border-radius:10px;background:var(--card);color:var(--ink);font-size:14px}
+input[type=range]{width:min(400px,80vw);accent-color:var(--gold)}
+#cv{width:min(640px,96vw);border-radius:14px;background:#141110;border:1px solid rgba(201,169,106,.3);touch-action:manipulation;cursor:crosshair}
+.panel{width:min(640px,96vw);background:var(--card);border:1px solid rgba(201,169,106,.22);border-radius:14px;padding:12px 14px;margin-top:10px}
+.panel h2{font-family:'Noto Serif TC',serif;font-size:15.5px;color:var(--gold);margin-bottom:6px}
+.row2{display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px dashed rgba(201,169,106,.18);font-size:14px}
+.note{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6}
+</style></head><body>
+<h1>平面圖疊盤</h1>
+<div class="sub">① 選擇/拍下平面圖 ② 轉「北向」對齊 ③ 點「設立極」再點圖中心 ④ 切「標房間」逐格點擊指定房間 → 吉凶直接畫在你家圖上</div>
+<div class="row">
+ <button class="mchip on" id="pick">📁 選擇平面圖 / 拍照</button>
+ <input type="file" id="fileIn" accept="image/*" hidden>
+ <select id="sit"></select><select id="per"></select>
+</div>
+<div class="row">
+ <span style="font-size:13px;color:var(--dim)">圖上方=北向</span>
+ <input type="range" id="north" min="0" max="359" value="0" step="1">
+ <input type="number" id="northN" min="0" max="359" value="0" style="width:74px">°
+</div>
+<div class="row">
+ <button class="mchip on" id="mJi">📍 設立極</button>
+ <button class="mchip" id="mRoom">🏷 標房間(點擊循環)</button>
+ <button class="mchip" id="expBtn">⬇ 匯出圖</button>
+</div>
+<canvas id="cv"></canvas>
+<div class="panel"><h2>檢核結果</h2><div id="out" class="note" style="font-size:13.5px">先完成上方步驟。</div>
+<div class="note">飛星:每宮「山/向」;著色:綠=八宅吉方、紅=凶方;⚠=流年五黃/二黑加臨。標房間循環:大門→主臥→廚房→書桌→廁所→神位→清除。</div></div>
+<script>
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const PAL2NUM=Object.fromEntries(Object.entries(NUM2PAL).map(([k,v])=>[v,+k]));
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const TI={};'子癸甲申'.split('').forEach(m=>TI[m]=1);'壬卯乙未坤'.split('').forEach(m=>TI[m]=2);
+'乾亥辰巽巳戌'.split('').forEach(m=>TI[m]=6);'酉辛丑艮丙'.split('').forEach(m=>TI[m]=7);'寅午庚丁'.split('').forEach(m=>TI[m]=9);
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting,ti=false){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,refIfFive)=>{
+    const s=base[pal];
+    if(s===5)return fly(5,YANG.has(refIfFive));
+    const ref=PAL_M[NUM2PAL[s]][kind];
+    return fly(ti?TI[ref]:s,YANG.has(ref));
+  };
+  const mt=sc(sp,sitting),fc=sc(fp,facing);
+  const n=period;
+  const pattern=mt[sp]===n&&fc[fp]===n?'旺山旺向':mt[fp]===n&&fc[sp]===n?'上山下水':
+    mt[fp]===n&&fc[fp]===n?'雙星會向':mt[sp]===n&&fc[sp]===n?'雙星會坐':'其他';
+  const tri=[[1,4,7],[2,5,8],[3,6,9]];
+  const fm=FLY.every(q=>tri.some(t=>{const st=new Set([mt[q],fc[q],base[q]]);return st.size===3&&t.every(x=>st.has(x))}));
+  const lz=!fm&&FLY.every(q=>{const v=[mt[q],fc[q],base[q]].sort((a,b)=>a-b);
+    const ok=x=>{const s=[(x-1)%9+1,x%9+1,(x+1)%9+1].sort((a,b)=>a-b);return s.join()===v.join()};
+    return [...Array(9)].some((_,i)=>ok(i+1))});
+  const ADJ={'坎':['乾','艮'],'艮':['坎','震'],'震':['艮','巽'],'巽':['震','離'],'離':['巽','坤'],'坤':['離','兌'],'兌':['坤','乾'],'乾':['兌','坎']};
+  const GEN={1:6,6:1,2:7,7:2,3:8,8:3,4:9,9:4};
+  const gates=ADJ[fp].map(gp=>{const s=base[gp];let usable=false;
+    if(s!==5){usable=!YANG.has(PAL_M[NUM2PAL[s]][kind])}
+    return{palace:gp,kind:GEN[PAL2NUM[fp]]===PAL2NUM[gp]?'正城門':'副城門',usable}});
+  const yd={'中':5,'乾':6,'兌':7,'艮':8,'離':9,'坎':1,'坤':2,'震':3,'巽':4};
+  const warnings=[];
+  for(const[nm,cc]of[['山星',mt],['向星',fc]]){
+    if(FLY.every(q=>cc[q]===yd[q]))warnings.push(nm+'全盤伏吟');
+    if(FLY.every(q=>q==='中'?cc[q]===5:cc[q]+yd[q]===10))warnings.push(nm+'全盤反吟');
+  }
+  return{period,sitting,facing,ti,base,mountain:mt,facing_stars:fc,pattern,
+         sanban:fm?'父母三般卦':lz?'連珠三般卦':null,gates,warnings};
+}
+// 八宅
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
+const DIRZH={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+const GONG8=['坎','艮','震','巽','離','坤','兌','乾'];
+const EMO={'大門':'🚪','主臥':'🛏','廚房':'🍳','書桌':'📖','廁所':'🚽','神位':'🕯'};
+const ROOMS=['大門','主臥','廚房','書桌','廁所','神位'];
+const annualStar=y=>(11-y%9-1+9)%9+1;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let img=null,jiji=null,mode='ji',rooms={},north=0,sit='壬',per=9;
+const sitS=document.getElementById('sit'),perS=document.getElementById('per');
+for(const m of M24)sitS.add(new Option('坐 '+m,m));
+for(let i=1;i<=9;i++)perS.add(new Option(i+'運',i));perS.value=9;
+sitS.onchange=e=>{sit=e.target.value;draw()};
+perS.onchange=e=>{per=+e.target.value;draw()};
+document.getElementById('pick').onclick=()=>document.getElementById('fileIn').click();
+document.getElementById('fileIn').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const im=new Image();im.onload=()=>{img=im;jiji=null;rooms={};fit();draw()};
+  im.src=URL.createObjectURL(f);};
+function fit(){
+  const maxW=Math.min(640,window.innerWidth-24);
+  const sc=img?Math.min(maxW/img.width,520/img.height):1;
+  const w=img?img.width*sc:maxW,h=img?img.height*sc:360;
+  cv.width=w*devicePixelRatio;cv.height=h*devicePixelRatio;
+  cv.style.width=w+'px';cv.style.height=h+'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);}
+document.getElementById('north').oninput=e=>{north=+e.target.value;document.getElementById('northN').value=north;draw()};
+document.getElementById('northN').onchange=e=>{north=((+e.target.value)%360+360)%360;document.getElementById('north').value=north;draw()};
+document.getElementById('mJi').onclick=e=>{mode='ji';e.target.classList.add('on');document.getElementById('mRoom').classList.remove('on')};
+document.getElementById('mRoom').onclick=e=>{mode='room';e.target.classList.add('on');document.getElementById('mJi').classList.remove('on')};
+cv.addEventListener('click',e=>{
+  if(!img)return;
+  const r=cv.getBoundingClientRect();
+  const x=e.clientX-r.left,y=e.clientY-r.top;
+  if(mode==='ji'){jiji={x,y};draw();verdicts();return}
+  if(!jiji)return;
+  const b=((Math.atan2(x-jiji.x,-(y-jiji.y))*180/Math.PI)+north+360)%360;
+  const g=GONG8[Math.floor(((b+22.5)%360)/45)%8];
+  const cur=rooms[g];const i=cur?ROOMS.indexOf(cur):-1;
+  if(i>=ROOMS.length-1)delete rooms[g];else rooms[g]=ROOMS[i+1];
+  draw();verdicts();});
+function draw(){
+  const w=cv.width/devicePixelRatio,h=cv.height/devicePixelRatio;
+  ctx.clearRect(0,0,w,h);
+  if(!img){ctx.fillStyle='#8f887b';ctx.font='14px "Noto Sans TC"';ctx.textAlign='center';
+    ctx.fillText('請先選擇平面圖或拍照',w/2,h/2);return}
+  ctx.drawImage(img,0,0,w,h);
+  if(!jiji)return;
+  const c=xkChart(per,sit),zhai=palaceOf(sit);
+  const annC=fly(annualStar(new Date().getFullYear()));
+  const R=Math.max(w,h);
+  for(let k=0;k<8;k++){
+    const b0=22.5+k*45;
+    const a=(b0-north-90)*Math.PI/180;
+    ctx.strokeStyle='rgba(201,169,106,.85)';ctx.lineWidth=1.5;
+    ctx.setLineDash([7,5]);
+    ctx.beginPath();ctx.moveTo(jiji.x,jiji.y);
+    ctx.lineTo(jiji.x+Math.cos(a)*R,jiji.y+Math.sin(a)*R);ctx.stroke();ctx.setLineDash([]);
+    // 扇形著色
+    const g=GONG8[Math.floor((((k*45)+22.5+22.5)%360)/45)%8]; // 中心=k*45+45? 修正於下
+  }
+  for(let k=0;k<8;k++){
+    const g=GONG8[k];
+    const bc=k*45;
+    const a0=(bc-22.5-north-90)*Math.PI/180,a1=(bc+22.5-north-90)*Math.PI/180;
+    const yx=youxing(zhai,g),ji='生氣天醫延年伏位'.includes(yx);
+    ctx.beginPath();ctx.moveTo(jiji.x,jiji.y);ctx.arc(jiji.x,jiji.y,R,a0,a1);ctx.closePath();
+    ctx.fillStyle=ji?'rgba(143,196,154,.13)':'rgba(224,122,106,.13)';ctx.fill();
+    // 標籤
+    const am=(bc-north-90)*Math.PI/180;
+    const lr=Math.min(w,h)*0.34;
+    const lx=jiji.x+Math.cos(am)*lr,ly=jiji.y+Math.sin(am)*lr;
+    const ann=annC[g],warn=(ann===5||ann===2);
+    ctx.textAlign='center';
+    ctx.font='700 13px "Noto Serif TC"';
+    ctx.fillStyle='rgba(0,0,0,.55)';
+    const txt1=DIRZH[g]+'・'+yx+(warn?'⚠':''),txt2='山'+c.mountain[g]+'/向'+c.facing_stars[g],txt3=rooms[g]?(EMO[rooms[g]]+rooms[g]):'';
+    const bw=86;ctx.fillRect(lx-bw/2,ly-24,bw,txt3?50:36);
+    ctx.fillStyle=ji?'#8FC49A':'#E07A6A';ctx.fillText(txt1,lx,ly-10);
+    ctx.fillStyle='#EDE7DA';ctx.font='11.5px "Noto Sans TC"';ctx.fillText(txt2,lx,ly+4);
+    if(txt3){ctx.font='12px "Noto Sans TC"';ctx.fillStyle='#F6E3A6';ctx.fillText(txt3,lx,ly+19);}
+  }
+  // 立極點
+  ctx.fillStyle='#C9A96A';ctx.beginPath();ctx.arc(jiji.x,jiji.y,6,0,7);ctx.fill();
+  ctx.strokeStyle='#141110';ctx.lineWidth=2;ctx.stroke();
+  // 北向箭頭(圖角)
+  const na=(-north-90)*Math.PI/180;
+  ctx.save();ctx.translate(34,34);ctx.rotate(na+Math.PI/2);
+  ctx.fillStyle='rgba(224,122,106,.95)';
+  ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(-7,6);ctx.lineTo(7,6);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='700 11px sans-serif';ctx.textAlign='center';ctx.fillText('N',0,20);
+  ctx.restore();
+}
+function verdicts(){
+  if(!jiji){return}
+  const c=xkChart(per,sit),zhai=palaceOf(sit);
+  const annC=fly(annualStar(new Date().getFullYear()));
+  const out=[];
+  for(const g of GONG8){
+    const t=rooms[g];if(!t)continue;
+    const yx=youxing(zhai,g),ji='生氣天醫延年伏位'.includes(yx);
+    const m=c.mountain[g],a=annC[g];
+    let ok=true,v='';
+    if(t==='大門'){ok=ji||c.facing_stars[g]===per;v=ok?'納吉氣':'凶方開門,設玄關化解'}
+    else if(t==='主臥'){ok=ji&&m!==2&&m!==5;v=ok?'吉方安床':'不利,床頭朝吉方或換房'}
+    else if(t==='廚房'){ok=!ji;v=ok?'火燒凶方,合局':'壓吉方,爐向朝吉補救'}
+    else if(t==='書桌'){ok=(m===4||c.facing_stars[g]===4||m===1);v=ok?'文昌之氣':'非文昌位'}
+    else if(t==='廁所'){ok=!ji;v=ok?'壓凶,反吉':'占吉方,常閉門保持乾燥'}
+    else{ok=ji&&a!==5;v=ok?'妥':'宜遷吉方'}
+    if((a===5||a===2)&&t!=='廁所')v+='(流年'+(a===5?'五黃':'二黑')+'⚠)';
+    out.push('<div class="row2"><span>'+DIRZH[g]+'・'+t+'</span><b style="color:'+(ok?'var(--green)':'var(--red)')+'">'+(ok?'✓ ':'⚠ ')+v+'</b></div>');
+  }
+  document.getElementById('out').innerHTML=out.join('')||'切到「標房間」,在圖上各區點擊指定房間類型。';
+}
+document.getElementById('expBtn').onclick=()=>{
+  if(!img){alert('請先載入平面圖');return}
+  const a=document.createElement('a');a.href=cv.toDataURL('image/jpeg',0.9);
+  a.download='平面圖疊盤.jpg';a.click();};
+fit();draw();
+</script></body></html>
