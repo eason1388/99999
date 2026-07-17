@@ -100,21 +100,24 @@ footer.note{color:rgba(237,231,218,.35)}
 <div id="sheet"><h3>更多功能</h3><button class="mitem" data-k="map"><span class="bi">⚑</span><div><b>地圖</b><small>地圖測向・立極</small></div></button><button class="mitem" data-k="dragon"><span class="bi">⛰</span><div><b>尋龍</b><small>地理尋龍</small></div></button><button class="mitem" data-k="learn"><span class="bi">✎</span><div><b>學堂</b><small>風水學堂</small></div></button><button class="mitem" data-k="report"><span class="bi">▤</span><div><b>報告</b><small>專業報告</small></div></button><button class="mitem" data-k="plan"><span class="bi">🗺</span><div><b>平面圖疊盤</b><small>吉凶直接畫在你家平面圖上</small></div></button><button class="mitem" data-k="flow"><span class="bi">📋</span><div><b>勘察流程</b><small>陽宅・陰宅・尋龍點穴 完整步驟</small></div></button><button class="mitem" data-k="guide"><span class="bi">❓</span><div><b>說明</b><small>使用說明・每個功能怎麼用</small></div></button></div>
 <script>
 
-// ── 查詢紀錄(批次寄送站方) ──
-const LOGQ=[];let logT=null;
-const LOG_URL='https://formsubmit.co/ajax/easonh1688@gmail.com';
+// ── 查詢紀錄(寫入站方 Google 試算表)──
+const LOG_URL='https://script.google.com/macros/s/AKfycbzNwokR094D9jrS8XYVWmLHmybgOf1tcfinLi1Io2EgSPuorPHgzzaq19ygQGrmKtZ5yw/exec';
+let LOGQ=[],logT=null;
 function fscLog(page,action,data){
-  try{LOGQ.push(new Date().toLocaleString('zh-TW',{hour12:false}).slice(5)+'|'+page+'|'+action+'|'+String(data).slice(0,120));
-  if(LOGQ.length>=12)flushLog();else{clearTimeout(logT);logT=setTimeout(flushLog,45000);}}catch(e){}
+  try{LOGQ.push({page:page,action:action,data:String(data).slice(0,140)});
+    if(LOGQ.length>=10)flushLog();else{clearTimeout(logT);logT=setTimeout(flushLog,30000);}
+  }catch(e){}
 }
 function flushLog(){
   if(!LOGQ.length)return;
-  const msg=LOGQ.splice(0).join('\n');
-  fetch(LOG_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify({_subject:'玄學羅盤查詢紀錄',_captcha:'false',_template:'box',message:msg})}).catch(()=>{});
+  const rows=LOGQ.splice(0);
+  const body=JSON.stringify({rows:rows,ua:navigator.userAgent.slice(0,80)});
+  try{fetch(LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:body}).catch(()=>{});}catch(e){}
 }
-addEventListener('pagehide',()=>{try{if(LOGQ.length&&navigator.sendBeacon){
-  navigator.sendBeacon(LOG_URL,new Blob([JSON.stringify({_subject:'玄學羅盤查詢紀錄',_captcha:'false',message:LOGQ.splice(0).join('\n')})],{type:'application/json'}));}}catch(e){}});
+addEventListener('pagehide',()=>{try{if(LOGQ.length){
+  const body=JSON.stringify({rows:LOGQ.splice(0),ua:navigator.userAgent.slice(0,80)});
+  if(navigator.sendBeacon)navigator.sendBeacon(LOG_URL,new Blob([body],{type:'text/plain'}));
+}}catch(e){}});
 function hookFrame(k,f){
   f.addEventListener('load',()=>{try{
     const d=f.contentDocument;
