@@ -43,7 +43,8 @@ button{font-family:inherit}
   出生年 <input id="by" type="number" value="1990" style="width:88px">
 </div>
 <div class="panel">
-  <div class="box"><h2>流年盤 <span id="yTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="yGrid"></div>
+  <div class="box" style="min-width:280px;width:min(560px,94vw)"><h2>📅 今日農民曆</h2><div id="todayAlmanac">載入中…</div></div>
+<div class="box"><h2>流年盤 <span id="yTitle" style="font-size:13px;opacity:.7"></span></h2><div class="grid" id="yGrid"></div>
     <div id="shensha" style="margin-top:8px"></div></div>
   <div class="box"><h2>流月盤</h2><div class="months" id="mChips"></div><div class="grid" id="mGrid"></div>
     <div class="note">月序以節氣「節」為界(寅月=立春起)。</div></div>
@@ -294,7 +295,7 @@ function render(){
     const XS2=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
     const yx2=(z,g)=>XS2[TRIB2[z]^TRIB2[g]];
     const N2G={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
-    const dsum=n=>n<10?n:dsum(Math.floor(n/10)+n%10);
+    const dsum=n=>{n=+n;if(!isFinite(n)||n<0)return 0;return n<10?n:dsum(Math.floor(n/10)+n%10)};
     const bys2=suiYear(by,7,1);let gN=true?dsum((11-dsum(bys2))===0?9:11-dsum(bys2)):0;
     // 性別:擇時頁無性別選項,以男性公式為預設並註記
     if(gN===5)gN=2;
@@ -330,6 +331,41 @@ function render(){
    +'<span class="tag good">驛馬:'+YM+'('+DIR[YM]+')</span>'
    +'<span class="tag good">貴人:'+GR[0]+'、'+GR[1]+'</span>';
 }
+// ── 今日農民曆(永遠顯示真實今天)──
+function renderToday(){
+  const n=new Date();
+  const Y=n.getFullYear(),M=n.getMonth()+1,D=n.getDate();
+  const sy=suiYear(Y,M,D);
+  const yG=((sy-1984)%60+60)%60;
+  const mi=monthIndex(Y,M,D);
+  const mS=((yG%10)%5*2+2+mi)%10, mB=(mi+2)%12;
+  const jc=jianChu(Y,M,D);
+  const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+  const chongB=(jc.db+6)%12;
+  const dstar=dayStar(Y,M,D)[0];
+  const dch=fly(dstar,true);
+  const DZ={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+  const good=Object.entries(dch).filter(([p,v])=>p!=='中'&&[1,6,8,9].includes(v)).map(([p])=>DZ[p]);
+  const bad=Object.entries(dch).filter(([p,v])=>p!=='中'&&[2,5].includes(v)).map(([p,v])=>DZ[p]+(v===5?'(五黃)':'(二黑)'));
+  const yiJi=jc.yi.split(';');
+  document.getElementById('todayAlmanac').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">'
+    +'<b style="font-size:17px">'+Y+'年'+M+'月'+D+'日(週'+'日一二三四五六'[n.getDay()]+')</b>'
+    +'<span style="font-size:13.5px;opacity:.75">'+ST[yG%10]+BR[yG%12]+'年 '+ST[mS]+BR[mB]+'月 '+gzOfDay(Y,M,D)+'日</span></div>'
+    +'<div style="margin:8px 0"><b style="font-family:\'Noto Serif TC\',serif;font-size:21px;color:var(--gold)">'+jc.name+'日</b>'
+    +' <span class="tag warn" style="font-size:13px">沖'+BR[chongB]+'・屬'+SX[chongB]+'者今日留意</span></div>'
+    +'<div style="font-size:14.5px;line-height:1.9"><span style="color:var(--green);font-weight:700">'+(yiJi[0]||'')+'</span>'
+    +(yiJi[1]?'<br><span style="color:var(--red);font-weight:700">'+yiJi[1]+'</span>':'')+'</div>'
+    +'<div style="font-size:12.5px;opacity:.65;margin-top:4px">彭祖百忌:'+PZ_G[jc.ds]+';'+PZ_Z[jc.db]+'</div>'
+    +'<div style="margin-top:6px">'+(good.length?'<span class="tag good">今日吉方:'+good.join('、')+'</span> ':'')
+    +(bad.length?'<span class="tag warn">慎用:'+bad.join('、')+'</span>':'')+'</div>';
+}
+// ── 開啟自動帶入今天(不再寫死日期)──
+(function(){const n=new Date(),pad=x=>String(x).padStart(2,'0');
+  document.getElementById('dt').value=n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate());
+  document.getElementById('yr').value=n.getFullYear();
+})();
+renderToday();
 document.getElementById('yr').onchange=render;
 document.getElementById('dt').onchange=()=>{mSel=null;render()};
 document.getElementById('by').onchange=render;
