@@ -123,6 +123,22 @@ select{padding:9px 12px;border:1.5px solid var(--gold2);border-radius:12px;backg
 <div class="panel"><h2>📆 本宅年度預警</h2>
 <div id="ywOut" class="note" style="font-size:13.5px">依目前坐向與流年,逐月掃描五黃二黑與沖煞。</div>
 <button class="mchip" id="ywBtn" style="font-size:14.5px;margin-top:6px">產生年度預警</button></div>
+<div class="panel"><h2>☯ 家人配位(易卦派)</h2>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+<select id="fmSel" style="padding:8px;border:1.5px solid var(--gold2);border-radius:12px;background:var(--card);color:var(--ink);font-size:14px">
+<option value="父">父(乾)</option><option value="母">母(坤)</option>
+<option value="長男">長男(震)</option><option value="中男">中男(坎)</option><option value="少男">少男(艮)</option>
+<option value="長女">長女(巽)</option><option value="中女">中女(離)</option><option value="少女">少女(兌)</option>
+</select>
+<select id="fmDir" style="padding:8px;border:1.5px solid var(--gold2);border-radius:12px;background:var(--card);color:var(--ink);font-size:14px">
+<option value="auto">用目前面向方位</option>
+<option value="坎">北</option><option value="艮">東北</option><option value="震">東</option><option value="巽">東南</option>
+<option value="離">南</option><option value="坤">西南</option><option value="兌">西</option><option value="乾">西北</option>
+</select>
+<button class="mchip" id="fmGo">合卦斷吉凶</button>
+<button class="mchip" id="fmAll">八方總表</button>
+</div>
+<div id="fmOut" class="note" style="font-size:14px">選成員與所在方位(睡房/座位):人卦為上、方位卦為下,合成六十四卦斷吉凶。例:父居西南=天地否(凶)、母居西北=地天泰(吉)。</div></div>
 <div class="panel" id="zyPanel" style="display:none"><h2>宅運時間軸</h2>
 <div id="zyBar" style="display:flex;gap:3px;margin:6px 0"></div>
 <div id="zyTxt" class="note" style="font-size:14px"></div></div>
@@ -1057,6 +1073,70 @@ document.getElementById('ywBtn').onclick=function(){
   }
   document.getElementById('ywOut').innerHTML='<b style="color:var(--gold)">'+x.sit+'山'+x.fac+'向・'+flowYear+'年逐月預警</b>'+head+rows+'<div style="opacity:.6;margin-top:4px;font-size:12px">月序以節氣為界(如寅月=立春起);修方動工請再配「擇時」頁選日課。</div>';
   window.fscP&&window.fscP('luopan','rx','yw');
+};
+// ===== 家人配位(易卦派):人卦為上、方位卦為下,合六十四卦 =====
+const FAM_G={'父':'乾','母':'坤','長男':'震','中男':'坎','少男':'艮','長女':'巽','中女':'離','少女':'兌'};
+const HEX_YG={
+'乾乾':['乾為天','平','純陽剛健,父居可用,他人嫌剛亢'],'乾兌':['天澤履','平','履虎尾,行事謹慎則無咎'],
+'乾離':['天火同人','吉','上下同心,和睦聚氣'],'乾震':['天雷無妄','平','守正則吉,妄動則有災'],
+'乾巽':['天風姤','凶','陰長之象,防口舌與爛桃花'],'乾坎':['天水訟','凶','天水相違,主爭訟口角'],
+'乾艮':['天山遯','凶','退避之象,氣退不聚'],'乾坤':['天地否','凶','天地不交,閉塞不通'],
+'兌乾':['澤天夬','凶','決裂之象,防衝突破財'],'兌兌':['兌為澤','平','重悅可喜,口舌是非亦多'],
+'兌離':['澤火革','平','變革之象,宜變動不宜久居'],'兌震':['澤雷隨','吉','隨順相從,和悅相得'],
+'兌巽':['澤風大過','凶','棟撓之象,負擔過重'],'兌坎':['澤水困','凶','困頓之象,精神財運受困'],
+'兌艮':['澤山咸','吉','交感和合,感情融洽(尤利少女)'],'兌坤':['澤地萃','吉','聚集之象,聚財聚人'],
+'離乾':['火天大有','吉','大有所獲,豐盛光明'],'離兌':['火澤睽','凶','乖離之象,家人不和'],
+'離離':['離為火','平','重明過燥,中女可用,防口舌心血'],'離震':['火雷噬嗑','平','咬合有阻,努力可通'],
+'離巽':['火風鼎','吉','鼎新之象,安穩尊貴'],'離坎':['火水未濟','凶','水火不交,諸事難成'],
+'離艮':['火山旅','凶','旅居不安,不宜久睡'],'離坤':['火地晉','吉','晉升之象,光明進益'],
+'震乾':['雷天大壯','平','壯而過剛易折,知止則吉'],'震兌':['雷澤歸妹','凶','位不正,感情婚姻不順'],
+'震離':['雷火豐','吉','豐大之象,盛極宜守'],'震震':['震為雷','平','重震動盪,長男可用,他人不安'],
+'震巽':['雷風恆','吉','恆久之象,婚姻家運安穩'],'震坎':['雷水解','平','解除之象,困境漸消'],
+'震艮':['雷山小過','凶','小有過越,諸事窒礙'],'震坤':['雷地豫','吉','安豫和樂之象'],
+'巽乾':['風天小畜','平','小有積蓄,密雲不雨'],'巽兌':['風澤中孚','吉','誠信之象,內外相孚'],
+'巽離':['風火家人','吉','家道興隆,最利家宅'],'巽震':['風雷益','吉','增益之象,進益有成'],
+'巽巽':['巽為風','平','重巽漂浮,長女可用,他人心緒不定'],'巽坎':['風水渙','凶','渙散之象,人心財氣俱散'],
+'巽艮':['風山漸','吉','循序漸進,穩步向上'],'巽坤':['風地觀','平','觀望之象,宜靜思不宜躁進'],
+'坎乾':['水天需','平','需待之象,耐心等待有益'],'坎兌':['水澤節','吉','節制有度,安穩有守'],
+'坎離':['水火既濟','吉','水火相濟,諸事已成'],'坎震':['水雷屯','凶','屯難之象,起步艱難'],
+'坎巽':['水風井','平','井養不移,安守本分'],'坎坎':['坎為水','凶','重險相陷,中男亦不宜久居'],
+'坎艮':['水山蹇','凶','蹇滯之象,阻礙重重'],'坎坤':['水地比','吉','親比之象,和睦相助'],
+'艮乾':['山天大畜','吉','大畜之象,積蓄豐厚'],'艮兌':['山澤損','凶','損耗之象,防財物身體受損'],
+'艮離':['山火賁','平','文飾之象,外美內虛'],'艮震':['山雷頤','平','頤養之象,謹言節食則吉'],
+'艮巽':['山風蠱','凶','蠱壞之象,積弊生事'],'艮坎':['山水蒙','平','蒙昧之象,利幼童啟蒙'],
+'艮艮':['艮為山','平','重山靜止,少男可用,他人氣滯'],'艮坤':['山地剝','凶','剝落之象,防損耗病痛'],
+'坤乾':['地天泰','吉','天地交泰,大吉安泰'],'坤兌':['地澤臨','吉','臨照之象,吉慶漸至'],
+'坤離':['地火明夷','凶','光明受傷,壓抑晦暗'],'坤震':['地雷復','吉','一陽來復,轉機重生'],
+'坤巽':['地風升','吉','上升之象,步步高升'],'坤坎':['地水師','凶','勞師動眾,多憂勞'],
+'坤艮':['地山謙','吉','謙德之象,吉無不利'],'坤坤':['坤為地','平','純陰厚載,母居可用,他人陰盛']};
+function fmJudge(mem,g){
+  const u=FAM_G[mem], h=HEX_YG[u+g];
+  const col=h[1]==='吉'?'#4a6b4f':(h[1]==='凶'?'#c0392b':'#8c6d3f');
+  return {name:h[0],lv:h[1],txt:h[2],col:col,u:u,g:g};
+}
+document.getElementById('fmGo').onclick=function(){
+  const mem=document.getElementById('fmSel').value;
+  let g=document.getElementById('fmDir').value;
+  let src='';
+  if(g==='auto'){const r=interp(heading);g=palaceOf(isFacing?r.m:r.opp);src='(目前面向:'+DIRZH[g]+')'}
+  const j=fmJudge(mem,g);
+  document.getElementById('fmOut').innerHTML=
+    '<b style="color:var(--gold);font-size:16px">'+mem+'居'+DIRZH[g]+'方 → '+j.name+'</b> <b style="color:'+j.col+'">['+j.lv+']</b>'+src
+    +'<div style="padding:4px 0">'+j.txt+'。</div>'
+    +'<div style="opacity:.7;font-size:12.5px">上卦'+j.u+'(人)+下卦'+j.g+'(方位)。'+(j.lv==='凶'?'建議調整房位(參考「八方總表」找吉位),或以五行通關化解。':'')+'</div>'
+    +'<div style="opacity:.55;font-size:11.5px;margin-top:3px">吉凶分級依通行卦義初排(待專業審校),各師承或有出入。</div>';
+  window.fscP&&window.fscP('luopan','yigua',mem+'/'+g);
+};
+document.getElementById('fmAll').onclick=function(){
+  const mem=document.getElementById('fmSel').value;
+  const rows=GONG8.map(function(g){return fmJudge(mem,g)});
+  const ord={'吉':0,'平':1,'凶':2};
+  rows.sort(function(a,b){return ord[a.lv]-ord[b.lv]});
+  document.getElementById('fmOut').innerHTML=
+    '<b style="color:var(--gold);font-size:15px">'+mem+'('+FAM_G[mem]+')八方吉凶總表</b>'
+    +rows.map(function(j){return '<div class="row2"><span><b>'+DIRZH[j.g]+'</b>('+j.g+'位)</span><b style="color:'+j.col+'">'+j.name+' ['+j.lv+']</b></div>'}).join('')
+    +'<div style="opacity:.55;font-size:11.5px;margin-top:3px">吉凶分級依通行卦義初排(待專業審校)。睡房、書桌、辦公位皆可依此挑吉避凶。</div>';
+  window.fscP&&window.fscP('luopan','yigua',mem+'/全表');
 };
 const ps=document.getElementById('period');
 for(let i=1;i<=9;i++)ps.add(new Option(i+'運'+(i===9?'(現值)':''),i));ps.value=9;
