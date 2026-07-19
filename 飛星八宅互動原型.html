@@ -51,6 +51,8 @@ button{font-family:inherit}
 </div>
 <div id="grid"></div>
 <div id="info"></div>
+<div style="margin-top:12px"><button class="chip" id="zxBtn">🎯 擇向建議(本運最佳坐向)</button></div>
+<div id="zxOut"></div>
 <script>
 const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
 const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
@@ -167,5 +169,30 @@ function render(){
     +' · 宅卦:'+zhai+'宅<br>'+badges.join('')
     +'<div style="margin-top:6px;font-size:12.5px;opacity:.7">金色=當運星。城門可用性:該宮同元龍屬陰、逆飛令旺星到宮(沈氏)。八宅遊星依宅卦('+zhai+'宅)以大遊年歌排佈。</div>';
 }
+// ===== 擇向建議引擎:掃描本運 24 山,依理氣格局排行 =====
+document.getElementById('zxBtn').onclick=function(){
+  const rows=[];
+  for(const m of M24){
+    const c=xkChart(period,m,false);
+    let sc=0;const tags=[];
+    if(c.pattern==='旺山旺向'){sc+=30;tags.push(['旺山旺向','gold']);}
+    else if(c.pattern==='雙星會向'){sc+=15;tags.push(['雙星會向','']);}
+    else if(c.pattern==='雙星會坐'){sc+=12;tags.push(['雙星會坐','']);}
+    else if(c.pattern==='上山下水'){sc-=30;tags.push(['上山下水','red']);}
+    if(c.sanban){sc+=8;tags.push([c.sanban,'green']);}
+    if(c.gates.some(function(g){return g.usable})){sc+=5;tags.push(['城門可用','green']);}
+    if(c.warnings.length){sc-=10;tags.push(['伏/反吟','red']);}
+    rows.push({m:m,fac:c.facing,sc:sc,tags:tags});
+  }
+  rows.sort(function(a,b){return b.sc-a.sc});
+  document.getElementById('zxOut').innerHTML=
+    '<div style="background:var(--card,#fff);border:1px solid #e4dcc8;border-radius:14px;padding:12px 14px;margin-top:8px;max-width:560px">'
+    +'<b style="color:var(--gold);font-size:16px">'+period+'運 擇向排行(前八)</b>'
+    +rows.slice(0,8).map(function(r,i){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px dashed #ddd;font-size:14px">'
+      +'<span><b>'+(i+1)+'. '+r.m+'山'+r.fac+'向</b> '+r.tags.map(function(t){return '<span class="badge '+t[1]+'" style="font-size:11px;padding:1px 8px">'+t[0]+'</span>'}).join('')+'</span>'
+      +'<b>'+(r.sc>0?'+':'')+r.sc+'</b></div>'}).join('')
+    +'<div style="font-size:11.5px;opacity:.6;margin-top:6px">依理氣格局排序(下卦盤);實際立向仍須現場分金避空亡差錯、配巒頭形勢與屋主八字。兼向過度須另看替卦。適用:新建擇向、重修改向、立碑選向。</div></div>';
+  window.fscP&&window.fscP('xk','zx',period+'運');
+};
 render();
 </script></body></html>

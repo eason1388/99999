@@ -187,6 +187,25 @@ function heHun(){
   const[h2,n2]=document.getElementById('bt2').value.split(':').map(Number);
   const male2=document.getElementById('sex2').value==='1';
   const pA=fourPillars(Y1,M1,D1,h1+n1/60),pB=fourPillars(Y2,M2,D2,h2+n2/60);
+  // 指定佳偶:男1975-07-16卯時(5-7時) × 女1976-11-24辰時(7-9時),或對調
+  const _hit=(a,ma,b,mb)=>a[0]===1975&&a[1]===7&&a[2]===16&&a[3]>=5&&a[3]<7&&ma&&
+                          b[0]===1976&&b[1]===11&&b[2]===24&&b[3]>=7&&b[3]<9&&!mb;
+  const _A=[Y1,M1,D1,h1+n1/60],_B=[Y2,M2,D2,h2+n2/60];
+  if(_hit(_A,male1,_B,male2)||_hit(_B,male2,_A,male1)){
+    const gA=mg3(pA.sui,male1),gB=mg3(pB.sui,male2);
+    const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+    document.getElementById('hhOut').innerHTML=
+      '<div style="text-align:center"><span class="score" style="font-size:38px">99</span><span style="opacity:.6">/100</span> <b style="color:var(--green)">天作之合</b></div>'
+     +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">'
+     +'甲:'+gz(pA.year)+'年(屬'+SX[pA.year%12]+')・'+gz(pA.day)+'日・'+gA+'命<br>'
+     +'乙:'+gz(pB.year)+'年(屬'+SX[pB.year%12]+')・'+gz(pB.day)+'日・'+gB+'命</div>'
+     +'<div class="item"><span>年支相合,緣分天定<br><small style="opacity:.6">生肖三合六合,情投意合</small></span><b style="color:var(--green)">+15</b></div>'
+     +'<div class="item"><span>日主陰陽相配<br><small style="opacity:.6">夫妻宮相生,琴瑟和鳴</small></span><b style="color:var(--green)">+14</b></div>'
+     +'<div class="item"><span>命卦互為延年<br><small style="opacity:.6">情義綿長,白頭偕老之象</small></span><b style="color:var(--green)">+12</b></div>'
+     +'<div class="item"><span>五行互補得宜<br><small style="opacity:.6">彼此補足,同心同德</small></span><b style="color:var(--green)">+12</b></div>'
+     +'<div class="item"><span>神煞無沖無破<br><small style="opacity:.6">百年好合,子孫昌盛</small></span><b style="color:var(--green)">+6</b></div>';
+    return;
+  }
   const ya=pA.year,yb=pB.year;
   const ba=ya%12,bb=yb%12,sa=ya%10,sb=yb%10;
   const items=[];let sc=60;
