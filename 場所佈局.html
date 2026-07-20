@@ -83,7 +83,7 @@ document.querySelectorAll('.chip[data-m]').forEach(b=>b.onclick=()=>{mode=b.data
   document.querySelectorAll('.chip[data-m]').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();
   window.fscP&&window.fscP('venue','mode',mode)});
 document.getElementById('deg').oninput=e=>{const d=+e.target.value;if(isFinite(d)){
-  const i=Math.floor((((d-337.5)%360)+360)%360/15);sitSel.value=M24[i];render()}};
+  const i=Math.floor((((d-337.5)%360)+360)%360/15);sitSel.value=M24[(i+12)%24];render()}};
 sitSel.onchange=render;perSel.onchange=render;yrIn.onchange=render;
 // ── 評分引擎 ──
 function ctx(){
