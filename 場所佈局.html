@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>場所佈局模式</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6D3F;--gold2:#C9A96A;--ink:#2b2418;--card:#fffdf7;--red:#A63A2E;--green:#4A6B4F;--bg:#f4efe4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold)}
+.box{background:var(--card);border:1px solid #e6dcc3;border-radius:16px;padding:12px 14px;width:min(560px,96vw);box-shadow:0 2px 10px rgba(120,90,40,.08)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0}
+select,input{padding:8px 10px;border:1.5px solid var(--gold2);border-radius:12px;background:#fff;color:var(--ink);font-size:14.5px}
+.chip{border:1px solid var(--gold);border-radius:999px;padding:7px 14px;font-size:14.5px;cursor:pointer;background:transparent;color:var(--ink)}
+.chip.on{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(140,109,63,.35)}
+.fcard{border-bottom:1px dashed #ddd0b0;padding:9px 2px}
+.fcard b.dir{font-size:17px;color:var(--gold);font-family:'Noto Serif TC',serif}
+.tag{display:inline-block;border-radius:99px;padding:1px 9px;font-size:11.5px;margin:1px 3px 1px 0;background:#f2ead6;color:#6b5427}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red)}
+.tag.good{background:rgba(74,107,79,.12);color:var(--green)}
+.ni{color:#8e6bb5;font-size:12.5px;margin-top:2px}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.cell{background:#fff;border:1px solid #e6dcc3;border-radius:10px;min-height:64px;padding:5px;font-size:11.5px;text-align:center}
+.cell b{display:block;font-size:12.5px;color:var(--gold)}
+.cell .fn{color:#4A6B4F;font-weight:700}
+.cell.bad{border-color:var(--red);background:rgba(166,58,46,.05)}
+.banner{background:rgba(166,58,46,.08);border:1px solid rgba(166,58,46,.3);border-radius:12px;padding:8px 12px;font-size:13.5px;color:var(--red)}
+.note{font-size:12px;opacity:.65;margin-top:6px}
+</style></head><body>
+<h1>🏮 場所佈局模式</h1>
+<div class="box">
+<div class="row">
+ <span style="font-size:13.5px">場所類型:</span>
+ <button class="chip on" data-m="rest">🍜 餐廳</button>
+ <button class="chip" data-m="office">🏢 辦公室</button>
+ <button class="chip" data-m="factory">🏭 工廠</button>
+ <button class="chip" data-m="shop">🏪 店面</button>
+ <button class="chip" data-m="home">🏠 住家</button>
+</div>
+<div class="row">
+ <span style="font-size:13.5px">坐山:</span><select id="sit"></select>
+ <span style="font-size:13.5px">或輸入度數:</span><input id="deg" type="number" min="0" max="359" placeholder="量到的°" style="width:90px">
+ <select id="per"></select>
+ <input id="yr" type="number" style="width:84px">
+</div>
+<div class="note">先到「羅盤」頁量出坐向(或直接輸入羅盤度數,自動換算坐山)。度數=你背對建築、面向正前方時的方位角。</div>
+</div>
+<div id="warnBox"></div>
+<div class="box" id="out"></div>
+<div class="box"><b style="font-family:'Noto Serif TC',serif;color:var(--gold)">佈局九宮圖</b><div class="grid9" id="g9"></div>
+<div class="note">紅框=今年五黃/二黑所在,勿動工修造。本佈局依玄空飛星(向星財、山星丁)+八宅遊星+流年紫白綜合排定,並附倪師(天紀)一派之說;巒頭形勢仍須現場合參。</div></div>
+<script>
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const DIRZH={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+const GONG8=['坎','艮','震','巽','離','坤','兌','乾'];
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,refIfFive)=>{const s=base[pal];
+    if(s===5)return fly(5,YANG.has(refIfFive));
+    const ref=PAL_M[NUM2PAL[s]][kind];
+    return fly(s,YANG.has(ref))};
+  return{facing,mountain:sc(sp,sitting),facing_stars:sc(fp,facing),sp,fp};
+}
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
+// ── 控制項 ──
+const sitSel=document.getElementById('sit'),perSel=document.getElementById('per'),yrIn=document.getElementById('yr');
+for(const m of M24){const o=document.createElement('option');o.value=m;o.textContent=m+'山'+M24[(M24.indexOf(m)+12)%24]+'向';sitSel.appendChild(o)}
+sitSel.value='子';
+for(let i=1;i<=9;i++){const o=document.createElement('option');o.value=i;o.textContent=i+'運';perSel.appendChild(o)}
+perSel.value=9;
+yrIn.value=new Date().getFullYear();
+let mode='rest';
+document.querySelectorAll('.chip[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;
+  document.querySelectorAll('.chip[data-m]').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();
+  window.fscP&&window.fscP('venue','mode',mode)});
+document.getElementById('deg').oninput=e=>{const d=+e.target.value;if(isFinite(d)){
+  const i=Math.floor((((d-337.5)%360)+360)%360/15);sitSel.value=M24[i];render()}};
+sitSel.onchange=render;perSel.onchange=render;yrIn.onchange=render;
+// ── 評分引擎 ──
+function ctx(){
+  const per=+perSel.value,yr=+yrIn.value,sit=sitSel.value;
+  const c=xkChart(per,sit),zhai=palaceOf(sit);
+  const annS=(11-yr%9-1+9)%9+1,ann=fly(annS,true);
+  const n1=per%9+1,n2=n1%9+1;
+  const G=GONG8.map(g=>({g,dir:DIRZH[g],fs:c.facing_stars[g],ms:c.mountain[g],yx:youxing(zhai,g),a:ann[g]}));
+  return{per,yr,sit,fac:c.facing,zhai,G,n1,n2,ann};
+}
+const JI='生氣天醫延年伏位';
+function annPen(o){return o.a===5?-60:o.a===2?-35:0}
+function wealth(x,o){let s=0;if(o.fs===x.per)s+=100;else if(o.fs===x.n1)s+=75;else if(o.fs===x.n2)s+=55;else if([1,6,8].includes(o.fs))s+=30;if(JI.includes(o.yx))s+=12;if(o.a===8)s+=10;if(o.a===9)s+=6;return s+annPen(o)}
+function people(x,o){let s=0;if(o.ms===x.per)s+=100;else if(o.ms===x.n1)s+=70;else if([1,6,8].includes(o.ms))s+=30;if(JI.includes(o.yx))s+=15;return s+annPen(o)}
+function suppress(x,o){let s=0;if('絕命五鬼禍害'.includes(o.yx))s+=60;else if(o.yx==='六煞')s+=38;if([2,3,5,7].includes(o.fs)&&o.fs!==x.per)s+=18;if(o.ms===x.per||o.fs===x.per)s-=90;if(o.a===5)s-=35;if(o.a===2)s-=15;return s}
+function quiet(x,o){let s=0;if(o.ms===x.per)s+=70;else if([1,6,8].includes(o.ms))s+=40;if(o.yx==='伏位')s+=30;else if(o.yx==='天醫')s+=22;else if(JI.includes(o.yx))s+=10;if(o.fs===x.per)s-=15;return s+annPen(o)}
+function retreat(x,o){const prev=(x.per+7)%9+1;let s=0;if(o.fs===prev)s+=70;if(o.fs<=3&&!JI.includes(o.yx))s+=20;if(o.ms===x.per||o.fs===x.per)s-=60;return s}
+function wenchang(x,o){let s=0;if(o.fs===4)s+=70;if(o.ms===4)s+=55;if(o.a===4)s+=40;if(JI.includes(o.yx))s+=10;return s+annPen(o)}
+function reasons(x,o){const r=[];
+  if(o.fs===x.per)r.push(['向星'+x.per+'當旺','good']);else if(o.fs===x.n1)r.push(['向星'+x.n1+'生氣','good']);
+  if(o.ms===x.per)r.push(['山星'+x.per+'旺丁','good']);
+  if(JI.includes(o.yx))r.push(['八宅'+o.yx,'good']);else r.push(['八宅'+o.yx,'']);
+  if(o.a===8)r.push(['年八白','good']);if(o.a===4)r.push(['年四綠','good']);
+  if(o.a===5)r.push(['⚠年五黃','warn']);if(o.a===2)r.push(['⚠年二黑','warn']);
+  return r}
+// ── 各場所模式定義 ──
+const MODES={
+rest:{name:'餐廳',fns:[
+ {n:'🚪 大門/入口',f:wealth,note:'納旺氣,門前開闊明亮',ni:''},
+ {n:'💰 收銀台',f:wealth,note:'向星旺方,常亮燈、忌雜物、忌鏡對門',ni:''},
+ {n:'🔥 爐灶',f:suppress,ban:['乾','坤'],bonus:{'坎':25,'兌':25},note:'火壓凶方、灶口朝吉方',ni:'倪派:廚房忌西北(傷父/老闆)、西南(傷母),宜正北、正西。'},
+ {n:'🍽 主用餐區',f:people,note:'客人坐得穩、待得久,翻桌自然好',ni:''},
+ {n:'🏮 包廂/VIP',f:quiet,note:'靜穩之方,貴客宜安',ni:''},
+ {n:'🐟 水族箱/水景',f:wealth,banMs:true,note:'向星旺方見水催財;山星旺方見水損丁,故已排除',ni:''},
+ {n:'🚻 廁所',f:suppress,note:'壓凶方;絕不可居建築正中',ni:'倪派:廁在宅中央,主心臟中風氣喘,大凶。'}]},
+office:{name:'辦公室',fns:[
+ {n:'🚪 大門/入口',f:wealth,note:'納氣之口,取旺',ni:'倪派:最佳格局=大門在中心點西南、老闆在西北,成地天泰。'},
+ {n:'👑 老闆位',f:people,bonus:{'乾':22,'巽':15},note:'背實牆、面明堂,忌背門',ni:'倪派:老闆宜坐西北(乾)或東南(巽,雷風恆除外);正南亦可。'},
+ {n:'💼 主管位',f:people,rank:2,note:'次旺山星之方',ni:''},
+ {n:'💰 財務/會計',f:quiet,note:'靜穩不動之方,保險櫃靠實牆',ni:''},
+ {n:'📞 業務部',f:wealth,rank:2,note:'動線活絡之方,催業績',ni:'倪派:老闆的大將可坐東方(震位)。'},
+ {n:'👥 員工區',f:people,rank:3,note:'平穩之方',ni:'倪派:人事/後勤宜坐西南(坤位)。'},
+ {n:'📋 會議室',f:wenchang,note:'四綠文昌方,議事清明',ni:''},
+ {n:'🚻 廁所/茶水',f:suppress,note:'壓凶方,忌居中',ni:''}]},
+factory:{name:'工廠',fns:[
+ {n:'🚪 大門/貨運口',f:wealth,note:'納旺氣,出入動線順',ni:''},
+ {n:'🏢 辦公區',f:people,note:'山星旺方,人事穩',ni:''},
+ {n:'⚙️ 主要機台/生產線',f:wealth,note:'機器屬動,置向星旺方生產順暢',ni:''},
+ {n:'📦 成品倉庫',f:retreat,note:'退氣方靜藏,貨不積壓',ni:''},
+ {n:'🔥 高溫/危險設備',f:suppress,banA5:true,note:'壓凶方;今年五黃方已排除(五黃忌動火)',ni:''},
+ {n:'🙏 神位',f:quiet,note:'靜方、背實牆、不沖門、上方無樑',ni:''},
+ {n:'🚻 廁所',f:suppress,note:'壓凶方,忌居中',ni:''}]},
+shop:{name:'店面',fns:[
+ {n:'🚪 大門',f:wealth,note:'開在旺方,客自來',ni:''},
+ {n:'💰 收銀台',f:wealth,rank:2,note:'旺方且能顧全場,忌背門',ni:''},
+ {n:'⭐ 主打商品區',f:wealth,rank:3,note:'生氣方陳列,帶動銷售',ni:''},
+ {n:'🪑 顧客停留區',f:people,note:'坐得穩、待得久',ni:''},
+ {n:'📦 倉庫',f:retreat,note:'退氣方',ni:''},
+ {n:'🚻 廁所',f:suppress,note:'壓凶方,忌居中、忌對大門',ni:''}]},
+home:{name:'住家',fns:[
+ {n:'🚪 大門',f:wealth,note:'納旺氣',ni:''},
+ {n:'🛏 主臥(夫妻)',f:people,bonus:{'乾':25},note:'山星旺方安床,床頭實牆',ni:'倪派:夫妻宜住西北(乾),成地天泰,一世夫妻;西北無房主無父。'},
+ {n:'📖 書房/書桌',f:wenchang,note:'四綠文昌方',ni:''},
+ {n:'🔥 廚房爐灶',f:suppress,ban:['乾','坤'],bonus:{'坎':25,'兌':25},note:'壓凶方,灶口朝吉',ni:'倪派:廚房在西北殺父、西南殺母、東方傷長子,宜正北、正西。'},
+ {n:'🙏 神明廳',f:quiet,note:'靜方、背實牆、不沖門',ni:''},
+ {n:'🚻 廁所',f:suppress,note:'壓凶方;絕不可居宅中央',ni:'倪派:廁居宅心,主心臟中風氣喘。'}]}};
+// ── 排盤輸出 ──
+function render(){
+  const x=ctx();
+  const md=MODES[mode];
+  const used={};
+  let html='<b style="font-family:\'Noto Serif TC\',serif;font-size:17px;color:var(--gold)">'+md.name+'模式・'+x.sit+'山'+x.fac+'向・'+x.per+'運・'+x.yr+'年</b>';
+  const cellFns={};
+  for(const fn of md.fns){
+    let cand=x.G.slice();
+    if(fn.ban)cand=cand.filter(o=>!fn.ban.includes(o.g));
+    if(fn.banMs)cand=cand.filter(o=>o.ms!==x.per);
+    if(fn.banA5)cand=cand.filter(o=>o.a!==5);
+    cand=cand.map(o=>({o,s:fn.f(x,o)+(fn.bonus&&fn.bonus[o.g]?fn.bonus[o.g]:0)}));
+    cand.sort((a,b)=>b.s-a.s);
+    const pick=cand[Math.min((fn.rank||1)-1,cand.length-1)];
+    const alt=cand[fn.rank||1]||null;
+    const o=pick.o;
+    (cellFns[o.g]=cellFns[o.g]||[]).push(fn.n.split(' ')[1]||fn.n);
+    html+='<div class="fcard"><div>'+fn.n+' → <b class="dir">'+o.dir+'('+o.g+')</b>'
+      +(alt?' <span style="opacity:.6;font-size:12.5px">次選:'+alt.o.dir+'</span>':'')+'</div>'
+      +'<div>'+reasons(x,o).map(r=>'<span class="tag '+r[1]+'">'+r[0]+'</span>').join('')+'</div>'
+      +'<div style="font-size:12.5px;opacity:.8">'+fn.note+'</div>'
+      +(fn.ni?'<div class="ni">☯ '+fn.ni+'</div>':'')+'</div>';
+  }
+  document.getElementById('out').innerHTML=html;
+  // 警示
+  const g5=x.G.find(o=>o.a===5),g2=x.G.find(o=>o.a===2);
+  document.getElementById('warnBox').innerHTML='<div class="banner">⚠ '+x.yr+'年五黃在<b>'
+    +(g5?g5.dir:'中宮')+'</b>、二黑在<b>'+(g2?g2.dir:'中宮')+'</b>:此二方勿動工、勿裝修、勿設爐灶收銀;可置金屬重物化洩。</div>';
+  // 九宮圖
+  const GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
+  document.getElementById('g9').innerHTML=GRID.flat().map(p=>{
+    if(p==='中')return '<div class="cell"><b>中宮</b><span style="opacity:.5">立極</span></div>';
+    const o=x.G.find(q=>q.g===p);
+    const bad=o.a===5||o.a===2;
+    return '<div class="cell'+(bad?' bad':'')+'"><b>'+DIRZH[p]+'</b><span style="opacity:.6">'+o.ms+'/'+o.fs+' '+o.yx+'</span><br><span class="fn">'+(cellFns[p]||[]).join('・')+'</span></div>';
+  }).join('');
+}
+render();
+</script></body></html>
