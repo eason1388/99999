@@ -332,6 +332,59 @@ function render(){
    +'<span class="tag good">貴人:'+GR[0]+'、'+GR[1]+'</span>';
 }
 // ── 今日農民曆(永遠顯示真實今天)──
+// ── 農民曆擴充資料 ──
+const TERM24=['春分','清明','穀雨','立夏','小滿','芒種','夏至','小暑','大暑','立秋','處暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒','立春','雨水','驚蟄'];
+const NAYIN=['海中金','爐中火','大林木','路旁土','劍鋒金','山頭火','澗下水','城頭土','白蠟金','楊柳木','泉中水','屋上土','霹靂火','松柏木','長流水','沙中金','山下火','平地木','壁上土','金箔金','覆燈火','天河水','大驛土','釵釧金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+const SHEN12=['青龍','明堂','天刑','朱雀','金匱','天德','白虎','玉堂','天牢','玄武','司命','勾陳'];
+const HUANGDAO=new Set(['青龍','明堂','金匱','天德','玉堂','司命']); // 黃道六吉神
+const XIU28=['角','亢','氐','房','心','尾','箕','斗','牛','女','虛','危','室','壁','奎','婁','胃','昴','畢','觜','參','井','鬼','柳','星','張','翼','軫'];
+const XIU_QI='木金土日月火水木金土日月火水木金土日月火水木金土日月火水'; // 七政
+const XIU_JX=['吉·宜嫁娶修造','凶·忌起造安葬','凶·忌婚喪','吉·諸事皆宜','凶·忌營造','吉·宜婚姻造葬','吉·宜開渠開門',
+'吉·宜開倉造作','凶·忌諸事','凶·忌爭訟嫁娶','凶·忌造葬','凶·忌登高築堤','吉·宜祭祀嫁娶','吉·宜婚姻修造',
+'小吉·宜出行','吉·宜嫁娶造作','吉·宜造葬修倉','凶·忌造作','吉·宜諸事','凶·忌諸事','吉·宜旅行立券',
+'吉·宜祭祀動土','凶·唯宜安葬','凶·忌婚喪','凶·忌婚事','吉·宜婚娶宴會','凶·忌婚嫁','吉·宜婚姻置產'];
+const XI_DIR=['東北','西北','西南','正南','東南','東北','西北','西南','正南','東南']; // 喜神(日干)
+const FU_DIR=['正北','正北','正東','正東','正南','正南','東南','東南','西南','西南']; // 福神(日干,通書)
+const TAI_G=['占大門','占碓磨','占廚灶','占倉庫','占房床','占大門','占碓磨','占廚灶','占倉庫','占房床']; // 胎神(日干占物)
+const BR_DIR=['正北','東北','東北','正東','東南','東南','正南','西南','西南','正西','西北','西北'];
+function nextTermInfo(Y,M,D){
+  const lon=sunLon(jdn(Y,M,D)-8/24,Y);
+  const idx=Math.floor(((lon%360)+360)%360/15);          // 目前節氣
+  const curDeg=idx*15, nextDeg=(idx+1)*15%360;
+  const nextIdx=(idx+1)%24;
+  const localDate=deg=>{let j=termJdn(Y,(deg+270)%360); // termJdn 以 315=立春基準,用相對度數求
+    return Math.floor(j+8/24+0.5)};
+  // 直接用當年求該黃經日期(termJdn 內含年份錨定)
+  const jNext=Math.floor(termJdn(Y,nextDeg)+8/24+0.5);
+  let days=jNext-jdn(Y,M,D);
+  if(days<0){const jN2=Math.floor(termJdn(Y+1,nextDeg)+8/24+0.5);days=jN2-jdn(Y,M,D);}
+  const jCur=Math.floor(termJdn(Y,curDeg)+8/24+0.5);
+  return{cur:TERM24[idx],curJ:jCur,next:TERM24[nextIdx],days:days};
+}
+function zhiShen(mi,db){ // 黃道黑道十二值神:依月建起青龍
+  const mb=(mi+2)%12;
+  const start={0:8,6:8,1:10,7:10,2:0,8:0,3:2,9:2,4:4,10:4,5:6,11:6}[mb];
+  const k=((db-start)%12+12)%12;
+  const name=SHEN12[k];
+  return{name,huang:HUANGDAO.has(name)};
+}
+function xiu28(Y,M,D){
+  const base=jdn(2000,1,1); // 2000-01-01=氐(index 2),與七政星期相合
+  const k=(((jdn(Y,M,D)-base)%28+2)%28+28)%28;
+  return{name:XIU28[k],qi:XIU_QI[k],jx:XIU_JX[k]};
+}
+function shiChenLuck(db){ // 十二時辰吉凶:沖日支=凶,三合/六合=吉
+  const TRIA=[[0,4,8],[2,6,10],[3,7,11],[1,5,9]];
+  const liuHe={0:1,1:0,2:11,11:2,3:10,10:3,4:9,9:4,5:8,8:5,6:7,7:6};
+  const chong=(db+6)%12;
+  const myTri=TRIA.find(t=>t.includes(db));
+  return [...Array(12)].map((_,tb)=>{
+    if(tb===chong)return{tb,lv:'凶'};
+    if(myTri.includes(tb)||liuHe[db]===tb)return{tb,lv:'吉'};
+    return{tb,lv:'平'};
+  });
+}
+const SHICHEN=['23-01','01-03','03-05','05-07','07-09','09-11','11-13','13-15','15-17','17-19','19-21','21-23'];
 function renderToday(){
   const n=new Date();
   const Y=n.getFullYear(),M=n.getMonth()+1,D=n.getDate();
@@ -348,17 +401,48 @@ function renderToday(){
   const good=Object.entries(dch).filter(([p,v])=>p!=='中'&&[1,6,8,9].includes(v)).map(([p])=>DZ[p]);
   const bad=Object.entries(dch).filter(([p,v])=>p!=='中'&&[2,5].includes(v)).map(([p,v])=>DZ[p]+(v===5?'(五黃)':'(二黑)'));
   const yiJi=jc.yi.split(';');
+  const di=jc.di;                                   // 日柱干支序(甲子=0)
+  const nayin=NAYIN[Math.floor(di/2)];
+  const zs=zhiShen(mi,jc.db);
+  const xiu=xiu28(Y,M,D);
+  const term=nextTermInfo(Y,M,D);
+  const wk='日一二三四五六'[n.getDay()];
+  const md=x=>(Math.floor(x)%100);                  // 供顯示
+  const jdToMD=j=>{ // JDN → M/D
+    const a=j+32044,b=Math.floor((4*a+3)/146097),c=a-Math.floor(146097*b/4);
+    const dd=Math.floor((4*c+3)/1461),e=c-Math.floor(1461*dd/4),m2=Math.floor((5*e+2)/153);
+    return (m2+3-12*Math.floor(m2/10))+'/'+(e-Math.floor((153*m2+2)/5)+1);};
+  const sc=shiChenLuck(jc.db);
+  const scCol={'吉':'var(--green)','凶':'var(--red)','平':'#8a8072'};
+  const row=(lbl,val)=>'<div style="display:flex;gap:8px;padding:2px 0;font-size:13.5px"><span style="color:#8a8072;min-width:52px;flex-shrink:0">'+lbl+'</span><span>'+val+'</span></div>';
   document.getElementById('todayAlmanac').innerHTML=
     '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">'
-    +'<b style="font-size:17px">'+Y+'年'+M+'月'+D+'日(週'+'日一二三四五六'[n.getDay()]+')</b>'
+    +'<b style="font-size:17px">'+Y+'年'+M+'月'+D+'日(週'+wk+')</b>'
     +'<span style="font-size:13.5px;opacity:.75">'+ST[yG%10]+BR[yG%12]+'年 '+ST[mS]+BR[mB]+'月 '+gzOfDay(Y,M,D)+'日</span></div>'
-    +'<div style="margin:8px 0"><b style="font-family:\'Noto Serif TC\',serif;font-size:21px;color:var(--gold)">'+jc.name+'日</b>'
-    +' <span class="tag warn" style="font-size:13px">沖'+BR[chongB]+'・屬'+SX[chongB]+'者今日留意</span></div>'
+    // 建除 + 沖 + 黃黑道
+    +'<div style="margin:8px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+    +'<b style="font-family:\'Noto Serif TC\',serif;font-size:21px;color:var(--gold)">'+jc.name+'日</b>'
+    +'<span class="tag '+(zs.huang?'good':'warn')+'" style="font-size:13px">'+zs.name+'('+(zs.huang?'黃道吉':'黑道凶')+')</span>'
+    +'<span class="tag warn" style="font-size:13px">沖'+BR[chongB]+'・屬'+SX[chongB]+'者留意</span></div>'
+    // 宜忌
     +'<div style="font-size:14.5px;line-height:1.9"><span style="color:var(--green);font-weight:700">'+(yiJi[0]||'')+'</span>'
     +(yiJi[1]?'<br><span style="color:var(--red);font-weight:700">'+yiJi[1]+'</span>':'')+'</div>'
-    +'<div style="font-size:12.5px;opacity:.65;margin-top:4px">彭祖百忌:'+PZ_G[jc.ds]+';'+PZ_Z[jc.db]+'</div>'
-    +'<div style="margin-top:6px">'+(good.length?'<span class="tag good">今日吉方:'+good.join('、')+'</span> ':'')
-    +(bad.length?'<span class="tag warn">慎用:'+bad.join('、')+'</span>':'')+'</div>';
+    +'<div style="border-top:1px solid rgba(160,140,90,.2);margin:8px 0 4px"></div>'
+    // 詳細條目
+    +row('節氣',term.cur+'('+jdToMD(term.curJ)+')　距<b style="color:var(--gold)">'+term.next+'</b>還有 '+term.days+' 天')
+    +row('納音',nayin+'　<span style="opacity:.6">('+gzOfDay(Y,M,D)+')</span>')
+    +row('星宿',xiu.name+xiu.qi+'　<span style="color:'+(xiu.jx[0]==='吉'?'var(--green)':xiu.jx[0]==='凶'?'var(--red)':'var(--gold)')+'">'+xiu.jx+'</span>')
+    +row('喜神',XI_DIR[jc.ds]+'　福神'+FU_DIR[jc.ds])
+    +row('胎神',TAI_G[jc.ds]+BR_DIR[jc.db]+'方　<span style="opacity:.6">忌此方修造動土</span>')
+    +row('彭祖',PZ_G[jc.ds]+';'+PZ_Z[jc.db])
+    +row('吉方',(good.length?'<span style="color:var(--green)">'+good.join('、')+'</span>':'—')+(bad.length?'　慎用<span style="color:var(--red)">'+bad.join('、')+'</span>':''))
+    // 時辰吉凶
+    +'<div style="border-top:1px solid rgba(160,140,90,.2);margin:8px 0 4px"></div>'
+    +'<div style="font-size:12px;color:#8a8072;margin-bottom:3px">十二時辰吉凶(沖時勿用要事)</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px">'
+    +sc.map(function(s){return '<div style="text-align:center;background:rgba(0,0,0,.15);border-radius:6px;padding:3px 1px;font-size:11px">'
+      +'<div style="font-weight:700">'+BR[s.tb]+'</div><div style="font-size:9px;opacity:.55">'+SHICHEN[s.tb]+'</div>'
+      +'<div style="color:'+scCol[s.lv]+';font-weight:700">'+s.lv+'</div></div>'}).join('')+'</div>';
 }
 // ── 開啟自動帶入今天(不再寫死日期)──
 (function(){const n=new Date(),pad=x=>String(x).padStart(2,'0');
