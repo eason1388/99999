@@ -440,24 +440,43 @@ function onOrient(e){
   if(lastLive===null){const b=document.getElementById('live');if(liveOn)b.textContent='⏸ 即時量測中 ●(手機保持水平)';}
   lastLive=h;heading=h;drawFast();updateLight();fullDebounce();
 }
-async function toggleLive(){
+// 感測權限:必須在使用者手勢當下「同步」呼叫 requestPermission(iOS 限制),故用 .then 不用 await
+let sensorGranted=false;
+function requestSensorPerm(cb){
+  if(sensorGranted){cb&&cb(true);return;}
+  try{
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+      // 直接呼叫(此函式須由 onclick 第一時間同步進入),回傳 Promise 再處理
+      DeviceOrientationEvent.requestPermission().then(function(st){
+        if(st==='granted'){sensorGranted=true;cb&&cb(true);}
+        else{alert('需要允許「動作與方向」權限才能即時量測。\n若沒跳出詢問視窗,請確認:\n① 用 Safari 直接開啟(非 LINE/FB/IG 內建瀏覽器)\n② 設定→Safari→動作與方向存取權 已開啟');cb&&cb(false);}
+      }).catch(function(err){
+        alert('方向感測啟用失敗:'+err+'\n請改用 Safari 直接開啟本網站,並在跳出視窗按「允許」。');cb&&cb(false);
+      });
+    }else{ // 非 iOS 或舊版:直接可用
+      sensorGranted=true;cb&&cb(true);
+    }
+  }catch(err){alert('此裝置不支援方向感測:'+err);cb&&cb(false);}
+}
+function startSensor(){
+  const btn=document.getElementById('live');
+  window.addEventListener('deviceorientationabsolute',onOrient);
+  window.addEventListener('deviceorientation',onOrient);
+  liveOn=true;btn.classList.add('on');btn.textContent='⏸ 即時量測中…(手機保持水平)';
+  // iframe 直接收得到就不打擾父層;1.5 秒沒資料才請父層接手轉發
+  setTimeout(function(){if(lastLive===null&&liveOn){
+    try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}}},1500);
+  setTimeout(function(){if(lastLive===null&&liveOn){
+    btn.textContent='⚠ 尚未收到感測資料(可繼續等或手動輸入度數)';
+    try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}
+  }},6000);
+}
+function toggleLive(){
   const btn=document.getElementById('live');
   if(liveOn){window.removeEventListener('deviceorientation',onOrient);
     window.removeEventListener('deviceorientationabsolute',onOrient);
     liveOn=false;lastLive=null;btn.classList.remove('on');btn.textContent='📡 即時量測(用手機感測器)';return}
-  try{
-    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-      const st=await DeviceOrientationEvent.requestPermission();
-      if(st!=='granted'){alert('需要允許「動作與方向」權限才能即時量測');return}}
-    window.addEventListener('deviceorientationabsolute',onOrient);
-    window.addEventListener('deviceorientation',onOrient);
-    try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}
-    liveOn=true;btn.classList.add('on');btn.textContent='⏸ 即時量測中…(手機保持水平)';
-    setTimeout(()=>{if(lastLive===null&&liveOn){
-      btn.textContent='⚠ 尚未收到感測資料(可繼續等或手動輸入度數)';
-      try{window.parent&&window.parent!==window&&window.parent.postMessage('fsc-sensor-start','*');}catch(e){}
-    }},6000);
-  }catch(err){alert('此裝置不支援方向感測:'+err)}
+  requestSensorPerm(function(ok){if(ok)startSensor();});
 }
 document.getElementById('live').onclick=toggleLive;
 let flowYear=2026,birthYear=1990,isMale=true,useMing=false;
@@ -845,9 +864,10 @@ function instFaceUpdate(){
   if(c0)c0.innerHTML='<span class="tri">'+TRIG[g]+'</span><span class="gn" style="color:'+x.lv[1]+'">'+DIRZH[g]+'</span><span class="vd" style="color:'+x.lv[1]+'">'+x.lv[0]+'</span>';
 }
 document.getElementById('instBtn').onclick=()=>{
+  // 先在手勢當下同步要感測權限,再繪製(順序很重要,iOS 才會跳詢問)
+  if(!liveOn)requestSensorPerm(function(ok){if(ok)startSensor();});
   try{renderInstant();instFaceUpdate();}catch(e){console.error(e);}
   document.getElementById('instBtn').style.display='none';
-  if(!liveOn)toggleLive();
 };
 // ── 語音播報 ──
 let voiceOn=false;
@@ -891,12 +911,16 @@ document.getElementById('recRsIn').onchange=e=>{
   rd.readAsText(f);e.target.value='';};
 // ── AR 實景羅盤 ──
 let arOn=false,arStream=null;
-async function arStart(){
+function arBtnTap(){
+  // 關鍵:先在點擊當下「同步」要方向權限(iOS),成功後才開相機
+  if(!liveOn)requestSensorPerm(function(ok){if(ok)startSensor();});
+  arStartCam();
+}
+async function arStartCam(){
   const wrap=document.getElementById('arWrap'),v=document.getElementById('arV');
   try{arStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});}
   catch(e){alert('無法開啟相機:'+e.message+'(電腦可能沒有後鏡頭)');return}
   v.srcObject=arStream;wrap.style.display='block';arOn=true;
-  if(!liveOn)toggleLive();
   const c=document.getElementById('arC');
   const fitAR=()=>{c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;
     c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);};
@@ -905,7 +929,7 @@ async function arStart(){
 }
 function arStop(){arOn=false;document.getElementById('arWrap').style.display='none';
   if(arStream){arStream.getTracks().forEach(t=>t.stop());arStream=null;}}
-document.getElementById('arBtn').onclick=arStart;
+document.getElementById('arBtn').onclick=arBtnTap;
 document.getElementById('arX').onclick=arStop;
 let arT0=0;
 function arDraw(){
