@@ -329,8 +329,13 @@ function updateLight(){
   document.getElementById('slider').value=heading.toFixed(1);
   document.getElementById('num').value=heading.toFixed(1);
 }
-let fullT=null;
-function fullDebounce(){clearTimeout(fullT);fullT=setTimeout(()=>{bake();drawFast();update()},160)}
+let fullT=null,lastFull=0;
+function fullDebounce(){
+  // 節流:轉動中也固定每 180ms 刷新飛星盤/八宅(不再是停下來才更新),停止後再補一次
+  const now=Date.now();
+  if(now-lastFull>=180){lastFull=now;bake();drawFast();update();}
+  else{clearTimeout(fullT);fullT=setTimeout(()=>{lastFull=Date.now();bake();drawFast();update();},180);}
+}
 function draw(){bake();drawFast();update();}
 function interp(d){
   const i=Math.floor((((d-337.5)%360)+360)%360/15),m=M24S[i],opp=M24S[(i+12)%24];
