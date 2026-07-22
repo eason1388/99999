@@ -936,7 +936,47 @@ function arDrawBody(){
       g.font='900 22px "Noto Serif TC",serif';g.fillStyle='#C9A96A';
       g.fillText(M24S[i],x,48);}
   }
+  // ===== 八方位浮標(財位/文昌/五鬼/太歲/歲破…全部貼齊真實方位)=====
+  const V=instantVerdicts();
+  const GONG_AZ={'坎':0,'艮':45,'震':90,'巽':135,'離':180,'坤':225,'兌':270,'乾':315};
+  const COLmap={'var(--green)':'#8FC49A','var(--gold)':'#D8C68A','#c9944a':'#E0A94A','var(--red)':'#E8746A'};
+  const rr2=(x,y,ww,hh,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+ww,y,x+ww,y+hh,r);
+    g.arcTo(x+ww,y+hh,x,y+hh,r);g.arcTo(x,y+hh,x,y,r);g.arcTo(x,y,x+ww,y,r);g.closePath();};
+  // 每方位取一個最重要標籤(優先煞氣,其次吉神)
+  const pinLabel=(e)=>{
+    const r=e.rs;
+    for(const key of ['流年五黃','歲破方','三煞方','你的五鬼位','你的絕命位','你的禍害位','你的六煞位','太歲方宜靜','流年病符','流年是非','流年破耗'])
+      {const hit=r.find(s=>s.indexOf(key.replace('方宜靜','').replace('方',''))>=0);if(hit){
+        return {t:key==='流年五黃'?'五黃煞':key==='太歲方宜靜'?'太歲':hit.replace('你的','').replace('宜靜',''),warn:true}}}
+    for(const key of ['流年財星','流年文昌','流年喜慶','流年貴氣','你的生氣位','你的天醫位','你的延年位','你的伏位'])
+      {const hit=r.find(s=>s.indexOf(key.replace('你的',''))>=0);if(hit){
+        return {t:key==='流年財星'?'財位':key==='流年文昌'?'文昌位':hit.replace('你的',''),warn:false}}}
+    return {t:e.lv[0],warn:e.sc<0};
+  };
+  const pins=GONG8.map(gk=>{
+    const e=V.find(t=>t.g===gk);const az=GONG_AZ[gk];
+    let d=((az-heading+540)%360)-180;
+    return {gk,e,d,x:w/2+d*ppd,lab:pinLabel(e),col:COLmap[e.lv[1]]||'#D8C68A'};
+  }).filter(p=>Math.abs(p.d)<34).sort((a,b)=>a.x-b.x);
+  pins.forEach((p,i)=>{
+    const bw=118,bh=52,x=Math.max(6,Math.min(w-bw-6,p.x-bw/2));
+    const y=h*0.30+ (i%2)*70 + (i%3)*26;
+    // 引線到底部方向點
+    g.strokeStyle=p.col;g.lineWidth=1.5;g.globalAlpha=.5;
+    g.beginPath();g.moveTo(p.x,y+bh);g.lineTo(p.x,h-210);g.stroke();
+    g.globalAlpha=1;
+    g.beginPath();g.arc(p.x,h-210,4,0,7);g.fillStyle=p.col;g.fill();
+    // 標籤卡
+    g.fillStyle='rgba(18,15,13,.82)';rr2(x,y,bw,bh,12);g.fill();
+    g.strokeStyle=p.col;g.lineWidth=p.lab.warn?2.5:1.5;g.stroke();
+    g.textAlign='center';
+    g.fillStyle='#EDE7DA';g.font='800 14px "Noto Sans TC"';
+    g.fillText(DIRZH[p.gk]+'('+p.gk+')',x+bw/2,y+19);
+    g.fillStyle=p.col;g.font='900 17px "Noto Serif TC",serif';
+    g.fillText((p.lab.warn?'⚠':'')+p.lab.t,x+bw/2,y+41);
+  });
   // 中央準星+讀數
+  g.textAlign='center';
   g.strokeStyle='#E07A6A';g.lineWidth=2.5;
   g.beginPath();g.moveTo(w/2,34);g.lineTo(w/2,96);g.stroke();
   g.fillStyle='#fff';g.font='900 30px "Noto Serif TC",serif';
