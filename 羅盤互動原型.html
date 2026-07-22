@@ -874,13 +874,32 @@ document.getElementById('instBtn').onclick=()=>{
   try{renderInstant();instFaceUpdate();}catch(e){console.error(e);}
   document.getElementById('instBtn').style.display='none';
 };
-// ── 語音播報 ──
-let voiceOn=false;
+// ── 語音播報(iOS Safari 相容:語音清單非同步、播前需 resume、指定中文語音)──
+let voiceOn=false,_voices=[],_zhVoice=null;
+function loadVoices(){try{_voices=window.speechSynthesis.getVoices()||[];
+  _zhVoice=_voices.find(v=>/zh[-_]?TW|Taiwan/i.test(v.lang+'|'+v.name))
+        ||_voices.find(v=>/zh|Chinese|Mandarin|國語|普通|華/i.test(v.lang+'|'+v.name))||null;}catch(e){}}
+if(window.speechSynthesis){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
 function speak(t){if(!voiceOn||!window.speechSynthesis)return;
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=1.05;speechSynthesis.speak(u);}catch(e){}}
+  try{const ss=window.speechSynthesis;ss.cancel();
+    if(!_zhVoice)loadVoices();
+    const u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=1.05;if(_zhVoice)u.voice=_zhVoice;
+    ss.speak(u);
+    // iOS 會把佇列暫停,補一次 resume 才會出聲
+    setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(e){}},60);
+  }catch(e){}}
 document.getElementById('voiceBtn').onclick=e=>{voiceOn=!voiceOn;
   e.target.textContent='🔊 語音播報:'+(voiceOn?'開':'關');e.target.classList.toggle('on',voiceOn);
-  if(voiceOn)speak('語音播報已開啟');};
+  if(voiceOn){
+    // 在使用者手勢當下解鎖 iOS 語音:先載入語音清單,再暖機播一句
+    loadVoices();
+    try{const ss=window.speechSynthesis;ss.cancel();
+      const u=new SpeechSynthesisUtterance('語音播報已開啟');u.lang='zh-TW';u.rate=1.05;if(_zhVoice)u.voice=_zhVoice;
+      ss.speak(u);setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(_){}},60);
+      // 若語音清單尚未載入,載入後再補播一次確認
+      if(!_zhVoice)setTimeout(()=>{loadVoices();if(voiceOn&&_zhVoice)speak('語音播報已開啟');},400);
+    }catch(err){alert('此裝置或瀏覽器不支援語音播報:'+err)}
+  }else{try{window.speechSynthesis.cancel();}catch(e){}}};
 // ── 拍照紀錄 ──
 let pendingPhoto=null;
 document.getElementById('recCam').onclick=()=>document.getElementById('recPhotoIn').click();
