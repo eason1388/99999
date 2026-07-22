@@ -874,32 +874,36 @@ document.getElementById('instBtn').onclick=()=>{
   try{renderInstant();instFaceUpdate();}catch(e){console.error(e);}
   document.getElementById('instBtn').style.display='none';
 };
-// ── 語音播報(iOS Safari 相容:語音清單非同步、播前需 resume、指定中文語音)──
-let voiceOn=false,_voices=[],_zhVoice=null;
+// ── 語音播報(iOS Safari 相容)──
+let voiceOn=false,_voices=[],_zhVoice=null,_speakT=null,_vKeep=null;
 function loadVoices(){try{_voices=window.speechSynthesis.getVoices()||[];
-  _zhVoice=_voices.find(v=>/zh[-_]?TW|Taiwan/i.test(v.lang+'|'+v.name))
-        ||_voices.find(v=>/zh|Chinese|Mandarin|國語|普通|華/i.test(v.lang+'|'+v.name))||null;}catch(e){}}
+  const zh=_voices.filter(v=>/zh|Chinese|Mandarin|Taiwan|國語|華|普通|廣東|粵/i.test(v.lang+'|'+v.name));
+  // 優先挑 iOS 內建較自然的中文語音(美嘉=zh-TW 女聲),其次 zh-TW,再其次裝置本機語音
+  _zhVoice = zh.find(v=>/Meijia|美嘉|美佳/i.test(v.name))
+          || zh.find(v=>/zh[-_]?TW|Taiwan/i.test(v.lang)&&v.localService)
+          || zh.find(v=>/zh[-_]?TW|Taiwan/i.test(v.lang))
+          || zh.find(v=>v.localService)||zh[0]||null;
+}catch(e){}}
 if(window.speechSynthesis){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
+function mkUtter(t){const u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=0.96;u.pitch=1;if(_zhVoice)u.voice=_zhVoice;return u;}
+// 主播報:去抖 + cancel 後延遲再播(繞過 iOS「cancel 卡死」bug),讓「停下來的那個方位」被念出
 function speak(t){if(!voiceOn||!window.speechSynthesis)return;
-  try{const ss=window.speechSynthesis;ss.cancel();
-    if(!_zhVoice)loadVoices();
-    const u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=1.05;if(_zhVoice)u.voice=_zhVoice;
-    ss.speak(u);
-    // iOS 會把佇列暫停,補一次 resume 才會出聲
-    setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(e){}},60);
-  }catch(e){}}
+  const ss=window.speechSynthesis;clearTimeout(_speakT);
+  try{ss.cancel();}catch(e){}
+  _speakT=setTimeout(()=>{try{if(!_zhVoice)loadVoices();ss.speak(mkUtter(t));
+    setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(_){}},60);}catch(e){}},160);}
 document.getElementById('voiceBtn').onclick=e=>{voiceOn=!voiceOn;
   e.target.textContent='🔊 語音播報:'+(voiceOn?'開':'關');e.target.classList.toggle('on',voiceOn);
   if(voiceOn){
-    // 在使用者手勢當下解鎖 iOS 語音:先載入語音清單,再暖機播一句
     loadVoices();
     try{const ss=window.speechSynthesis;ss.cancel();
-      const u=new SpeechSynthesisUtterance('語音播報已開啟');u.lang='zh-TW';u.rate=1.05;if(_zhVoice)u.voice=_zhVoice;
-      ss.speak(u);setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(_){}},60);
-      // 若語音清單尚未載入,載入後再補播一次確認
-      if(!_zhVoice)setTimeout(()=>{loadVoices();if(voiceOn&&_zhVoice)speak('語音播報已開啟');},400);
+      ss.speak(mkUtter('語音播報已開啟'));                       // 手勢當下直接播,解鎖 iOS
+      setTimeout(()=>{try{if(ss.paused)ss.resume();}catch(_){}},60);
+      if(!_zhVoice)setTimeout(()=>{loadVoices();},500);          // 語音清單晚到,補載入(下句就有好聲音)
+      // iOS 會在閒置後暫停語音引擎,定時 resume 保活
+      clearInterval(_vKeep);_vKeep=setInterval(()=>{try{if(voiceOn&&window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(_){}},4000);
     }catch(err){alert('此裝置或瀏覽器不支援語音播報:'+err)}
-  }else{try{window.speechSynthesis.cancel();}catch(e){}}};
+  }else{clearInterval(_vKeep);clearTimeout(_speakT);try{window.speechSynthesis.cancel();}catch(e){}}};
 // ── 拍照紀錄 ──
 let pendingPhoto=null;
 document.getElementById('recCam').onclick=()=>document.getElementById('recPhotoIn').click();
