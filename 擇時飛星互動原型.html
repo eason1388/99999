@@ -170,6 +170,8 @@ const QDOOR={1:'休',8:'生',3:'傷',4:'杜',9:'景',2:'死',7:'驚',6:'開'};
 const QGOD=['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天'];
 const QYI='戊己庚辛壬癸丁丙乙';
 const QXUN={0:'戊',10:'己',20:'庚',30:'辛',40:'壬',50:'癸'}; // 旬首→六儀
+const gz=i=>ST[((i%10)+10)%10]+BR[((i%12)+12)%12];            // 干支序→字串
+function gzi(s,b){for(let i=0;i<60;i++)if(i%10===((s%10)+10)%10&&i%12===((b%12)+12)%12)return i;return 0;} // 天干序+地支序→干支序
 function qimenCore(dayI,hI,seg){
   const yang=(seg>=270||seg<90);
   const ju3=QM_JU[seg];
@@ -206,7 +208,7 @@ const QDIR={1:'北',8:'東北',3:'東',4:'東南',9:'南',2:'西南',7:'西',6:'
 const QGRIDP=[[4,9,2],[3,5,7],[8,1,6]];
 const qmSel=document.getElementById('qmH');
 '子丑寅卯辰巳午未申酉戌亥'.split('').forEach((b,i)=>qmSel.add(new Option(b+'時('+((i*2+23)%24)+'-'+((i*2+1))+'點)',i)));
-document.getElementById('qmBtn').onclick=()=>{
+document.getElementById('qmBtn').onclick=()=>{try{
   const[Y,M,D]=document.getElementById('dt').value.split('-').map(Number);
   const hb=+qmSel.value;
   const J=jdn(Y,M,D),dayI=((J-11)%60+60)%60;
@@ -230,6 +232,7 @@ document.getElementById('qmBtn').onclick=()=>{
   document.getElementById('qmLuck').innerHTML=
     '<span class="tag good">吉方:'+goods.map(g=>QDIR[g]+'('+q.doors[g]+'門)').join('、')+'</span> '
    +'<span class="tag warn">慎行:'+bads.map(g=>QDIR[g]+'('+q.gods[g]+')').join('、')+'</span>';
+}catch(err){document.getElementById('qmInfo').innerHTML='<span style="color:var(--red)">起局失敗:'+err.message+'</span>';console.error(err);}
 };
 // ── 黃曆:建除十二神+彭祖百忌 ──
 // 規則:日支=月支(節氣月)為「建」,順數十二神;破日=沖月支(必為第7位)。
