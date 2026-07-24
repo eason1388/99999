@@ -45,8 +45,8 @@ nav.bottom{display:none;flex:none;background:var(--dark);padding:6px 4px calc(6p
 .bnav,.bmore{border:0;background:transparent;color:#E8E2D6;opacity:.6;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;cursor:pointer;font-family:inherit;border-radius:10px}
 .bnav.on{opacity:1;color:var(--gold2)}
 .bi{font-size:19px;line-height:1}
-#sheet{position:fixed;left:0;right:0;bottom:-100%;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.25);padding:18px 18px calc(24px + env(safe-area-inset-bottom));transition:bottom .25s;z-index:20}
-#sheet.show{bottom:0}
+#sheet{position:fixed;left:0;right:0;bottom:0;transform:translateY(110%);visibility:hidden;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.25);padding:18px 18px calc(24px + env(safe-area-inset-bottom));transition:transform .25s,visibility .25s;z-index:20}
+#sheet.show{transform:translateY(0);visibility:visible}
 #sheet h3{font-family:'Noto Serif TC',serif;color:var(--gold);font-size:15px;margin-bottom:10px}
 .mitem{display:flex;gap:12px;align-items:center;width:100%;border:0;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left;border:1px solid rgba(140,109,63,.14)}
 .mitem b{font-size:14.5px} .mitem small{display:block;font-size:11.5px;opacity:.55}
