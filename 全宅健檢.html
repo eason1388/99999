@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全宅健檢總報告</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6D3F;--gold2:#C9A96A;--ink:#2b2418;--card:#fffdf7;--red:#A63A2E;--green:#4A6B4F;--bg:#f4efe4;--pur:#8e6bb5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold)}
+.box{background:var(--card);border:1px solid #e6dcc3;border-radius:16px;padding:12px 14px;width:min(720px,96vw);box-shadow:0 2px 10px rgba(120,90,40,.08)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0}
+select,input{padding:8px 10px;border:1.5px solid var(--gold2);border-radius:12px;background:#fff;color:var(--ink);font-size:14.5px}
+.big{background:var(--gold);color:#fff;border:0;border-radius:14px;padding:13px 22px;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(140,109,63,.35)}
+.chip{border:1px solid var(--gold);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;background:transparent;color:var(--ink)}
+h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:14px 0 8px}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:6px 0}
+.cell{background:#fff;border:1px solid #e6dcc3;border-radius:10px;min-height:60px;padding:5px;font-size:11.5px;text-align:center}
+.cell b{font-size:15px}
+.cell.bad{border-color:var(--red);background:rgba(166,58,46,.06)}
+.cell.sit{outline:2px solid #3E5C76}.cell.fac{outline:2px solid var(--red)}
+.tag{display:inline-block;border-radius:99px;padding:1px 10px;font-size:12px;margin:1px 3px 1px 0;background:#f2ead6;color:#6b5427}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red)}
+.tag.good{background:rgba(74,107,79,.12);color:var(--green)}
+.row2{display:flex;justify-content:space-between;gap:10px;padding:4px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+th,td{border:1px solid #e0d5ba;padding:5px 6px;text-align:center}
+th{background:#f2ead6;font-weight:700}
+.note{font-size:11.5px;opacity:.65;margin-top:4px}
+.brand{display:flex;justify-content:space-between;align-items:center;border-bottom:3px double var(--gold2);padding-bottom:8px;margin-bottom:6px}
+.brand .t{font-family:'Noto Serif TC',serif;font-weight:900;font-size:22px;color:var(--gold)}
+.brand .s{font-size:12px;letter-spacing:.4em;color:var(--gold2)}
+@media print{
+ body{background:#fff;padding:0}
+ #ctrl,.noprint{display:none!important}
+ .box{border:0;box-shadow:none;width:100%;border-radius:0;padding:0 4mm}
+ h2{page-break-after:avoid}
+ .grid9,table,.row2{page-break-inside:avoid}
+}
+</style></head><body>
+<div class="box" id="ctrl">
+<h1 style="margin-bottom:6px">📋 全宅健檢總報告</h1>
+<div class="row">
+ <input id="cname" placeholder="案名/屋主(如:王公館)" style="flex:1;min-width:140px">
+ <select id="sit"></select>
+ <input id="deg" type="number" min="0" max="359" placeholder="或面向度數°" style="width:110px">
+</div>
+<div class="row">
+ <select id="per"></select>
+ <input id="yr" type="number" style="width:84px" title="流年">
+ <input id="by" type="number" style="width:110px" placeholder="屋主出生年" value="1975">
+ <select id="sex"><option value="1">男</option><option value="0">女</option></select>
+</div>
+<div class="row">
+ <button class="big" id="go" style="flex:1">⚡ 一鍵健檢</button>
+ <button class="chip noprint" id="printBtn" style="display:none">🖨 列印/存 PDF</button>
+</div>
+<div class="note">度數=在屋內面向大門外所測方位角(自動換算坐山)。列印時自動轉 A4 版面,可存成 PDF 交付。</div>
+</div>
+<div class="box" id="report" style="display:none"></div>
+<script>
+// ── 引擎(玄空+八宅+紫白)──
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const DIRZH={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+const GONG8=['坎','艮','震','巽','離','坤','兌','乾'];
+const GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,ref)=>{const s=base[pal];
+    if(s===5)return fly(5,YANG.has(ref));
+    return fly(s,YANG.has(PAL_M[NUM2PAL[s]][kind]))};
+  const mt=sc(sp,sitting),fc=sc(fp,facing);
+  const n=period;
+  const pattern=mt[sp]===n&&fc[fp]===n?'旺山旺向':mt[fp]===n&&fc[sp]===n?'上山下水':
+    mt[fp]===n&&fc[fp]===n?'雙星會向':mt[sp]===n&&fc[sp]===n?'雙星會坐':'其他';
+  const ADJ={'坎':['乾','艮'],'艮':['坎','震'],'震':['艮','巽'],'巽':['震','離'],'離':['巽','坤'],'坤':['離','兌'],'兌':['坤','乾'],'乾':['兌','坎']};
+  const gates=ADJ[fp].map(gp=>{const s=base[gp];let usable=false;
+    if(s!==5){usable=!YANG.has(PAL_M[NUM2PAL[s]][kind])}
+    return{palace:gp,usable}});
+  const yd={'中':5,'乾':6,'兌':7,'艮':8,'離':9,'坎':1,'坤':2,'震':3,'巽':4};
+  const warnings=[];
+  for(const[nm,cc]of[['山星',mt],['向星',fc]]){
+    if(FLY.every(q=>cc[q]===yd[q]))warnings.push(nm+'全盤伏吟');
+    if(FLY.every(q=>q==='中'?cc[q]===5:cc[q]+yd[q]===10))warnings.push(nm+'全盤反吟');
+  }
+  return{facing,sp,fp,base,mountain:mt,facing_stars:fc,pattern,gates,warnings};
+}
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(z,g)=>XSTAR[TRIB[z]^TRIB[g]];
+const YX_APP={'生氣':'旺丁旺財、積極進取;宜大門、主臥、辦公','天醫':'健康貴人;宜臥室、廚房、長輩房','延年':'和諧姻緣、人際;宜夫妻房、客廳','伏位':'平穩守成;宜書房、神位','絕命':'最凶,主健康破財;宜廁所、儲藏','五鬼':'口舌是非、破財;宜廁所、雜物','禍害':'小人官非;宜儲藏、少用','六煞':'桃色糾紛、失眠;宜浴廁'};
+const SN={1:'一白貪狼(水)・利名聲智慧',2:'二黑病符(土)・主疾病',3:'三碧蚩尤(木)・主是非',4:'四綠文昌(木)・利文書考試',5:'五黃廉貞(土)・大凶忌動',6:'六白武曲(金)・利權貴',7:'七赤破軍(金)・主破耗口舌',8:'八白左輔(土)・當旺財星',9:'九紫右弼(火)・喜慶桃花'};
+const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬',BR='子丑寅卯辰巳午未申酉戌亥',ST='甲乙丙丁戊己庚辛壬癸';
+const ds=n=>{n=+n;if(!isFinite(n)||n<0)return 0;return n<10?n:ds(Math.floor(n/10)+n%10)};
+function mingGua(by,male){let sd=ds(by);let g=male?ds((11-sd)===0?9:11-sd):ds(sd+4);if(g===5)g=male?2:8;return NUM2PAL[g];}
+// 天紀層(共用羅盤模組資料)
+let HEX_YG={},HEX_N={};
+fetch('%E7%BE%85%E7%9B%A4%E4%BA%92%E5%8B%95%E5%8E%9F%E5%9E%8B.html').then(r=>r.text()).then(t=>{
+  try{const a=t.match(/const HEX_YG=\{[\s\S]*?\};/);if(a)HEX_YG=eval('('+a[0].slice(13,-1)+')');}catch(e){}
+  try{const b=t.match(/const HEX_N=\{[\s\S]*?\};/);if(b)HEX_N=eval('('+b[0].slice(12,-1)+')');}catch(e){}
+}).catch(()=>{});
+// ── 控制 ──
+const sitSel=document.getElementById('sit'),perSel=document.getElementById('per'),yrIn=document.getElementById('yr');
+for(const m of M24){const o=document.createElement('option');o.value=m;o.textContent=m+'山'+M24[(M24.indexOf(m)+12)%24]+'向';sitSel.appendChild(o)}
+sitSel.value='子';
+for(let i=1;i<=9;i++){const o=document.createElement('option');o.value=i;o.textContent=i+'運';perSel.appendChild(o)}
+perSel.value=9;yrIn.value=new Date().getFullYear();
+document.getElementById('deg').oninput=e=>{const d=+e.target.value;
+  if(isFinite(d)){const i=Math.floor((((d-337.5)%360)+360)%360/15);sitSel.value=M24[(i+12)%24];}};
+document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('go').onclick=run;
+function g9html(fn,marks){return GRID.flat().map(p=>fn(p)).join('')}
+function run(){
+  const sit=sitSel.value,per=+perSel.value,yr=+yrIn.value,by=+document.getElementById('by').value||1975;
+  const male=document.getElementById('sex').value==='1';
+  const cname=document.getElementById('cname').value||'____公館';
+  const c=xkChart(per,sit),zhai=palaceOf(sit),fac=c.facing;
+  const annS=(11-yr%9-1+9)%9+1,ann=fly(annS,true);
+  const yb=((yr-4)%12+12)%12,ts=yb,sp2=(yb+6)%12;
+  const shaG={8:0,0:0,4:0,2:1,6:1,10:1,5:2,9:2,1:2,11:3,3:3,7:3}[yb];
+  const shaB=[[5,6,7],[11,0,1],[2,3,4],[8,9,10]][shaG].map(b=>['坎','艮','艮','震','巽','巽','離','坤','坤','兌','乾','乾'][b]);
+  const mg=mingGua(by,male);
+  const east='坎離震巽';
+  const match=east.includes(mg)===east.includes(zhai);
+  const today=new Date();
+  const g5=GONG8.find(g=>ann[g]===5),g2=GONG8.find(g=>ann[g]===2);
+  // 綜合評分
+  let score=60;const plus=[],minus=[];
+  if(c.pattern==='旺山旺向'){score+=20;plus.push('旺山旺向,丁財兩旺 +20')}
+  else if(c.pattern==='雙星會向'){score+=10;plus.push('雙星會向,旺財 +10')}
+  else if(c.pattern==='雙星會坐'){score+=8;plus.push('雙星會坐,旺丁 +8')}
+  else if(c.pattern==='上山下水'){score-=15;minus.push('上山下水,須巒頭補救 -15')}
+  if(c.gates.some(g=>g.usable)){score+=5;plus.push('城門可用 +5')}
+  if(c.warnings.length){score-=10;minus.push(c.warnings.join('、')+' -10')}
+  if(match){score+=8;plus.push('宅命相配(同組) +8')}else{score-=5;minus.push('宅命不同組 -5')}
+  if(palaceOf(sit)===GONG8.find(g=>ann[g]===5)){score-=8;minus.push('流年五黃臨坐山 -8')}
+  const bi=BR.indexOf(sit);
+  if(bi>=0&&bi===sp2){score-=10;minus.push('坐山歲破 -10')}
+  score=Math.max(20,Math.min(98,score));
+  const lv=score>=85?'優':score>=70?'良':score>=55?'中':'待改善';
+  // 開運四位
+  const find=(mp,s)=>GONG8.find(g=>mp[g]===s);
+  const cai=find(c.facing_stars,per),cai2=find(c.facing_stars,per%9+1);
+  const ding=find(c.mountain,per);
+  const wen=find(c.facing_stars,4)||find(c.mountain,4),wenY=find(ann,4);
+  const yan=GONG8.find(g=>youxing(zhai,g)==='延年');
+  // 逐月預警
+  const msFirst=[8,5,2][yb%3];
+  const MN=['寅月(2月)','卯月(3月)','辰月(4月)','巳月(5月)','午月(6月)','未月(7月)','申月(8月)','酉月(9月)','戌月(10月)','亥月(11月)','子月(12月)','丑月(1月)'];
+  let mwarn='';
+  for(let i=0;i<12;i++){
+    const st2=((msFirst-1-i)%9+9)%9+1;const mch=fly(st2,true);
+    const m5=GONG8.find(p=>mch[p]===5);
+    let w='';
+    if(m5===c.fp)w='⚠五黃到向首,勿修門動土';
+    else if(m5===c.sp)w='⚠五黃到坐山,勿修方';
+    if(w)mwarn+='<div class="row2"><span>'+MN[i]+'</span><b style="color:var(--red)">'+w+'</b></div>';
+  }
+  if(!mwarn)mwarn='<div class="row2"><span>本年逐月</span><b style="color:var(--green)">五黃未犯坐向,無大礙</b></div>';
+  // 家人配位(易卦派)
+  const FAM={'父':'乾','母':'坤','長男':'震','長女':'巽'};
+  let famRows='';
+  for(const[mem,u]of Object.entries(FAM)){
+    const best=GONG8.map(g=>({g,e:(HEX_YG[u+g]||['?','平'])})).filter(x=>x.e[1]==='吉').map(x=>DIRZH[x.g]);
+    const worst=GONG8.map(g=>({g,e:(HEX_YG[u+g]||['?','平'])})).filter(x=>x.e[1]==='凶').map(x=>DIRZH[x.g]);
+    famRows+='<tr><td>'+mem+'</td><td style="color:var(--green)">'+(best.join('、')||'—')+'</td><td style="color:var(--red)">'+(worst.join('、')||'—')+'</td></tr>';
+  }
+  // 渲染
+  let h='<div class="brand"><div><div class="t">全宅健檢總報告</div><div class="s">隨 緣 堂・MASTER FENG SHUI</div></div>'
+    +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&data=https://eason1388.github.io/99999/" width="72" height="72" style="border-radius:8px" alt="QR"></div>'
+    +'<div class="row2"><span>案名</span><b>'+cname+'</b></div>'
+    +'<div class="row2"><span>勘察日期</span><b>'+today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate()+'</b></div>'
+    +'<div class="row2"><span>坐向</span><b>'+sit+'山'+fac+'向('+per+'運)・'+zhai+'宅('+(east.includes(zhai)?'東四宅':'西四宅')+')</b></div>'
+    +'<div class="row2"><span>屋主</span><b>'+by+'年生('+(male?'男':'女')+')・命卦'+mg+'('+(east.includes(mg)?'東四命':'西四命')+')'+(match?' ✓相配':' ⚠不同組')+'</b></div>'
+    // 評分
+    +'<h2>一、綜合評分</h2>'
+    +'<div style="display:flex;align-items:center;gap:14px"><div style="font-family:\'Noto Serif TC\',serif;font-size:44px;font-weight:900;color:var(--gold)">'+score+'<span style="font-size:16px"> 分・'+lv+'</span></div>'
+    +'<div style="font-size:12.5px;flex:1">'+plus.map(p=>'<div style="color:var(--green)">+ '+p+'</div>').join('')+minus.map(p=>'<div style="color:var(--red)">− '+p+'</div>').join('')+'</div></div>'
+    // 飛星盤
+    +'<h2>二、玄空飛星盤('+per+'運'+sit+'山'+fac+'向)</h2>'
+    +'<div class="tag">'+c.pattern+'</div>'+c.gates.map(g=>'<span class="tag '+(g.usable?'good':'')+'">城門'+g.palace+'宮'+(g.usable?'可用':'不可用')+'</span>').join('')
+    +(c.warnings.length?c.warnings.map(w=>'<span class="tag warn">⚠'+w+'</span>').join(''):'')
+    +'<div class="grid9">'+GRID.flat().map(p=>{
+      const a=p==='中'?annS:ann[p];const bad=(a===5||a===2)&&p!=='中';
+      return '<div class="cell'+(p===c.sp?' sit':p===c.fp?' fac':'')+(bad?' bad':'')+'">'
+        +'<div style="opacity:.6">'+(p==='中'?'中宮':DIRZH[p]+'・'+p)+' <span style="float:right;font-size:10px;color:'+(bad?'var(--red)':'#999')+'">年'+a+'</span></div>'
+        +'<b>'+c.mountain[p]+' '+c.facing_stars[p]+'</b>'
+        +(p!=='中'?'<div style="font-size:10.5px;color:'+('生氣天醫延年伏位'.includes(youxing(zhai,p))?'var(--green)':'var(--red)')+'">'+youxing(zhai,p)+'</div>':'<div style="font-size:10px;opacity:.5">立極</div>')+'</div>';}).join('')+'</div>'
+    +'<div class="note">藍框=坐山,紅框=向首,紅底=流年五黃/二黑所臨。格內:山星 向星/八宅遊星/年星。</div>'
+    // 重點宮位
+    +'<h2>三、重點宮位詳斷</h2>'
+    +[['向首(納氣口)',c.fp],['坐山(靠山)',c.sp]].map(([t,p])=>{
+      const m=c.mountain[p],f=c.facing_stars[p];
+      return '<div class="row2"><span>'+t+' '+DIRZH[p]+'</span><b>山'+m+'向'+f+'・'+SN[f].split('・')[0]+'</b></div>'
+      +'<div style="font-size:12.5px;opacity:.8;padding:0 2px 6px">'+SN[m]+';'+SN[f]+'。'+(f===per?'向星當旺,'+(t.includes('向首')?'大門納旺氣,吉。':'坐後有水放光可催財。'):(m===per?'山星當旺,'+(t.includes('坐山')?'後方宜高實,人丁興旺。':'此處宜靜宜實。'):''))+'</div>';}).join('')
+    // 八宅
+    +'<h2>四、八宅遊星八方應用</h2><table><tr><th>方位</th><th>遊星</th><th>應事與建議</th></tr>'
+    +GONG8.map(g=>{const yx=youxing(zhai,g);const ji='生氣天醫延年伏位'.includes(yx);
+      return '<tr><td>'+DIRZH[g]+'</td><td style="color:'+(ji?'var(--green)':'var(--red)')+';font-weight:700">'+yx+'</td><td style="text-align:left">'+YX_APP[yx]+'</td></tr>';}).join('')+'</table>'
+    // 流年
+    +'<h2>五、'+yr+'年流年神煞</h2>'
+    +'<div><span class="tag warn">五黃:'+(g5?DIRZH[g5]:'中宮')+'(忌動土修造)</span><span class="tag warn">二黑:'+(g2?DIRZH[g2]:'中宮')+'(防疾病)</span>'
+    +'<span class="tag warn">太歲:'+BR[ts]+'方宜靜</span><span class="tag warn">歲破:'+BR[sp2]+'方勿動</span><span class="tag warn">三煞:'+[...new Set(shaB)].map(g=>DIRZH[g]).join('')+'</span>'
+    +'<span class="tag good">八白財星:'+DIRZH[GONG8.find(g=>ann[g]===8)]+'</span><span class="tag good">四綠文昌:'+DIRZH[GONG8.find(g=>ann[g]===4)]+'</span></div>'
+    +'<div style="margin-top:6px">'+mwarn+'</div>'
+    // 開運佈局
+    +'<h2>六、開運佈局建議</h2>'
+    +'<div class="row2"><span>💰 主財位</span><b>'+(cai?DIRZH[cai]+'方(向星'+per+'當旺)——明亮整潔,宜水局/收銀/辦公':'—')+'</b></div>'
+    +'<div class="row2"><span>🌱 進氣財位</span><b>'+(cai2?DIRZH[cai2]+'方(生氣星)——綠植長線佈局':'—')+'</b></div>'
+    +'<div class="row2"><span>👶 旺丁位</span><b>'+(ding?DIRZH[ding]+'方(山星'+per+')——主臥床頭設此':'—')+'</b></div>'
+    +'<div class="row2"><span>📖 文昌位</span><b>'+(wen?DIRZH[wen]+'方(四綠到宮)':'—')+(wenY?';流年文昌在'+DIRZH[wenY]:'')+'——書桌首選</b></div>'
+    +'<div class="row2"><span>💞 延年位</span><b>'+(yan?DIRZH[yan]+'方(八宅)——夫妻房、成對擺設':'—')+'</b></div>'
+    // 家人配位
+    +'<h2>七、家人配位建議(易卦派)</h2>'
+    +'<table><tr><th>成員</th><th>吉位(宜睡/坐)</th><th>凶位(避)</th></tr>'+famRows+'</table>'
+    +(HEX_N['坤乾']?'<div style="font-size:12px;color:var(--pur)">☯ 天紀一派:夫妻宜居西北(地天泰);廚房忌西北、西南;東方留房與長子,東南與長女。</div>':'')
+    // 化解
+    +'<h2>八、化解與注意總表</h2>'
+    +'<div class="row2"><span>流年五黃('+(g5?DIRZH[g5]:'中宮')+')</span><b>勿動土;置金屬重物、六帝錢化洩</b></div>'
+    +'<div class="row2"><span>流年二黑('+(g2?DIRZH[g2]:'中宮')+')</span><b>防疾病;金屬葫蘆,保持乾燥明亮</b></div>'
+    +GONG8.filter(g=>youxing(zhai,g)==='絕命'||youxing(zhai,g)==='五鬼').map(g=>'<div class="row2"><span>八宅'+youxing(zhai,g)+'('+DIRZH[g]+')</span><b>忌久坐久臥;宜廁所儲藏或以五行通關化解</b></div>').join('')
+    +(bi>=0&&bi===sp2?'<div class="row2"><span style="color:var(--red)">⚠ 坐山歲破</span><b style="color:var(--red)">本年切忌動土修造!</b></div>':'')
+    // 結尾
+    +'<h2>九、綜合結論</h2>'
+    +'<div style="font-size:13.5px;line-height:1.9">本宅'+sit+'山'+fac+'向,'+per+'運屬「'+c.pattern+'」之局。'
+    +(c.pattern==='旺山旺向'?'坐向皆得旺星,丁財兩旺,格局上乘,善用開運佈局可錦上添花。':
+      c.pattern==='雙星會向'?'旺氣聚於向首,利財;宜門前開陽,並以坐後厚實補丁氣。':
+      c.pattern==='雙星會坐'?'旺氣聚於坐山,利丁;坐後見水放光或明堂開闊可兼旺財。':
+      c.pattern==='上山下水'?'旺星顛倒,選宅宜慎;務必配合巒頭(前高後低反局)補救,並嚴守流年忌方。':
+      '非四大格局,吉凶須逐宮細論,重點在善用財位文昌、避開凶方。')
+    +(match?'屋主命卦與宅同組相配,居之安穩。':'屋主命卦與宅不同組,以個人四吉方(床位、座向)補救即可,毋須過慮。')
+    +'各項佈局以本報告為綱,巒頭形勢仍須現場合參。</div>'
+    +'<div style="border-top:3px double var(--gold2);margin-top:14px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;opacity:.75">本報告由「全能玄學羅盤・隨緣堂」生成<br>詳細諮詢與現場勘察,請洽隨緣堂</div>'
+    +'<div class="s" style="font-family:\'Noto Serif TC\',serif;font-weight:900;color:var(--gold);font-size:18px;letter-spacing:.3em">隨緣堂</div></div>'
+    +'<div class="note">免責:本分析僅供參考,不構成醫療、財務或法律建議。</div>';
+  const r=document.getElementById('report');r.style.display='block';r.innerHTML=h;
+  document.getElementById('printBtn').style.display='inline-block';
+  r.scrollIntoView({behavior:'smooth'});
+  window.fscP&&window.fscP('check','run',sit+'山'+per+'運');
+}
+</script></body></html>
