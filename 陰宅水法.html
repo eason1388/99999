@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>陰宅水法</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6D3F;--gold2:#C9A96A;--ink:#2b2418;--card:#fffdf7;--red:#A63A2E;--green:#4A6B4F;--bg:#f4efe4;--blue:#3E5C76}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold)}
+.box{background:var(--card);border:1px solid #e6dcc3;border-radius:16px;padding:12px 14px;width:min(640px,96vw);box-shadow:0 2px 10px rgba(120,90,40,.08)}
+.chip{border:1px solid var(--gold);border-radius:999px;padding:8px 16px;font-size:15px;cursor:pointer;background:transparent;color:var(--ink)}
+.chip.on{background:var(--gold);color:#fff}
+.mchip{border:1px solid var(--gold2);border-radius:99px;padding:5px 11px;font-size:13px;cursor:pointer;background:#fff;color:var(--ink);margin:2px}
+.mchip.come{background:rgba(74,107,79,.85);color:#fff;border-color:var(--green)}
+.mchip.go{background:rgba(62,92,118,.85);color:#fff;border-color:var(--blue)}
+select{padding:8px 10px;border:1.5px solid var(--gold2);border-radius:12px;background:#fff;color:var(--ink);font-size:14.5px}
+h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:10px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+th,td{border:1px solid #e0d5ba;padding:4px 5px;text-align:center}
+th{background:#f2ead6}
+.tag{display:inline-block;border-radius:99px;padding:1px 10px;font-size:12px;margin:1px 3px 1px 0;background:#f2ead6;color:#6b5427}
+.tag.warn{background:rgba(166,58,46,.12);color:var(--red)}
+.tag.good{background:rgba(74,107,79,.12);color:var(--green)}
+.row2{display:flex;justify-content:space-between;gap:10px;padding:4px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13.5px}
+.note{font-size:12px;opacity:.65;margin-top:6px}
+</style></head><body>
+<h1>⛰ 陰宅水法</h1>
+<div class="box">
+<div style="display:flex;gap:8px;margin-bottom:8px">
+ <button class="chip on" id="tSanhe">三合十二長生水法</button>
+ <button class="chip" id="tLongmen">龍門八局(乾坤國寶)</button>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+ <span style="font-size:13.5px">坐山:</span><select id="sit"></select>
+ <span id="juInfo" style="font-size:13.5px;color:var(--gold);font-weight:700"></span>
+</div>
+<div style="margin-top:8px;font-size:13px">點選<b style="color:var(--green)">來水</b>與<b style="color:var(--blue)">去水(水口)</b>方位(可複選來水;點一下=來水,再點=去水,三點=取消):</div>
+<div id="dirChips" style="margin-top:4px"></div>
+</div>
+<div class="box" id="out"></div>
+<div class="note" style="max-width:620px">三合依《地理五訣》雙山起長生;龍門八局先天/後天/賓/客位以先後天八卦互求。天劫、地刑之歸屬與庫池位各師承有異(標△處待師承校正),重大立向請專業複核;巒頭形勢、水之屈曲有情仍為首要。</div>
+<script>
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+// 十二雙山(地支為首)
+const SS=[['壬','子'],['癸','丑'],['艮','寅'],['甲','卯'],['乙','辰'],['巽','巳'],['丙','午'],['丁','未'],['坤','申'],['庚','酉'],['辛','戌'],['乾','亥']];
+const SSN=SS.map(p=>p[0]+p[1]);
+const BR='子丑寅卯辰巳午未申酉戌亥';
+const DIR12=['北','北北東','東北','東','東南東','東南','南','南南西','西南','西','西北西','西北'];
+// 四大局:以水口(去水)雙山定局;無水口時以向上三合五行定局
+// 水口在 乙辰巽巳丙午=水局(長生申) 丁未坤申庚酉=木局(長生亥) 辛戌乾亥壬子=火局(長生寅) 癸丑艮寅甲卯=金局(長生巳)
+const JU_BY_KOU={4:'水',5:'水',6:'水',7:'木',8:'木',9:'木',10:'火',11:'火',0:'火',1:'金',2:'金',3:'金'};
+const SHENG={'水':8,'木':11,'火':2,'金':5}; // 長生所在雙山index(申亥寅巳)
+const STAGE=['長生','沐浴','冠帶','臨官','帝旺','衰','病','死','墓','絕','胎','養'];
+const COME_TXT={'長生':['吉','貴人第一吉水:人丁大旺,忠孝賢良'],'沐浴':['凶','桃花水:主淫亂、賭蕩破家'],
+'冠帶':['吉','文章水:子孫聰明好學,利科甲'],'臨官':['吉','祿水:功名財祿,少年得志'],
+'帝旺':['吉','旺水:大富大貴,田產豐盛'],'衰':['平','衰方水來,平和;主聰明晚發,可用'],
+'病':['凶','病水:疾病纏綿,藥碗不斷'],'死':['凶','死水:損丁孤寡'],
+'墓':['凶','墓水來:退敗財產、訟獄(宜去不宜來)'],'絕':['凶','絕水:人丁不旺,防絕嗣'],
+'胎':['凶','胎水:主墮胎小產,人丁不安'],'養':['吉','養水同生:小吉,蔭人丁']};
+const GO_TXT={'長生':['凶','沖破生方:敗絕人丁,大凶'],'沐浴':['吉','桃花去:去淫去蕩,吉'],
+'冠帶':['凶','沖破冠帶:傷聰明幼子,損文貴'],'臨官':['凶','沖破臨官:傷成材之子,損功名,大凶'],
+'帝旺':['凶','沖破旺方:大敗財產'],'衰':['平','衰方去水,可'],
+'病':['吉','病方去:去病消災,吉'],'死':['吉','死方去:吉'],
+'墓':['吉','墓庫正竅:財歸庫,大吉'],'絕':['吉','絕方去:吉'],
+'胎':['平','胎方去:可,唯防人丁'],'養':['凶','沖破養方:同破生,損幼丁']};
+// 龍門八局:先天/後天/賓/客(以先後天八卦互求),案劫三方、輔卦
+const HOUTIAN={'坎':'北','艮':'東北','震':'東','巽':'東南','離':'南','坤':'西南','兌':'西','乾':'西北'};
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const GONG8=['坎','艮','震','巽','離','坤','兌','乾'];
+const palaceOf=m=>GONG8.find(p=>PAL_M[p].includes(m));
+// 先天八卦方位(卦→方位) 乾南 坤北 離東 坎西 震東北 巽西南 艮西北 兌東南
+const XT_POS={'乾':'離','坤':'坎','離':'震','坎':'兌','震':'艮','巽':'坤','艮':'乾','兌':'巽'};
+// XT_POS[X]=X在先天圖所處方位之「後天卦」→ 先天位
+// 後天位=先天圖中位於坐山方位之卦,其後天方位:
+const XT_AT={'離':'乾','坎':'坤','震':'離','兌':'坎','艮':'震','坤':'巽','乾':'艮','巽':'兌'};
+// XT_AT[後天方位卦]=該方位在先天圖上的卦 → 該卦之後天位即後天位
+const OPP={'坎':'離','離':'坎','震':'兌','兌':'震','艮':'坤','坤':'艮','乾':'巽','巽':'乾'};
+const ADJ={'坎':['乾','艮'],'艮':['坎','震'],'震':['艮','巽'],'巽':['震','離'],'離':['巽','坤'],'坤':['離','兌'],'兌':['坤','乾'],'乾':['兌','坎']};
+function longmen(sitPal){
+  const facPal=OPP[sitPal];
+  const xian=XT_POS[sitPal];                 // 先天位
+  const hou=HTpos(XT_AT[sitPal]);            // 後天位
+  const bin=XT_POS[facPal];                  // 賓位(向之先天)
+  const ke=HTpos(XT_AT[facPal]);             // 客位(向之後天)
+  const anJie=facPal;                        // 案劫(向首)
+  const jie=ADJ[facPal];                     // 天劫/地刑(向首左右,歸屬依派)
+  const used=new Set([xian,hou,bin,ke,anJie,...jie,sitPal]);
+  const fu=GONG8.filter(g=>!used.has(g));    // 輔卦位
+  return{xian,hou,bin,ke,anJie,jie,fu};
+}
+function HTpos(gua){return gua} // 卦之後天位即其本卦方位
+// ── UI ──
+const sitSel=document.getElementById('sit');
+for(const m of M24){const o=document.createElement('option');o.value=m;o.textContent=m+'山'+M24[(M24.indexOf(m)+12)%24]+'向';sitSel.appendChild(o)}
+sitSel.value='子';
+let modeT='sanhe';
+document.getElementById('tSanhe').onclick=()=>{modeT='sanhe';swap();render()};
+document.getElementById('tLongmen').onclick=()=>{modeT='longmen';swap();render()};
+function swap(){document.getElementById('tSanhe').classList.toggle('on',modeT==='sanhe');
+  document.getElementById('tLongmen').classList.toggle('on',modeT==='longmen');}
+// 方位籤:0=無 1=來水 2=去水
+let marks=Array(12).fill(0);
+function drawChips(){
+  const el=document.getElementById('dirChips');el.innerHTML='';
+  SSN.forEach((n,i)=>{const b=document.createElement('button');
+    b.className='mchip'+(marks[i]===1?' come':marks[i]===2?' go':'');
+    b.textContent=n+(marks[i]===1?'▲來':marks[i]===2?'▼去':'');
+    b.onclick=()=>{marks[i]=(marks[i]+1)%3;drawChips();render();
+      window.fscP&&window.fscP('water','mark',n+':'+marks[i]);};
+    el.appendChild(b);});
+}
+drawChips();
+sitSel.onchange=render;
+function render(){
+  const sit=sitSel.value,fac=M24[(M24.indexOf(sit)+12)%24];
+  const comes=marks.map((v,i)=>v===1?i:-1).filter(i=>i>=0);
+  const goes=marks.map((v,i)=>v===2?i:-1).filter(i=>i>=0);
+  let h='';
+  if(modeT==='sanhe'){
+    // 定局:優先以水口;無水口用向上雙山三合
+    let ju=null,src='';
+    if(goes.length){ju=JU_BY_KOU[goes[0]];src='依水口('+SSN[goes[0]]+')定局';}
+    else{
+      const fi=SS.findIndex(p=>p.includes(fac)||p.includes(M24[(M24.indexOf(sit)+12)%24]));
+      const fb=BR.indexOf(fac)>=0?BR.indexOf(fac):BR.indexOf(SS[fi][1]);
+      const tri={0:'水',4:'水',8:'水',2:'火',6:'火',10:'火',5:'金',9:'金',1:'金',11:'木',3:'木',7:'木'}[fb];
+      ju=tri;src='未標水口,暫依向上三合('+fac+'向)定局;請點選去水方更準';
+    }
+    document.getElementById('juInfo').textContent=ju+'局(長生在'+SSN[SHENG[ju]]+')';
+    const sh=SHENG[ju];
+    h+='<h2>三合十二長生水法・'+sit+'山'+fac+'向・'+ju+'局</h2>'
+      +'<div class="note" style="margin:0 0 6px">'+src+'。長生自'+SSN[sh]+'起,順行十二雙山。</div>'
+      +'<table><tr><th>雙山</th><th>方位</th><th>十二宮</th><th>來水斷</th><th>去水斷</th></tr>'
+      +SS.map((p,i)=>{
+        const st=STAGE[((i-sh)%12+12)%12];
+        const c=COME_TXT[st],g=GO_TXT[st];
+        const mk=marks[i]===1?'▲':marks[i]===2?'▼':'';
+        return '<tr'+(marks[i]?' style="background:'+(marks[i]===1?'rgba(74,107,79,.1)':'rgba(62,92,118,.1)')+'"':'')+'>'
+          +'<td><b>'+SSN[i]+'</b>'+mk+'</td><td>'+DIR12[i]+'</td><td><b>'+st+'</b></td>'
+          +'<td style="text-align:left;color:'+(c[0]==='吉'?'var(--green)':c[0]==='凶'?'var(--red)':'inherit')+'">'+c[0]+'・'+c[1]+'</td>'
+          +'<td style="text-align:left;color:'+(g[0]==='吉'?'var(--green)':g[0]==='凶'?'var(--red)':'inherit')+'">'+g[0]+'・'+g[1]+'</td></tr>';}).join('')
+      +'</table>';
+    // 針對已點選的來去水總判
+    if(comes.length||goes.length){
+      h+='<h2>本局來去水總判</h2>';
+      for(const i of comes){const st=STAGE[((i-sh)%12+12)%12];const c=COME_TXT[st];
+        h+='<div class="row2"><span>▲ 來水 '+SSN[i]+'('+st+')</span><b style="color:'+(c[0]==='吉'?'var(--green)':c[0]==='凶'?'var(--red)':'inherit')+'">'+c[1]+'</b></div>';}
+      for(const i of goes){const st=STAGE[((i-sh)%12+12)%12];const g=GO_TXT[st];
+        h+='<div class="row2"><span>▼ 去水 '+SSN[i]+'('+st+')</span><b style="color:'+(g[0]==='吉'?'var(--green)':g[0]==='凶'?'var(--red)':'inherit')+'">'+g[1]+'</b></div>';}
+      const badC=comes.filter(i=>COME_TXT[STAGE[((i-sh)%12+12)%12]][0]==='凶').length;
+      const badG=goes.filter(i=>GO_TXT[STAGE[((i-sh)%12+12)%12]][0]==='凶').length;
+      h+='<div style="margin-top:6px">'+(badC+badG===0?'<span class="tag good">來去水皆合局,格局清純 ✓</span>':'<span class="tag warn">有'+(badC+badG)+'處犯水法,宜改門路水路或另擇向</span>')+'</div>';
+    }
+  }else{
+    const sitPal=palaceOf(sit),lm=longmen(sitPal);
+    document.getElementById('juInfo').textContent=sitPal+'卦局';
+    const F=g=>HOUTIAN[g]+'('+PAL_M[g]+')';
+    h+='<h2>龍門八局・坐'+sitPal+'('+sit+'山'+fac+'向)</h2>'
+      +'<table><tr><th>位</th><th>方位(雙山)</th><th>水法要訣</th></tr>'
+      +'<tr><td style="color:var(--green);font-weight:700">先天位</td><td>'+F(lm.xian)+'</td><td style="text-align:left">水朝來→<b>旺人丁</b>;流破(去水)→損丁絕嗣,大忌</td></tr>'
+      +'<tr><td style="color:var(--green);font-weight:700">後天位</td><td>'+F(lm.hou)+'</td><td style="text-align:left">水朝來→<b>旺妻財</b>;流破→損妻破財,大忌</td></tr>'
+      +'<tr><td>賓位</td><td>'+F(lm.bin)+'</td><td style="text-align:left">水來蔭女兒、外姓、女婿;來去皆可</td></tr>'
+      +'<tr><td>客位</td><td>'+F(lm.ke)+'</td><td style="text-align:left">水來蔭外孫、旁系人緣;來去皆可</td></tr>'
+      +'<tr><td style="color:var(--red);font-weight:700">案劫(向首)</td><td>'+F(lm.anJie)+'</td><td style="text-align:left">忌直沖來水(藥碗水),宜案山秀麗、水聚天心</td></tr>'
+      +'<tr><td style="color:var(--red);font-weight:700">天劫/地刑△</td><td>'+lm.jie.map(F).join('・')+'</td><td style="text-align:left">向首左右二卦:<b>忌來水</b>,主損丁病訟;何者為天劫依師承△</td></tr>'
+      +(lm.fu.length?'<tr><td>輔卦位</td><td>'+lm.fu.map(F).join('・')+'</td><td style="text-align:left">平,水靜緩則吉</td></tr>':'')
+      +'<tr><td>坐山(玄武)</td><td>'+F(sitPal)+'</td><td style="text-align:left">宜靠實;拜堂水繞玄武須屈曲有情</td></tr>'
+      +'</table>'
+      +'<div class="note">庫池(財庫)位各師承取法不一(△待校正);正竅出水口須合局,先後天水切不可流破。</div>';
+    // 檢核已點選
+    if(comes.length||goes.length){
+      h+='<h2>來去水檢核</h2>';
+      const zone=i=>palaceOf(SS[i][0])||palaceOf(SS[i][1]);
+      const judge=(i,isCome)=>{
+        const z=palaceOf(SS[i][1]);
+        if(z===lm.xian)return isCome?['吉','先天水來,旺人丁']:['凶','流破先天,損丁,大忌!'];
+        if(z===lm.hou)return isCome?['吉','後天水來,旺妻財']:['凶','流破後天,損妻破財,大忌!'];
+        if(z===lm.bin)return isCome?['平','賓位水來,蔭女兒外姓']:['平','賓位去水,可'];
+        if(z===lm.ke)return isCome?['平','客位水來,蔭外孫人緣']:['平','客位去水,可'];
+        if(z===lm.anJie)return isCome?['凶','案劫直沖來水,主病藥不斷']:['平','向上出水須成正竅,依師承定'];
+        if(lm.jie.includes(z))return isCome?['凶','天劫/地刑方來水,主損丁病訟,大忌']:['平','劫刑方去水,可'];
+        if(z===palaceOf(sit))return isCome?['平','玄武水,須屈曲有情']:['凶','水破玄武,主敗'];
+        return isCome?['平','輔卦水來,平吉']:['平','輔卦去水,可'];
+      };
+      for(const i of comes){const[j,t]=judge(i,true);
+        h+='<div class="row2"><span>▲ 來水 '+SSN[i]+'</span><b style="color:'+(j==='吉'?'var(--green)':j==='凶'?'var(--red)':'inherit')+'">'+t+'</b></div>';}
+      for(const i of goes){const[j,t]=judge(i,false);
+        h+='<div class="row2"><span>▼ 去水 '+SSN[i]+'</span><b style="color:'+(j==='吉'?'var(--green)':j==='凶'?'var(--red)':'inherit')+'">'+t+'</b></div>';}
+    }
+  }
+  document.getElementById('out').innerHTML=h;
+}
+render();
+window.fscP&&window.fscP('water','open','init');
+</script></body></html>
