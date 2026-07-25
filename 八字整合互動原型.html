@@ -23,7 +23,7 @@ td.gz{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:700}
 .score{font-family:"Noto Serif TC",serif;font-size:44px;font-weight:700;color:var(--gold);text-align:center}
 .item{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0;border-bottom:1px dashed #ddd}
 .note{font-size:11.5px;opacity:.55;margin-top:6px;line-height:1.5}
-.dy{display:inline-block;text-align:center;margin:3px;padding:5px 8px;background:#fff;border-radius:10px;font-size:13px}
+.dy{display:inline-block;text-align:center;margin:3px;padding:5px 8px;background:#fff;border-radius:10px;font-size:13px;border:1.5px solid #e6dcc3;line-height:1.35}
 .dy b{font-family:"Noto Serif TC",serif;display:block;font-size:17px}
 </style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet"><style>
 *{-webkit-tap-highlight-color:transparent}
@@ -46,7 +46,13 @@ button{font-family:inherit}
 <div class="panel">
   <div class="box"><h2>四柱命盤</h2><table id="pillars"></table>
     <div id="strength" style="margin-top:8px"></div><div id="verdict"></div>
-    <h2 style="margin-top:10px">大運 <span id="dyInfo" style="font-size:12px;opacity:.6"></span></h2><div id="dayun"></div></div>
+    <div id="naYin" style="margin-top:6px"></div>
+    <h2 style="margin-top:10px">格局・用神</h2><div id="geju"></div>
+    <h2 style="margin-top:10px">刑沖合害</h2><div id="xingchong"></div>
+    <h2 style="margin-top:10px">神煞</h2><div id="shensha"></div>
+    <h2 style="margin-top:10px">大運 <span id="dyInfo" style="font-size:12px;opacity:.6"></span></h2><div id="dayun"></div>
+    <h2 style="margin-top:10px">流年運勢 <input id="lnYear" type="number" style="width:80px;padding:3px 6px;border:1px solid var(--gold2);border-radius:8px"></h2><div id="liunian"></div>
+    <h2 style="margin-top:10px">性格與六親</h2><div id="xingge"></div></div>
   <div class="box"><h2>八字×風水整合評分</h2>
     房屋:<select id="period"></select> 運
     <select id="sit"></select> 山
@@ -258,6 +264,166 @@ function heHun(){
    +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('');
 }
 document.getElementById('hhBtn').onclick=heHun;
+// ═══ 專業強化模組 ═══
+// ── 納音六十甲子 ──
+const NAYIN=['海中金','爐中火','大林木','路旁土','劍鋒金','山頭火','澗下水','城頭土','白蠟金','楊柳木','泉中水','屋上土','霹靂火','松柏木','長流水','沙中金','山下火','平地木','壁上土','金箔金','覆燈火','天河水','大驛土','釵釧金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+const nayinOf=i=>NAYIN[Math.floor((((i%60)+60)%60)/2)];
+// ── 調候用神(窮通寶鑑・日主×月令)──
+const TIAOHOU={
+'甲':['丙癸','庚丙丁戊','庚丁壬','癸丁庚','癸丁庚','癸丁庚','庚丁壬','庚丁丙','庚甲丁壬','庚丁丙戊','丁庚丙','丁庚丙'],
+'乙':['丙癸','丙癸','癸丙戊','癸','癸丙','癸丙','丙癸己','癸丙丁','癸辛','丙戊','丙','丙'],
+'丙':['壬庚','壬己','壬甲','壬庚癸','壬庚','壬庚','壬戊','壬癸','甲壬','甲戊庚壬','壬戊己','壬甲'],
+'丁':['甲庚','庚甲','甲庚','甲庚','壬庚癸','甲壬庚','甲庚丙戊','甲庚丙戊','甲庚戊','甲庚','甲庚','甲庚'],
+'戊':['丙甲癸','丙甲癸','甲丙癸','甲丙癸','壬甲丙','癸丙甲','丙癸甲','丙癸','甲丙癸','甲丙','丙甲','丙甲'],
+'己':['丙庚甲','甲癸丙','丙癸甲','癸丙','癸丙','癸丙','丙癸','丙癸','甲丙癸','丙甲戊','丙甲戊','丙甲戊'],
+'庚':['丙甲壬','丁甲庚丙','甲丁壬癸','壬戊丙丁','壬癸','丁甲','丁甲','丁甲丙','甲壬','丁丙','丁甲丙','丙丁甲'],
+'辛':['己壬庚','壬甲','壬甲','壬甲癸','壬己癸','壬庚甲','壬甲戊','壬甲','壬甲','壬丙','丙壬戊','丙壬戊'],
+'壬':['庚丙戊','戊辛庚','甲庚','壬辛庚癸','癸庚辛','辛甲','戊丁','甲庚','甲丙','戊丙庚','戊丙','丙丁甲'],
+'癸':['辛丙','庚辛','丙辛甲','辛','庚壬癸','庚辛壬癸','丁','辛丙','辛甲壬癸','庚辛戊丁','丙辛','丙丁']};
+// ── 神煞 ──
+const TIANYI={'甲':'丑未','戊':'丑未','庚':'丑未','乙':'子申','己':'子申','丙':'亥酉','丁':'亥酉','壬':'卯巳','癸':'卯巳','辛':'午寅'};
+const WENCHANG={'甲':'巳','乙':'午','丙':'申','丁':'酉','戊':'申','己':'酉','庚':'亥','辛':'子','壬':'寅','癸':'卯'};
+const YANGREN={'甲':'卯','丙':'午','戊':'午','庚':'酉','壬':'子'};
+const LUSHEN={'甲':'寅','乙':'卯','丙':'巳','戊':'巳','丁':'午','己':'午','庚':'申','辛':'酉','壬':'亥','癸':'子'};
+const JINYU={'甲':'辰','乙':'巳','丙':'未','丁':'申','戊':'未','己':'申','庚':'戌','辛':'亥','壬':'丑','癸':'寅'};
+const HONGYAN={'甲':'午','乙':'午','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申'};
+const TIANDE=['丁','申','壬','辛','亥','甲','癸','寅','丙','乙','巳','庚']; // 寅月起
+const YUEDE_TRI={'寅午戌':'丙','申子辰':'壬','亥卯未':'甲','巳酉丑':'庚'};
+const TRI_GROUP={'申子辰':{tao:'酉',ma:'寅',hua:'辰',jiang:'子',jie:'巳',wang:'亥'},
+'寅午戌':{tao:'卯',ma:'申',hua:'戌',jiang:'午',jie:'亥',wang:'巳'},
+'巳酉丑':{tao:'午',ma:'亥',hua:'丑',jiang:'酉',jie:'寅',wang:'申'},
+'亥卯未':{tao:'子',ma:'巳',hua:'未',jiang:'卯',jie:'申',wang:'寅'}};
+const GUCHEN={'亥子丑':['寅','戌'],'寅卯辰':['巳','丑'],'巳午未':['申','辰'],'申酉戌':['亥','未']};
+const SS_TXT={'天乙貴人':'最尊之吉神,逢凶化吉、遇難呈祥,一生多得貴人提攜',
+'文昌貴人':'聰明好學、利考試文書,主才華與名聲','太極貴人':'好玄學宗教、有始有終',
+'天德貴人':'德蔭深厚,遇險有救,心性慈善','月德貴人':'福德綿長,得長輩庇蔭,少病災',
+'桃花':'人緣佳、異性緣強;過多則主風流情困','驛馬':'主奔波遷動、外出發展、利遠行貿易',
+'華蓋':'聰慧孤高、喜哲學藝術宗教;主孤獨、易離群索居','將星':'領導統御之才,宜掌權管眾',
+'羊刃':'性剛烈果決、有魄力;主刑傷破財、忌與人爭強','祿神':'衣祿豐足、自立自強,身健有實力',
+'金輿':'主富貴安逸、得配偶之助,利乘車行動','紅豔煞':'風情外露、異性糾葛,感情宜守分',
+'劫煞':'主破財意外、小人暗算,行事宜謹慎','亡神':'主城府深沉、心機重;失意破耗',
+'孤辰':'主孤獨、與六親緣薄','寡宿':'主孤寡、感情易孤單','空亡':'該柱之事易落空、成中有敗;宜實務不宜投機'};
+function shenSha(p){
+  const dS=ST[p.day%10],yS=ST[p.year%10];
+  const zs=[BR[p.year%12],BR[p.month%12],BR[p.day%12],BR[p.hour%12]];
+  const names=['年','月','日','時'];
+  const out=[];
+  const add=(nm,pos)=>{if(pos.length)out.push([nm,pos.join('、')])};
+  add('天乙貴人',zs.map((b,i)=>TIANYI[dS].includes(b)||TIANYI[yS].includes(b)?names[i]:null).filter(Boolean));
+  add('文昌貴人',zs.map((b,i)=>b===WENCHANG[dS]?names[i]:null).filter(Boolean));
+  add('祿神',zs.map((b,i)=>b===LUSHEN[dS]?names[i]:null).filter(Boolean));
+  if(YANGREN[dS])add('羊刃',zs.map((b,i)=>b===YANGREN[dS]?names[i]:null).filter(Boolean));
+  add('金輿',zs.map((b,i)=>b===JINYU[dS]?names[i]:null).filter(Boolean));
+  add('紅豔煞',zs.map((b,i)=>b===HONGYAN[dS]?names[i]:null).filter(Boolean));
+  // 天德月德(依月支)
+  const mi=(p.month%12-2+12)%12;
+  const td=TIANDE[mi];
+  if(ST.includes(td)){if([ST[p.year%10],ST[p.month%10],ST[p.day%10],ST[p.hour%10]].includes(td))out.push(['天德貴人','天干見'+td]);}
+  else if(zs.includes(td))out.push(['天德貴人','支見'+td]);
+  const mb=BR[p.month%12];
+  for(const[k,v]of Object.entries(YUEDE_TRI))if(k.includes(mb)&&[ST[p.year%10],ST[p.month%10],ST[p.day%10],ST[p.hour%10]].includes(v))out.push(['月德貴人','天干見'+v]);
+  // 三合系(以年支與日支各取)
+  for(const base of [BR[p.year%12],BR[p.day%12]]){
+    for(const[k,g]of Object.entries(TRI_GROUP)){
+      if(!k.includes(base))continue;
+      const tag=(base===BR[p.year%12]?'年支':'日支')+'起';
+      const p1=zs.map((b,i)=>b===g.tao?names[i]:null).filter(Boolean);if(p1.length)out.push(['桃花',tag+':'+p1.join('、')]);
+      const p2=zs.map((b,i)=>b===g.ma?names[i]:null).filter(Boolean);if(p2.length)out.push(['驛馬',tag+':'+p2.join('、')]);
+      const p3=zs.map((b,i)=>b===g.hua?names[i]:null).filter(Boolean);if(p3.length)out.push(['華蓋',tag+':'+p3.join('、')]);
+      const p4=zs.map((b,i)=>b===g.jiang?names[i]:null).filter(Boolean);if(p4.length)out.push(['將星',tag+':'+p4.join('、')]);
+      const p5=zs.map((b,i)=>b===g.jie?names[i]:null).filter(Boolean);if(p5.length)out.push(['劫煞',tag+':'+p5.join('、')]);
+      const p6=zs.map((b,i)=>b===g.wang?names[i]:null).filter(Boolean);if(p6.length)out.push(['亡神',tag+':'+p6.join('、')]);
+      break;
+    }
+  }
+  // 孤辰寡宿(年支)
+  for(const[k,v]of Object.entries(GUCHEN)){if(k.includes(BR[p.year%12])){
+    const a=zs.map((b,i)=>b===v[0]?names[i]:null).filter(Boolean);if(a.length)out.push(['孤辰',a.join('、')]);
+    const b2=zs.map((b,i)=>b===v[1]?names[i]:null).filter(Boolean);if(b2.length)out.push(['寡宿',b2.join('、')]);
+  }}
+  // 空亡(依日柱旬)
+  const xun=Math.floor(p.day/10)*10;
+  const kb=[BR[(xun+10)%12],BR[(xun+11)%12]];
+  const kv=zs.map((b,i)=>kb.includes(b)?names[i]:null).filter(Boolean);
+  if(kv.length)out.push(['空亡',kv.join('、')+'柱('+kb.join('')+')']);
+  // 去重
+  const seen={},res=[];
+  for(const[n,v]of out){if(seen[n]){seen[n].push(v)}else{seen[n]=[v];res.push(n)}}
+  return res.map(n=>[n,[...new Set(seen[n])].join(' / ')]);
+}
+// ── 格局判定(月令取格)──
+const GE_TXT={'正官格':'品行端正、重名譽責任,宜公職管理;忌傷官見官','七殺格':'魄力果斷、能任壓力,宜武職競爭行業;須食神制殺或印化',
+'正財格':'務實勤儉、理財有道,宜穩健經商;身弱不勝財則勞碌','偏財格':'慷慨善交際、財來財去,宜投資業務;桃花財氣並見',
+'食神格':'溫和有涵養、口福才藝佳,宜文教餐飲;最忌梟印奪食','傷官格':'聰明才華外露、不受拘束,宜技藝創作;傷官見官為禍(除傷官配印/生財)',
+'正印格':'仁厚好學、得長輩庇蔭,宜學術文教;印重則依賴懶散','偏印格(梟)':'思維獨特、偏門專技,宜玄學技術;梟奪食則多疑孤剋',
+'建祿格':'自立自強、白手成家,不靠祖蔭;宜有財官為用','羊刃格':'剛猛有魄力、能擔大事;宜殺刃相濟,忌刑沖太重'};
+function geju(p,st){
+  const mB=BR[p.month%12],dmS=p.day%10;
+  const hid=HID[mB];
+  const stems=[p.year%10,p.month%10,p.hour%10].map(i=>ST[i]);
+  let benqi=hid[0][0],透=null,which='';
+  for(const[hs,w]of hid){if(stems.includes(hs)){透=hs;which=(w===hid[0][1]?'本氣':'中餘氣');break}}
+  const use=透||benqi;
+  const god=tenGod(dmS,ST.indexOf(use));
+  let ge;
+  if(god==='比肩')ge='建祿格';else if(god==='劫財')ge='羊刃格';
+  else if(god==='正官')ge='正官格';else if(god==='七殺')ge='七殺格';
+  else if(god==='正財')ge='正財格';else if(god==='偏財')ge='偏財格';
+  else if(god==='食神')ge='食神格';else if(god==='傷官')ge='傷官格';
+  else if(god==='正印')ge='正印格';else ge='偏印格(梟)';
+  const th=TIANEHOU_get(ST[dmS],(p.month%12-2+12)%12);
+  return{ge,use,god,透:透?('月令'+use+which+'透干'):('月令本氣'+benqi+'不透,以本氣論格'),th};
+}
+function TIANEHOU_get(dm,mi){return (TIAOHOU[dm]||[])[mi]||''}
+// ── 刑沖合害 ──
+const LIUHE={'子':'丑','丑':'子','寅':'亥','亥':'寅','卯':'戌','戌':'卯','辰':'酉','酉':'辰','巳':'申','申':'巳','午':'未','未':'午'};
+const LIUCHONG={'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
+const LIUHAI={'子':'未','未':'子','丑':'午','午':'丑','寅':'巳','巳':'寅','卯':'辰','辰':'卯','申':'亥','亥':'申','酉':'戌','戌':'酉'};
+const TG_HE={'甲':'己','己':'甲','乙':'庚','庚':'乙','丙':'辛','辛':'丙','丁':'壬','壬':'丁','戊':'癸','癸':'戊'};
+const TG_CHONG={'甲':'庚','庚':'甲','乙':'辛','辛':'乙','丙':'壬','壬':'丙','丁':'癸','癸':'丁'};
+const HE_HUA={'甲己':'土','乙庚':'金','丙辛':'水','丁壬':'木','戊癸':'火'};
+const SANHE=[['申子辰','水'],['寅午戌','火'],['巳酉丑','金'],['亥卯未','木']];
+const SANHUI=[['寅卯辰','木'],['巳午未','火'],['申酉戌','金'],['亥子丑','水']];
+function xingChong(p){
+  const names=['年','月','日','時'];
+  const ss=[ST[p.year%10],ST[p.month%10],ST[p.day%10],ST[p.hour%10]];
+  const bs=[BR[p.year%12],BR[p.month%12],BR[p.day%12],BR[p.hour%12]];
+  const out=[];
+  for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
+    if(TG_HE[ss[i]]===ss[j])out.push(['合','天干',names[i]+ss[i]+'合'+names[j]+ss[j],'化'+(HE_HUA[ss[i]+ss[j]]||HE_HUA[ss[j]+ss[i]])+';主情義相牽、合則有情']);
+    if(TG_CHONG[ss[i]]===ss[j])out.push(['沖','天干',names[i]+ss[i]+'沖'+names[j]+ss[j],'主意見相左、變動不安']);
+    if(LIUHE[bs[i]]===bs[j])out.push(['合','地支六合',names[i]+bs[i]+'合'+names[j]+bs[j],'和合有情,主人緣助力;過多則牽絆']);
+    if(LIUCHONG[bs[i]]===bs[j])out.push(['沖','地支六沖',names[i]+bs[i]+'沖'+names[j]+bs[j],
+      (i===0&&j===2)?'年日相沖:與長輩緣薄、婚姻多波折':(i===1&&j===3)?'月時相沖:中晚年變動、與子女聚少':'主動盪遷移、宮位所主之事不安']);
+    if(LIUHAI[bs[i]]===bs[j])out.push(['害','六害',names[i]+bs[i]+'害'+names[j]+bs[j],'主暗損、六親不和,恩中招怨']);
+  }
+  // 三合三會
+  for(const[k,wx]of SANHE){const idx=[...k].map(c=>bs.indexOf(c));
+    if(idx.every(x=>x>=0))out.push(['合','三合局',k+'合'+wx+'局','三合成局,'+wx+'氣大盛,主此五行之事得力']);
+    else{const two=[...k].filter(c=>bs.includes(c));if(two.length===2&&(two.includes(k[1])))out.push(['合','半合',two.join('')+'半合'+wx,'半合有情,'+wx+'氣增強']);}}
+  for(const[k,wx]of SANHUI){const idx=[...k].map(c=>bs.indexOf(c));
+    if(idx.every(x=>x>=0))out.push(['合','三會方',k+'會'+wx+'方','三會成方,'+wx+'氣極旺']);}
+  // 三刑自刑
+  const has=c=>bs.includes(c);
+  if(has('寅')&&has('巳')&&has('申'))out.push(['刑','三刑','寅巳申','無恩之刑:主恩將仇報、官非傷病']);
+  else{if(has('寅')&&has('巳'))out.push(['刑','相刑','寅刑巳','主是非傷病']);if(has('巳')&&has('申'))out.push(['刑','相刑','巳刑申','刑中帶合,主先合後傷']);}
+  if(has('丑')&&has('戌')&&has('未'))out.push(['刑','三刑','丑戌未','恃勢之刑:主刑傷官訟、朋友反目']);
+  else{if(has('丑')&&has('戌'))out.push(['刑','相刑','丑刑戌','主爭執損財']);if(has('戌')&&has('未'))out.push(['刑','相刑','戌刑未','主親友失和']);}
+  if(has('子')&&has('卯'))out.push(['刑','相刑','子卯刑','無禮之刑:主家庭失和、禮數有失']);
+  for(const z of ['辰','午','酉','亥'])if(bs.filter(b=>b===z).length>=2)out.push(['刑','自刑',z+z+'自刑','主自我矛盾、自尋煩惱']);
+  return out;
+}
+// ── 十神性格與六親 ──
+const TEN_TXT={'比肩':['自主獨立、意志堅定,重朋友義氣;主兄弟同輩、競爭對手','過旺則固執己見、剋妻破財、合夥易生糾紛'],
+'劫財':['積極好勝、行動力強,善交際;主兄弟姊妹、合作者','過旺則投機爭奪、破財損妻,慎防人情借貸'],
+'食神':['溫和寬厚、有口福才藝、生活享受;女命主子女、男命主晚輩','過旺則懶散好逸、不切實際'],
+'傷官':['才華洋溢、創意十足、不服拘束;女命主子女、主表現慾','過旺則傲慢犯上、口舌是非,女命傷夫星'],
+'偏財':['慷慨大方、善交際理財、機會財多;主父親、男命偏妻','過旺則風流破耗、財來財去留不住'],
+'正財':['勤儉務實、腳踏實地、正財可守;男命主妻子、主固定收入','過旺(身弱)則財多身弱、為錢勞碌'],
+'七殺':['果斷有魄力、能扛壓力、開創力強;主上司壓力、女命主情人','過旺無制則暴躁孤剋、多災傷官非'],
+'正官':['正直守法、負責自律、名譽為重;女命主丈夫、主職位官貴','過旺則保守拘謹、壓力自縛'],
+'偏印':['思維獨到、直覺敏銳、偏門專技(玄學醫藝);主繼母長輩','過旺則多疑孤僻、梟神奪食主福薄'],
+'正印':['仁慈厚道、好學有涵養、貴人多助;主母親、學歷名聲','過旺則依賴懶惰、優柔寡斷']};
 function render(){
   const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
   const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
@@ -287,9 +453,83 @@ function render(){
   if(!fw&&tj>p.J)tj=termJdn(jy-1,jieLon);
   const age0=Math.abs(p.J-tj)/3;
   document.getElementById('dyInfo').textContent=(fw?'順排':'逆排')+' · 約 '+age0.toFixed(1)+' 歲起運';
-  document.getElementById('dayun').innerHTML=[...Array(8)].map((_,k)=>{
-    const idx=((p.month+(fw?k+1:-(k+1)))%60+60)%60;
-    return '<span class="dy"><b>'+gz(idx)+'</b>'+(age0+k*10).toFixed(0)+'歲</span>'}).join('');
+  const dyList=[...Array(8)].map((_,k)=>({gzi:((p.month+(fw?k+1:-(k+1)))%60+60)%60,age:age0+k*10}));
+  const nowY=new Date().getFullYear(),curAge=nowY-Y;
+  document.getElementById('dayun').innerHTML=dyList.map((d,k)=>{
+    const cur=curAge>=d.age&&curAge<d.age+10;
+    const tg=tenGod(dmS,d.gzi%10);
+    const fav=st.favor.includes(WX[d.gzi%10]);
+    return '<span class="dy"'+(cur?' style="background:var(--gold);color:#fff;font-weight:700"':fav?' style="border-color:var(--green)"':'')+'>'
+      +'<b>'+gz(d.gzi)+'</b>'+d.age.toFixed(0)+'歲<br><span style="font-size:10px;opacity:.75">'+tg+(fav?' ✓喜':'')+'</span></span>'}).join('');
+  // ═══ 專業區塊 ═══
+  // 納音
+  document.getElementById('naYin').innerHTML='<span class="tag">年納音 '+nayinOf(p.year)+'</span><span class="tag">日納音 '+nayinOf(p.day)+'</span>'
+    +'<span class="tag">'+(BR[p.month%12])+'月生</span>';
+  // 格局・調候
+  const gj=geju(p,st);
+  document.getElementById('geju').innerHTML=
+    '<div style="font-family:\'Noto Serif TC\',serif;font-size:19px;color:var(--gold);font-weight:700">'+gj.ge+'</div>'
+    +'<div style="font-size:12.5px;opacity:.7;margin-bottom:4px">'+gj.透+'</div>'
+    +'<div style="font-size:13.5px;line-height:1.8">'+(GE_TXT[gj.ge]||'')+'</div>'
+    +(gj.th?'<div style="margin-top:6px;padding:6px 9px;background:rgba(201,169,106,.18);border-left:3px solid var(--gold);border-radius:0 8px 8px 0">'
+      +'<b>調候用神:'+[...gj.th].join('、')+'</b><div style="font-size:12.5px;opacity:.8">'+ST[dmS]+'日主生於'+BR[p.month%12]+'月,依《窮通寶鑑》取此為調候之神——命中有此字(或大運流年逢之)則寒暖燥濕得宜,一生順遂;全無則多勞碌不得志。</div></div>':'')
+    +'<div style="font-size:12.5px;margin-top:4px">扶抑喜用:<b>'+(st.favor.join('、')||'中和,取調候為主')+'</b>　忌神:<b style="color:var(--red)">'+(st.verdict==='身強'?[WX[dmS],'木火土金水'[('木火土金水'.indexOf(WX[dmS])+4)%5]].join('、'):st.verdict==='身弱'?['木火土金水'[('木火土金水'.indexOf(WX[dmS])+1)%5],'木火土金水'[('木火土金水'.indexOf(WX[dmS])+2)%5],'木火土金水'[('木火土金水'.indexOf(WX[dmS])+3)%5]].join('、'):'—')+'</b></div>';
+  // 刑沖合害
+  const xc=xingChong(p);
+  document.getElementById('xingchong').innerHTML=xc.length?xc.map(([k,t,a,d])=>
+    '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13px">'
+    +'<span class="tag '+(k==='合'?'good':'warn')+'" style="flex-shrink:0">'+k+'</span>'
+    +'<div><b>'+a+'</b> <span style="opacity:.6;font-size:11.5px">'+t+'</span><br><span style="font-size:12.5px;opacity:.85">'+d+'</span></div></div>').join('')
+    :'<div style="font-size:13px;opacity:.7">四柱無明顯刑沖合害,格局清純安穩。</div>';
+  // 神煞
+  const ssL=shenSha(p);
+  document.getElementById('shensha').innerHTML=ssL.length?ssL.map(([n,pos])=>{
+    const good='天乙貴人文昌貴人天德貴人月德貴人祿神金輿將星'.includes(n);
+    return '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13px">'
+    +'<span class="tag '+(good?'good':'warn')+'" style="flex-shrink:0;min-width:74px;text-align:center">'+n+'</span>'
+    +'<div><span style="opacity:.65;font-size:11.5px">'+pos+'</span><br><span style="font-size:12.5px">'+(SS_TXT[n]||'')+'</span></div></div>'}).join('')
+    :'<div style="font-size:13px;opacity:.7">無明顯神煞。</div>';
+  // 流年運勢
+  const lnIn=document.getElementById('lnYear');
+  if(!lnIn.value)lnIn.value=nowY;
+  lnIn.onchange=()=>render();
+  const ly=+lnIn.value||nowY;
+  const lgz=((ly-1984)%60+60)%60;
+  const lS=ST[lgz%10],lB=BR[lgz%12];
+  const lTen=tenGod(dmS,lgz%10);
+  const lFav=st.favor.includes(WX[lgz%10]);
+  const dyNow=dyList.filter(d=>ly-Y>=d.age).pop();
+  const bsArr=[BR[p.year%12],BR[p.month%12],BR[p.day%12],BR[p.hour%12]];
+  const pn=['年柱(祖上少年)','月柱(父母事業)','日柱(自身配偶)','時柱(子女晚年)'];
+  const inter=[];
+  bsArr.forEach((b,i)=>{
+    if(LIUCHONG[b]===lB)inter.push(['沖','流年'+lB+'沖'+pn[i]+b,'該宮之事動盪:'+(i===2?'夫妻感情、健康須留意':i===0?'長輩、根基變動':i===1?'工作事業變動、搬遷':'子女、居所變動')]);
+    if(LIUHE[b]===lB)inter.push(['合','流年'+lB+'合'+pn[i]+b,'該宮有情:'+(i===2?'利感情婚姻、合作':'人事和合、機會來')]);
+    if(LIUHAI[b]===lB)inter.push(['害','流年'+lB+'害'+pn[i]+b,'該宮暗損,防小人與是非']);
+  });
+  if(TG_HE[ST[dmS]]===lS)inter.push(['合','流年'+lS+'合日主','主有牽絆羈絆、易受人情左右;亦主機緣']);
+  if(TG_CHONG[ST[dmS]]===lS)inter.push(['沖','流年'+lS+'剋沖日主','壓力增大、易衝動,宜守不宜攻']);
+  if(lB===BR[p.year%12])inter.push(['值','流年值太歲(本命年)','犯太歲之年,宜安不宜動;可安太歲、行善積福']);
+  if(LIUCHONG[BR[p.year%12]]===lB)inter.push(['沖','流年沖太歲(歲破)','變動最大之年,忌重大投資與婚喪動土']);
+  document.getElementById('liunian').innerHTML=
+    '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+    +'<b style="font-family:\'Noto Serif TC\',serif;font-size:20px;color:var(--gold)">'+ly+' '+lS+lB+'年</b>'
+    +'<span class="tag '+(lFav?'good':'')+'">流年十神:'+lTen+(lFav?' ✓喜用':'')+'</span>'
+    +(dyNow?'<span class="tag">現行大運 '+gz(dyNow.gzi)+'('+dyNow.age.toFixed(0)+'歲起)</span>':'')+'</div>'
+    +'<div style="font-size:13.5px;line-height:1.8;margin:4px 0">'+(TEN_TXT[lTen]?'本年'+lTen+'當令:'+TEN_TXT[lTen][0].split(';')[0]+'之事顯現。'+(lFav?'此為喜用之年,宜積極把握、開展新局。':'此非喜用,宜守成蓄勢、避免躁進。'):'')+'</div>'
+    +(inter.length?inter.map(([k,a,d])=>'<div style="display:flex;gap:8px;padding:3px 0;font-size:12.5px"><span class="tag '+(k==='合'?'good':'warn')+'" style="flex-shrink:0">'+k+'</span><div><b>'+a+'</b><br><span style="opacity:.85">'+d+'</span></div></div>').join('')
+      :'<div style="font-size:12.5px;opacity:.7">流年與四柱無明顯刑沖,本年平順。</div>');
+  // 性格與六親
+  const tgAll=[[p.year%10,'年干'],[p.month%10,'月干'],[p.hour%10,'時干']].map(([s,w])=>[tenGod(dmS,s),w]);
+  const cnt={};tgAll.forEach(([g])=>cnt[g]=(cnt[g]||0)+1);
+  HID[BR[p.month%12]].forEach(([hs])=>{const g=tenGod(dmS,ST.indexOf(hs));cnt[g]=(cnt[g]||0)+0.5});
+  const main=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  document.getElementById('xingge').innerHTML=main.map(([g,n])=>
+    '<div style="padding:5px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
+    +'<b style="color:var(--gold)">'+g+'</b> <span style="font-size:11.5px;opacity:.6">力量 '+n+'</span>'
+    +'<div style="font-size:13px;line-height:1.75">'+(TEN_TXT[g]?TEN_TXT[g][0]:'')+'</div>'
+    +(n>=2?'<div style="font-size:12px;color:var(--red)">⚠ '+(TEN_TXT[g]?TEN_TXT[g][1]:'')+'</div>':'')+'</div>').join('')
+    +'<div class="note">十神力量以天干現身+月令藏干計;性格取前三主導星,實斷仍須合參格局、調候與大運。</div>';
   // 整合評分
   const per=+document.getElementById('period').value, sitM=document.getElementById('sit').value;
   const house=xkChart(per,sitM);
