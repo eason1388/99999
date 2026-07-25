@@ -42,7 +42,7 @@ select{padding:7px 9px;border:1.5px solid var(--gold2);border-radius:10px;backgr
 <button class="chip" id="resetBtn" style="display:none;margin-top:6px">↺ 重新起卦</button>
 </div>
 <div class="box" id="result" style="display:none"></div>
-<div class="note" style="max-width:540px">卦爻辭為《周易》通行本原文;吉凶提示與白話僅供參考,重大決策請洽隨緣堂詳斷。占卦貴誠,一事不二問。</div>
+<div class="note" style="max-width:540px">卦爻辭為《周易》通行本原文;吉凶提示與白話僅供參考,重大決策請洽抱朴隨緣堂詳斷。占卦貴誠,一事不二問。</div>
 <script>
 // ── 周易六十四卦 卦辭+爻辭(通行本原文;乾坤含用九用六)──
 const ZY={
@@ -291,7 +291,7 @@ function finish(){
   // 天紀層
   if(key&&HEX_N[key])h+='<div class="sec"><b style="color:var(--pur)">【天紀(倪海廈)一派參考】</b><div style="font-size:13.5px;line-height:1.8">'+HEX_N[key]+'</div></div>';
   if(key&&HEX_N2[key])h+='<div class="sec"><b style="color:var(--pur)">【人間道深解】</b><div style="font-size:13.5px;line-height:1.8">'+HEX_N2[key]+'</div></div>';
-  h+='<div class="note">變占法依朱熹《易學啟蒙》;卦爻辭為通行本原文。欲詳斷流年應期、用神喜忌,請洽隨緣堂。</div>';
+  h+='<div class="note">變占法依朱熹《易學啟蒙》;卦爻辭為通行本原文。欲詳斷流年應期、用神喜忌,請洽抱朴隨緣堂。</div>';
   const r=document.getElementById('result');r.style.display='block';r.innerHTML=h;
   r.scrollIntoView({behavior:'smooth'});
   window.fscP&&window.fscP('coin','result',ben.n+(nMov?'之'+bian.n:''));

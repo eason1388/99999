@@ -173,7 +173,7 @@ function run(){
     famRows+='<tr><td>'+mem+'</td><td style="color:var(--green)">'+(best.join('、')||'—')+'</td><td style="color:var(--red)">'+(worst.join('、')||'—')+'</td></tr>';
   }
   // 渲染
-  let h='<div class="brand"><div><div class="t">全宅健檢總報告</div><div class="s">隨 緣 堂・MASTER FENG SHUI</div></div>'
+  let h='<div class="brand"><div><div class="t">全宅健檢總報告</div><div class="s">抱 朴 隨 緣 堂・MASTER FENG SHUI</div></div>'
     +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&data=https://eason1388.github.io/99999/" width="72" height="72" style="border-radius:8px" alt="QR"></div>'
     +'<div class="row2"><span>案名</span><b>'+cname+'</b></div>'
     +'<div class="row2"><span>勘察日期</span><b>'+today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate()+'</b></div>'
@@ -238,8 +238,8 @@ function run(){
     +(match?'屋主命卦與宅同組相配,居之安穩。':'屋主命卦與宅不同組,以個人四吉方(床位、座向)補救即可,毋須過慮。')
     +'各項佈局以本報告為綱,巒頭形勢仍須現場合參。</div>'
     +'<div style="border-top:3px double var(--gold2);margin-top:14px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
-    +'<div style="font-size:12px;opacity:.75">本報告由「全能玄學羅盤・隨緣堂」生成<br>詳細諮詢與現場勘察,請洽隨緣堂</div>'
-    +'<div class="s" style="font-family:\'Noto Serif TC\',serif;font-weight:900;color:var(--gold);font-size:18px;letter-spacing:.3em">隨緣堂</div></div>'
+    +'<div style="font-size:12px;opacity:.75">本報告由「全能玄學羅盤・抱朴隨緣堂」生成<br>詳細諮詢與現場勘察,請洽抱朴隨緣堂</div>'
+    +'<div class="s" style="font-family:\'Noto Serif TC\',serif;font-weight:900;color:var(--gold);font-size:18px;letter-spacing:.3em">抱朴隨緣堂</div></div>'
     +'<div class="note">免責:本分析僅供參考,不構成醫療、財務或法律建議。</div>';
   const r=document.getElementById('report');r.style.display='block';r.innerHTML=h;
   document.getElementById('printBtn').style.display='inline-block';
