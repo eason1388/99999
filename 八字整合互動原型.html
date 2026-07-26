@@ -41,7 +41,12 @@ button{font-family:inherit}
 <div style="margin-bottom:8px">
   出生 <input id="bd" type="date" value="1990-08-15"> <input id="bt" type="time" value="14:30">
   <select id="sex"><option value="1">男</option><option value="0">女</option></select>
-  <span style="font-size:13px">(當地時間,+8;真太陽時 v2)</span>
+</div>
+<div style="margin-bottom:8px;font-size:13px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+  出生地 <select id="city"></select>
+  經度 <input id="lon" type="number" step="0.01" value="121.52" style="width:88px">°E
+  <label style="display:flex;align-items:center;gap:3px"><input type="checkbox" id="useTST" checked>用真太陽時</label>
+  <span id="tstInfo" style="color:var(--gold);font-weight:700"></span>
 </div>
 <div class="panel">
   <div class="box"><h2>四柱命盤</h2><table id="pillars"></table>
@@ -93,9 +98,22 @@ function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.242
   for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
   return jd}
 const gzi=(s,b)=>((6*s-5*b)%60+60)%60, gz=i=>ST[i%10]+BR[i%12];
-function fourPillars(Y,M,D,h){
-  const J=jdn(Y,M,D)+(h-12)/24-8/24; // 當地(+8)→UTC:節氣判界須用世界時
-  let civ=jdn(Y,M,D); if(h>=23)civ+=1;
+// ── 真太陽時:均時差(NOAA 公式,誤差 <0.1 分)+ 經度時差 ──
+function eqTime(Y,M,D,h){
+  const N=jdn(Y,M,D)-jdn(Y,1,1);                       // 年內日序(0起)
+  const g=2*Math.PI/365*(N+(h-12)/24);
+  return 229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)
+        -0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g)); // 分鐘
+}
+function trueSolar(Y,M,D,h,lon){
+  const eot=eqTime(Y,M,D,h);
+  const lonMin=4*(lon-120);            // 每度 4 分鐘(+8 時區標準經線 120°E)
+  return{h:h+(lonMin+eot)/60, eot, lonMin, total:lonMin+eot};
+}
+function fourPillars(Y,M,D,h,hT){
+  if(hT===undefined)hT=h;
+  const J=jdn(Y,M,D)+(h-12)/24-8/24; // 當地(+8)→UTC:節氣判界須用世界時(用鐘錶時)
+  let civ=jdn(Y,M,D); if(hT>=23)civ+=1; else if(hT<0)civ-=1;
   const day=((civ-11)%60+60)%60;
   const lc=termJdn(Y,315);
   const sui=(J>=lc)?Y:Y-1;
@@ -103,7 +121,8 @@ function fourPillars(Y,M,D,h){
   const lon=sunLon(J,Y);
   const mi=Math.floor(((lon-315)%360+360)%360/30);
   const mB=(mi+2)%12, mS=((year%10)%5*2+2+mi)%10;
-  const hB=Math.floor((h+1)/2)%12, hS=((day%10)%5*2+hB)%10;
+  const hn=((hT%24)+24)%24;
+  const hB=Math.floor((hn+1)/2)%12, hS=((day%10)%5*2+hB)%10;
   return {year,month:gzi(mS,mB),day,hour:gzi(hS,hB),sui,mi,J}
 }
 const tenGod=(d,o)=>{const rel=((('木火土金水'.indexOf(WX[o]))-('木火土金水'.indexOf(WX[d])))%5+5)%5;
@@ -192,7 +211,11 @@ function heHun(){
   const[Y2,M2,D2]=document.getElementById('bd2').value.split('-').map(Number);
   const[h2,n2]=document.getElementById('bt2').value.split(':').map(Number);
   const male2=document.getElementById('sex2').value==='1';
-  const pA=fourPillars(Y1,M1,D1,h1+n1/60),pB=fourPillars(Y2,M2,D2,h2+n2/60);
+  const _lonH=+((document.getElementById('lon')||{}).value)||120;
+  const _useT=(document.getElementById('useTST')||{}).checked;
+  const _hA=h1+n1/60,_hB2=h2+n2/60;
+  const pA=fourPillars(Y1,M1,D1,_hA,_useT?trueSolar(Y1,M1,D1,_hA,_lonH).h:_hA),
+        pB=fourPillars(Y2,M2,D2,_hB2,_useT?trueSolar(Y2,M2,D2,_hB2,_lonH).h:_hB2);
   // 指定佳偶:男1975-07-16卯時(5-7時) × 女1976-11-24辰時(7-9時),或對調
   const _hit=(a,ma,b,mb)=>a[0]===1975&&a[1]===7&&a[2]===16&&a[3]>=5&&a[3]<7&&ma&&
                           b[0]===1976&&b[1]===11&&b[2]===24&&b[3]>=7&&b[3]<9&&!mb;
@@ -424,11 +447,33 @@ const TEN_TXT={'比肩':['自主獨立、意志堅定,重朋友義氣;主兄弟�
 '正官':['正直守法、負責自律、名譽為重;女命主丈夫、主職位官貴','過旺則保守拘謹、壓力自縛'],
 '偏印':['思維獨到、直覺敏銳、偏門專技(玄學醫藝);主繼母長輩','過旺則多疑孤僻、梟神奪食主福薄'],
 '正印':['仁慈厚道、好學有涵養、貴人多助;主母親、學歷名聲','過旺則依賴懶惰、優柔寡斷']};
+// 常用出生地經度
+const CITIES=[['臺北',121.52],['新北',121.47],['基隆',121.74],['桃園',121.30],['新竹',120.97],['苗栗',120.82],
+['臺中',120.68],['彰化',120.54],['南投',120.69],['雲林',120.53],['嘉義',120.45],['臺南',120.21],
+['高雄',120.30],['屏東',120.49],['宜蘭',121.75],['花蓮',121.60],['臺東',121.15],['澎湖',119.57],
+['金門',118.32],['香港',114.17],['澳門',113.54],['北京',116.40],['上海',121.47],['廣州',113.26],
+['新加坡',103.85],['吉隆坡',101.69],['東京',139.69]];
+(function(){const c=document.getElementById('city');
+  CITIES.forEach(([n,l])=>{const o=document.createElement('option');o.value=l;o.textContent=n;c.appendChild(o)});
+  c.value='121.52';
+  c.onchange=()=>{document.getElementById('lon').value=c.value;render()};
+  document.getElementById('lon').onchange=()=>render();
+  document.getElementById('useTST').onchange=()=>render();})();
 function render(){
   const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
   const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
   const male=document.getElementById('sex').value==='1';
-  const p=fourPillars(Y,M,D,h+mn/60);
+  const hClock=h+mn/60;
+  const lon=+document.getElementById('lon').value||120;
+  const useT=document.getElementById('useTST').checked;
+  const ts=trueSolar(Y,M,D,hClock,lon);
+  const hUse=useT?ts.h:hClock;
+  const fmt=x=>{const hh=Math.floor(((x%24)+24)%24),mm=Math.round((x-Math.floor(x))*60);
+    return String(hh).padStart(2,'0')+':'+String(((mm%60)+60)%60).padStart(2,'0')};
+  document.getElementById('tstInfo').innerHTML=useT
+    ?('真太陽時 '+fmt(ts.h)+' <span style="font-weight:400;opacity:.7;font-size:12px">(經度差'+ts.lonMin.toFixed(1)+'分 + 均時差'+ts.eot.toFixed(1)+'分 = '+(ts.total>=0?'+':'')+ts.total.toFixed(1)+'分)</span>')
+    :'<span style="font-weight:400;opacity:.7;font-size:12px">未校正(用鐘錶時);真太陽時應為 '+fmt(ts.h)+'</span>';
+  const p=fourPillars(Y,M,D,hClock,hUse);
   const dmS=p.day%10;
   const cols=[['年柱',p.year],['月柱',p.month],['日柱',p.day],['時柱',p.hour]];
   document.getElementById('pillars').innerHTML=
