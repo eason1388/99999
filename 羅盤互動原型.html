@@ -23,7 +23,9 @@ html{scroll-behavior:smooth}
 }
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .panel{animation:fin .35s ease both}
-#wrap{position:relative;touch-action:none}
+#wrap{position:relative}
+/* 直向滑動交給瀏覽器捲頁,橫向/繞圈才轉盤——避免整塊羅盤變成捲不動的死區 */
+#cv{touch-action:pan-y}
 canvas{display:block;cursor:grab}
 #big{font-family:'Noto Serif TC',serif;font-weight:900;font-size:56px;font-variant-numeric:tabular-nums;min-height:62px;margin-top:6px;color:#fff;line-height:1.1;text-align:center}
 #title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:40px;color:var(--gold);text-align:center;letter-spacing:.12em;margin-top:2px}
@@ -412,7 +414,11 @@ function showCard(kind,arg){
 let dragging=false,lastA=null,moved=0;
 const pos=e=>{const b=cv.getBoundingClientRect();return[(e.clientX??e.touches[0].clientX)-b.left-W/2,(e.clientY??e.touches[0].clientY)-b.top-W/2]};
 const ang=e=>{const[x,y]=pos(e);return Math.atan2(y,x)*180/Math.PI};
-cv.addEventListener('pointerdown',e=>{dragging=true;moved=0;lastA=ang(e);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointerdown',e=>{dragging=true;moved=0;lastA=ang(e);
+  try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+// 瀏覽器接手捲動時會發 pointercancel,必須解除拖曳狀態,否則卡住不動
+cv.addEventListener('pointercancel',()=>{dragging=false;lastA=null});
+cv.addEventListener('lostpointercapture',()=>{dragging=false;lastA=null});
 cv.addEventListener('pointermove',e=>{if(!dragging)return;const a=ang(e);let d=a-lastA;if(d>180)d-=360;if(d<-180)d+=360;
   moved+=Math.abs(d);heading=((heading-d)%360+360)%360;lastA=a;drawFast();updateLight();fullDebounce()});
 cv.addEventListener('pointerup',e=>{dragging=false;

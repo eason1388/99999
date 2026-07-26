@@ -13,8 +13,9 @@
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;display:flex;flex-direction:column}
-/* iOS Safari:100% 會被底部工具列蓋住,改用動態視口高度 */
-@supports(height:100dvh){html,body{height:100dvh}}
+/* iOS Safari:用 svh(最小視口)固定高度——dvh 會在捲動時隨網址列伸縮而重排,導致捲動卡住 */
+@supports(height:100svh){html,body{height:100svh}}
+#stage,iframe{overscroll-behavior:contain}
 header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:var(--dark);color:#E8E2D6;flex:none;padding-top:max(12px,env(safe-area-inset-top))}
 .logo{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-weight:900;color:var(--gold2);font-size:17px;flex:none}
 .brand{font-family:'Noto Serif TC',serif;font-weight:900;font-size:17px;letter-spacing:.12em;white-space:nowrap}
@@ -28,7 +29,7 @@ iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;ba
 iframe.on{display:block;animation:fin .28s ease}
 @keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .mcard{animation:fin .45s ease both}
-#home{position:absolute;inset:0;overflow:auto;padding:0 0 90px}
+#home{position:absolute;inset:0;overflow:auto;padding:0 0 90px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .hero{background:linear-gradient(160deg,var(--dark) 0%,#2a2318 100%);color:#E8E2D6;text-align:center;padding:46px 20px 40px}
 .hero h2{font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;letter-spacing:.14em;color:var(--gold2)}
 .hero p{margin-top:12px;font-size:14px;line-height:1.9;opacity:.75;max-width:520px;margin-left:auto;margin-right:auto}
