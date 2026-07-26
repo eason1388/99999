@@ -12,18 +12,28 @@ input,select{padding:7px 9px;border:1.5px solid var(--gold2);border-radius:10px;
 .big{background:var(--gold);color:#fff;border:0;border-radius:12px;padding:10px 20px;font-size:15.5px;font-weight:700;cursor:pointer}
 h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:10px 0 8px}
 /* 命盤 4x4 */
-#chart{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(96px,auto));gap:3px;margin-top:6px}
-.pal{background:#fff;border:1px solid #e0d5ba;border-radius:8px;padding:3px 4px;font-size:10.5px;position:relative;overflow:hidden}
-.pal.ming{border:2px solid var(--gold);background:rgba(201,169,106,.12)}
-.pal.shen{box-shadow:inset 0 0 0 2px rgba(62,92,118,.45)}
-.pal.daxian{background:rgba(74,107,79,.1)}
-.pal .zhu{font-weight:700;font-size:12.5px;color:var(--ink);line-height:1.3}
-.pal .aux{color:#6b5427;line-height:1.3}
-.pal .sha{color:var(--red);line-height:1.3}
-.pal .ft{position:absolute;bottom:2px;left:4px;right:4px;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px}
-.pal .gname{font-weight:700;color:var(--gold);font-size:11.5px}
-.pal .gz{color:#8a8072}
-.pal .dx{color:var(--green);font-size:9.5px}
+#chart{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(132px,auto));gap:2px;margin-top:6px}
+.pal{background:#fff;border:1px solid #d8ccae;border-radius:6px;padding:2px 3px;font-size:10px;position:relative;display:flex;flex-direction:column}
+.pal.ming{border:2px solid var(--gold);background:rgba(201,169,106,.1)}
+.pal.shen::after{content:'身';position:absolute;top:2px;right:2px;background:var(--blue);color:#fff;font-size:8px;padding:0 3px;border-radius:3px}
+.pal.daxian{background:rgba(74,107,79,.09)}
+/* 星曜:每顆星一直行(星名直書+亮度+四化) */
+.stars{display:flex;flex-wrap:wrap;align-items:flex-start;gap:1px;min-height:52px}
+.star{display:inline-block;text-align:center;line-height:1.02;width:11px;flex:none}
+.star .nm{font-size:10.5px;font-weight:700;letter-spacing:-.5px}
+.star .br{font-size:8px;opacity:.6;display:block;margin-top:1px}
+.star.zhu .nm{color:#1a1510}
+.star.ji .nm{color:#1d6b3f}
+.star.sha .nm{color:#c0392b}
+.star.za .nm{color:#9b9384;font-weight:500;font-size:9.5px}
+.star .hb{display:block;font-size:8px;font-weight:700;color:#fff;border-radius:2px;margin-top:1px;line-height:1.25}
+.nums{font-size:7.5px;color:#a49b8c;line-height:1.3;margin-top:auto}
+.shen12{font-size:8px;color:#8fa3b5;line-height:1.25}
+.palft{display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;margin-top:1px;border-top:1px solid #efe7d4;padding-top:1px}
+.pal .gname{font-weight:700;color:var(--red);font-size:11px}
+.pal .gz{color:#6b6153;font-size:10px;font-weight:700}
+.pal .dx{color:var(--green);font-size:10px;font-weight:700}
+.pal .cs{color:#8a7fa8;font-size:8.5px}
 .center{grid-column:2/4;grid-row:2/4;background:#fffdf7;border:1px solid var(--gold2);border-radius:10px;padding:8px;font-size:12px;line-height:1.75}
 .hua{display:inline-block;border-radius:3px;padding:0 3px;font-size:9.5px;font-weight:700;margin-left:1px;color:#fff}
 .hua.lu{background:var(--green)}.hua.quan{background:#c9944a}.hua.ke{background:var(--blue)}.hua.ji{background:var(--red)}
@@ -164,6 +174,60 @@ const STAR_TXT={
 '七殺':'將星,肅殺果斷、獨立開創、行動派;宜軍警業務創業,一生起伏大、宜動不宜靜',
 '破軍':'耗星,破舊立新、衝勁十足、不守成規;宜開創變革之業,主變動破耗、先破後立'};
 const HUA_TXT={'祿':'得財順遂、機會來','權':'掌權能幹、增強勢','科':'名聲貴人、逢凶解','忌':'執著阻礙、宜化解'};
+// ═══ 十四主星 × 十二宮 深論(序:命兄夫子財疾遷僕官田福父)═══
+const SG={
+'紫微':['尊貴自重、領導慾強,喜見輔弼昌曲成「君臣慶會」主大貴;獨坐無輔為「孤君」,志高而助少,易剛愎自用','兄弟中有能者、地位高於己,易受手足主導;相處宜以禮不宜爭鋒','配偶條件優越、個性強勢有主見,宜晚婚;夫妻易爭主導權,能敬則久','子女聰明高貴、早熟有主張,將來有出息;親子間敬多於親,易有尊卑距離','財源尊貴穩定,宜大機構、公職、管理財;錢財來得體面,不宜偏財投機','主脾胃與頭部,體質尚佳而易犯慢性消化道、壓力型病症;宜規律作息','出外受敬重、得貴人扶持,在外比在家吃得開;宜遠地或大都會發展','交友層次高、多識有力人士;然部屬易恃才凌上,用人須держ分寸','事業格局大,宜居決策管理之位;公職、大企業、自營掌權皆宜,不宜屈居人下','家宅氣派、能置高級房產,祖業可承;住所宜高不宜低、宜正不宜偏','享受慾高、重生活品質與精神地位;自視高不易滿足,老來重名聲','父母有地位、家教嚴,受庇蔭亦受管束;與父母敬重多於親暱'],
+'天機':['心思機巧善變、企劃力強,一生多動少靜;宜五術、企劃、幕僚,不安於現狀易換跑道','兄弟聰明多智但緣分較淡,聚少離多;可為智囊不可共財','配偶機敏善謀、心思細膩,感情多變化;宜年齡差距或動中求穩','子女聰慧靈動、多才多藝,不易管束;宜引導不宜壓制','財來財去、動中生財,宜以智取財、佣金企劃;不宜死守固定收入','主肝膽神經、四肢,易失眠焦慮神經衰弱;忌思慮過度','一生驛動、出外多變,宜外出求財;搬遷旅行機會多','朋友多為聰明善謀之士,交往流動性大;易因謀劃事而聚散','事業多變動、宜動態企劃研究之業;忌一成不變之工作,常有轉職念頭','家宅多變動、常搬遷或改裝;不動產進出頻繁,難久守一處','思慮多、閒不下來,興趣廣泛;精神易緊繃,宜修心靜坐','父母聰明、與父母互動多而聚少;易離鄉背井'],
+'太陽':['熱心博愛、光明磊落、不計回報,好面子重名聲;廟旺主貴、落陷則勞而少功且傷父星','兄弟中有豪爽熱心者,樂於相助;然易付出多回報少','配偶熱情大方、事業心重;男命妻能幹,女命夫忙碌顧家少','子女活潑外向、有領導才;主男丁,與子女緣厚而聚少','財來自名聲與付出,宜公開、服務、教育之業;主散財、不宜守財','主眼目、心血管、頭部,血壓與眼疾須留意;落陷更甚','出外貴顯得名、宜外地發展或涉外工作;動中得利','朋友眾多、廣結善緣,常為朋友付出;施恩不望報,亦易被利用','事業宜光明公開之業:公職、教育、傳媒、醫療、政治;主名不主利','家宅明亮開闊為宜,住所宜向陽;不動產不宜過度置產','熱心公益、精神生活豐富;好動不耐靜,晚年宜修養','父緣深厚(廟旺)或父早別離勞碌(落陷);主父星,受父影響大'],
+'武曲':['剛毅果決、執行力強、重承諾,不擅言辭;宜金融軍警財經,女命剛強獨立、感情較晚成','兄弟性剛耿直,可共事不易共情;財務往來須明算','配偶剛強務實、不善柔情,晚婚為宜;宜相敬如賓、忌硬碰硬','子女個性剛強獨立、不易親近;宜以理服人','正財星,善理財聚財,宜實業金融;財自辛勞中得,不宜投機','主肺與呼吸道、金屬外傷;宜防刀傷手術','出外求財有成、宜遠行經商;動中生財、勞而有獲','朋友多剛直務實之人,交淺言深者少;宜以誠信相交','事業宜財經、金融、軍警、機械、五金、外科;主實務執行不主空談','能置產守產、田宅豐厚;宜實質資產不宜虛擬投資','個性剛不易放鬆、享受少;宜培養柔性興趣調和','父母嚴厲剛直、少言關懷;與父母情深而表達少'],
+'天同':['福星,溫和樂天、有口福享受、心性善良;缺開創衝勁,逢煞反能激發成器','兄弟和氣融洽、感情佳;彼此依賴而助力有限','配偶溫柔體貼、重感情享受;婚姻和諧但易安逸','子女乖巧可愛、福厚;親子關係融洽,勿過度溺愛','財源平順、不缺花用,主享受之財;不宜大富追求,守成即安','主膀胱腎與情緒,易水腫、內分泌失調;心寬體胖','出外平安順遂、易得人助;旅遊享受之機多','朋友多性情中人、和氣相處;交友重感覺不重利害','事業宜服務、餐飲、休閒、文教、社福;不宜高壓競爭之業','家宅安逸舒適、居住品質佳;不動產得來平順','福厚享受、心境平和、興趣廣泛;晚年安樂,唯忌太過安逸','父母慈祥和藹、疼愛有加;受父母福蔭深'],
+'廉貞':['個性複雜、能公能私、外圓內剛,善企劃公關;見煞則感情糾葛、官非是非,守正則成大器','兄弟關係複雜、有親有疏;易因利益生變','配偶個性強、感情濃烈多轉折;易有波瀾,需經營','子女個性複雜早熟、有才藝;管教須恩威並用','財來自交際企劃、偏門機巧;正偏財兼有,見煞防因財涉訟','主血液、心臟、婦科;見煞防手術意外','出外多交際應酬、人際複雜;宜謹言慎行','朋友三教九流、人脈廣而雜;宜擇友,防小人','事業宜公關、企劃、業務、演藝、電子;能開創亦能守成','家宅裝潢講究、住所人來人往;不動產有進出','情感豐富、慾望多元、精神起伏大;宜修身養性','父母個性強、關係時親時疏;受父母影響深'],
+'天府':['庫星,穩重保守、善守成理財、有格局器度;能守不能攻,喜見祿存化祿實庫,逢空庫則虛有其表','兄弟穩重可靠、能互相扶持;手足和睦有助力','配偶顧家穩重、善理財;婚姻穩定,主內有方','子女乖巧穩重、將來有成;能守家業','財庫豐厚、善積蓄,宜穩健理財置產;財來平穩不主暴發','主脾胃消化,飲食過度易生積滯;體質中和','出外平順、得長輩助;不宜大冒險,穩中求進','朋友多穩重之士、交往長久;得友之助有實質','事業宜財務、行政、管理、金融、地產;主守成經營不主開創','田宅豐厚、能置產守產,住宅寬敞;祖業可承','衣食無憂、享受安穩;心性寬厚,晚年福厚','父母慈愛且有家業;受父母庇蔭多'],
+'太陰':['富星、母星,溫柔細膩、重感情、有藝術品味;夜生人尤佳,落陷則多愁善感、勞心;男命得女助','姐妹緣深、感情細膩;易受兄弟姊妹之情牽動','配偶溫柔美麗、體貼顧家;感情深而細膩,忌多疑','子女乖巧貼心、多女兒緣;親子情深','財星主富,宜不動產、財務、女性市場;財來細水長流、宜積蓄','主腎、眼、婦科與內分泌;女命尤須留意經期與睡眠','出外得女性貴人、宜外地或海外;動中生財','朋友多女性或溫和之士;相處長久細膩','事業宜財務、地產、美容、藝術、服務女性之業','田宅主星,最利置產、房產運佳;住宅宜潔淨明亮','情感豐富、重視精神生活與美感;心思細膩易多愁','母緣深厚、受母親影響大;落陷則母早勞或緣薄'],
+'貪狼':['桃花兼慾望星,才藝多、應酬強、人緣佳、學習力好;見火鈴成「火貪格」主暴發,忌沉迷酒色賭','兄弟交遊廣闊、常有應酬;情分好而各自精采','配偶魅力足、社交廣;感情濃烈需經營,防外緣','子女多才多藝、活潑好動;宜培養專長','財自交際才藝而來,偏財機會多;見火鈴主橫發,亦防橫破','主肝膽與生殖系統;縱慾傷身,宜節制','出外人緣佳、機會多;應酬中得財,亦防酒色誤事','朋友遍及各界、交遊極廣;酒肉朋友多,宜辨真偽','事業宜業務、演藝、公關、餐飲、美容、五術;動中求財','家宅熱鬧、常有客;不動產有進有出','慾望多、興趣廣、懂享受;精神生活豐富亦易空虛','父母交遊廣、關係熱絡;易聚少離多'],
+'巨門':['暗星、口舌星,口才佳擅分析批評、疑心重;宜律師教師業務命理,是非多宜修口德;化權化祿反成大器','兄弟間多口舌爭議、意見不合;宜少論是非','配偶多話善辯或沉默寡言兩極;婚姻多口角,宜溝通不宜冷戰','子女個性強、愛頂嘴;宜講理不宜壓制','財自口舌專業而來:教學、業務、律師、廣播;競爭中得財,防口舌破財','主口腔咽喉、腸胃、暗疾;易有隱疾須定期檢查','出外多是非口舌、亦多以口得利;宜謹言','朋友易生誤會口角、知交少;交友貴精不貴多','事業宜以口為業:教育、法律、業務、傳媒、醫療、五術;競爭激烈中出頭','家宅易有暗晦潮濕、鄰里口舌;住宅宜明亮通風','思慮深、疑心重、易鑽牛角尖;宜修心開闊','與父母溝通有隔閡、易生口角;宜多體諒'],
+'天相':['印星,忠厚有禮、重形象、善輔佐、講義氣;受左右夾宮影響極大,吉夾則貴、凶夾(刑囚夾印)則勞','兄弟和睦互助、有情義;能得手足之助','配偶端正有禮、賢內助;婚姻和諧,重相互扶持','子女乖巧有禮、聽話;親子關係融洽','財源穩定、宜受薪或輔佐性職;理財中規中矩','主皮膚、泌尿與內分泌;體質平和','出外得人緣與助力、宜輔佐性外派;在外形象佳','朋友忠厚可靠、能相互幫襯;宜結交正派之士','事業宜幕僚、副手、行政、公職、服務;輔佐之位最能發揮','住宅整潔體面、能置產;家宅安穩','重生活品味與形象、心性平和;享受中規中矩','父母端正慈愛、家教得體;受父母照顧周到'],
+'天梁':['蔭星、老人星,正直有原則、逢凶化吉、好管閒事;宜醫藥、公職、宗教、司法;易老成孤高、愛照顧人','兄長如父、有照顧之責;手足間為長者或受長者蔭','配偶年長或成熟穩重、能照顧自己;婚姻宜姊弟或有年齡差','子女懂事早熟、有長者風;親子如友','財自專業與名望而來,宜穩健;不主暴發,遇困有貴人解','主肝與消化、慢性病;有病能遇良醫,逢凶化吉','出外遇難有救、得長輩貴人;宜外地發展','朋友多長者與正派之士;能得年長者提攜','事業宜醫藥、公職、法律、教育、宗教、監察;主清貴','祖產可承、住宅穩固;不動產得長輩之助','清高有原則、重精神修養;晚年好宗教哲學,福厚','父母慈祥有德、庇蔭深厚;受父母恩澤多'],
+'七殺':['將星,肅殺果斷、獨立開創、行動派、不受拘束;宜軍警業務創業,一生起伏大宜動不宜靜;見吉化為權威,見煞主刑傷','兄弟個性剛烈獨立、各自發展;情分淡而不失義','配偶個性剛強獨立、主見強;宜晚婚、聚少離多反佳','子女獨立早熟、不受管束;宜放手不宜緊迫','財自開創競爭而得,大起大落;宜專業技術或創業,忌合夥','主肺、外傷、意外;宜防手術與交通意外','出外開創有成、宜遠地打拚;動中生財,在家反悶','朋友多剛烈江湖之士;交友重義氣,防受連累','事業宜開創競爭之業:業務、軍警、外科、工程、創業;能獨當一面','家宅變動大、不易久守;置產宜謹慎','個性剛不服輸、閒不住;精神壓力大,宜學放鬆','與父母緣分較淡、早年離家;性格與父母相異'],
+'破軍':['耗星,破舊立新、衝勁十足、不守成規、敢冒險;宜開創變革之業,主變動破耗、先破後立;見祿權則大成','兄弟各行其是、聚散無常;不宜合夥共財','配偶個性獨特、婚姻多變動;宜晚婚,忌閃婚閃離','子女個性強、想法獨特;教養宜順勢引導','財來財去、破而後立;宜變動性行業,忌保守死守','主生殖與消耗性疾病;體力透支須調養','出外變動大、宜遠離出生地發展;動中求變','朋友來去無常、少長久;交友宜看清再深交','事業宜開創、變革、拆除重建、業務、海運、軍警;不宜守成之業','家宅屢遷、舊屋翻新;不動產先破後成','慾望強、閒不住、喜新厭舊;精神起伏大,宜安定心性','與父母緣薄或早年離家;親子觀念差距大']};
+// ═══ 格局判定 ═══
+function patterns(z){
+  const R=[],has=(i,s)=>z.P[i].zhu.includes(s)||z.P[i].aux.includes(s)||z.P[i].sha.includes(s);
+  const m=z.ming,opp=(m+6)%12,t1=(m+4)%12,t2=(m+8)%12; // 三方四正
+  const SF=[m,opp,t1,t2];
+  const inSF=s=>SF.some(i=>has(i,s));
+  const mz=z.P[m].zhu;
+  if(mz.includes('紫微')&&(inSF('左輔')||inSF('右弼'))&&(inSF('文昌')||inSF('文曲')))
+    R.push(['君臣慶會','紫微得輔弼昌曲來會,主大貴之格;有才有助,適居領導決策之位,一生多得力於人','吉']);
+  if(mz.includes('紫微')&&!inSF('左輔')&&!inSF('右弼'))
+    R.push(['孤君無輔','紫微獨坐而輔弼不來,雖有帝王之志而少人助;宜自立不宜倚賴,忌剛愎','平']);
+  if(mz.includes('紫微')&&mz.includes('天府'))R.push(['紫府同宮','帝星與庫星同臨,格局尊貴、財官雙美;宜居高位掌實權','吉']);
+  if(inSF('七殺')&&inSF('破軍')&&inSF('貪狼'))
+    R.push(['殺破狼','命遇殺破狼三星會照,一生變動起伏大、開創力強;宜動不宜靜,能破能立;逢吉化主大成,逢煞則勞碌奔波','平']);
+  if(inSF('天機')&&inSF('太陰')&&inSF('天同')&&inSF('天梁'))
+    R.push(['機月同梁','此格主文職幕僚、公門專業,穩定中求進;宜受薪、企劃、公職、專技,不宜冒險創業','吉']);
+  if(inSF('天府')&&inSF('天相'))R.push(['府相朝垣','府相會命,衣食豐足、有格局有守成之力;主一生安穩富足','吉']);
+  if(inSF('太陽')&&inSF('太陰')&&(brOf('太陽',SF.find(i=>has(i,'太陽')))+brOf('太陰',SF.find(i=>has(i,'太陰')))).match(/廟|旺/g)?.length>=2)
+    R.push(['日月並明','日月皆得廟旺會命,主聰明富貴、名利雙收;父母雙全,人生光明','吉']);
+  if(inSF('貪狼')&&(inSF('火星')||inSF('鈴星')))
+    R.push([inSF('火星')?'火貪格':'鈴貪格','貪狼逢火(鈴),主橫發突起、意外之財或機遇;然來得快去得快,宜見好就收','吉']);
+  if(inSF('祿存')&&['祿'].some(t=>SF.some(i=>Object.values(z.P[i].hua).includes('祿'))))
+    R.push(['雙祿交流','祿存與化祿並會,財源豐厚、一生不缺;宜穩健經營,富中取貴','吉']);
+  if(inSF('天馬')&&(inSF('祿存')||SF.some(i=>Object.values(z.P[i].hua).includes('祿'))))
+    R.push(['祿馬交馳','祿與馬會,主動中生財、遠方得利;宜外出、貿易、跨區發展','吉']);
+  const h3=['祿','權','科'].every(t=>SF.some(i=>Object.values(z.P[i].hua).includes(t)));
+  if(h3)R.push(['三奇嘉會','祿權科三化齊會命宮三方,主名利雙收、際遇非凡;為斗數上格','吉']);
+  if(has(m,'擎羊')&&has(m,'陀羅'))R.push(['羊陀夾身','羊陀同臨,行事多阻、身心勞頓;宜守正忍讓,以技藝立身','凶']);
+  if(has((m+1)%12,'擎羊')&&has((m+11)%12,'陀羅'))R.push(['羊陀夾命','命宮左右為羊陀所夾,一生多阻礙牽制;宜修身養性、以柔化剛','凶']);
+  if(has(m,'火星')&&has(m,'鈴星'))R.push(['火鈴夾制','火鈴同宮,性急易怒、事多波折;宜緩心慢行','凶']);
+  if(has(m,'地空')&&has(m,'地劫'))R.push(['空劫夾命','空劫同臨,錢財難聚、想法超脫;宜從事精神、宗教、創意之業反佳','平']);
+  if(mz.includes('天相')&&(has((m+1)%12,'廉貞')||has((m+11)%12,'廉貞'))&&(has((m+1)%12,'擎羊')||has((m+11)%12,'擎羊')))
+    R.push(['刑囚夾印','天相受廉貞擎羊所夾,主刑訟牽累、勞心費神;宜謹守法度','凶']);
+  if(mz.includes('巨門')&&(m===0||m===6))R.push(['石中隱玉','巨門居子午,才華內蘊、大器晚成;初年辛苦,中年後名利漸顯','吉']);
+  if(has(m,'擎羊')&&m===6)R.push(['馬頭帶劍','擎羊居午,性剛果決有威權;宜武職技藝,忌意氣用事','平']);
+  if(mz.length===0)R.push(['命無主星','命宮空宮借對宮之星論;主個性隨環境變化、人生多依他力;宜早立志向','平']);
+  return R;
+}
 // ── 星曜廟旺利陷(通行表;子丑寅卯辰巳午未申酉戌亥)──
 const BRIGHT={
 '紫微':'平廟廟旺陷旺廟廟旺平陷旺','天機':'廟陷得旺利平廟陷得旺利平',
@@ -330,16 +394,18 @@ function render(){
     const d=document.createElement('div');
     d.className='pal'+(i===z.ming?' ming':'')+(i===z.shen?' shen':'')+(inDx?' daxian':'');
     d.style.gridRow=r+1;d.style.gridColumn=c+1;
-    const hua=nm=>p.hua[nm]?'<span class="hua '+({'祿':'lu','權':'quan','科':'ke','忌':'ji'})[p.hua[nm]]+'">'+p.hua[nm]+'</span>':'';
-    const br=nm=>{const b=brOf(nm,i);return b?'<span style="font-size:8.5px;opacity:.55">'+b+'</span>':''};
-    const fmt=s=>s+br(s)+hua(s);
-    d.innerHTML='<div class="zhu">'+(p.zhu.map(fmt).join(' ')||'<span style="opacity:.35">—</span>')+'</div>'
-      +(p.aux.length?'<div class="aux">'+p.aux.map(fmt).join(' ')+'</div>':'')
-      +(p.sha.length?'<div class="sha">'+p.sha.map(fmt).join(' ')+'</div>':'')
-      +'<div style="font-size:8.5px;color:#9a9184;line-height:1.25;margin-top:2px">'
-        +(z.bs[i]||'')+' '+(z.cs[i]||'')+'<br>'+(z.jq[i]||'')+' '+(z.sq[i]||'')+'</div>'
-      +'<div class="ft"><span class="dx">'+dx[0]+'-'+dx[1]+'<br><span style="font-size:8px;opacity:.75">小'+(z.xx[i]||[]).slice(0,4).join(',')+'</span></span>'
-      +'<span style="text-align:right"><span class="gname">'+z.gname[i]+(i===z.shen?'・身':'')+'</span><br><span class="gz">'+z.gongGan(i)+BR[i]+'</span></span></div>';
+    const JI6='文昌文曲左輔右弼天魁天鉞祿存天馬';
+    const cls=s=>p.zhu.includes(s)?'zhu':JI6.includes(s)?'ji':p.sha.includes(s)?'sha':'za';
+    const star=s=>{const b=brOf(s,i),hv=p.hua[s];
+      return '<span class="star '+cls(s)+'"><span class="nm">'+[...s].join('<br>')+'</span>'
+        +(b?'<span class="br">'+b+'</span>':'')
+        +(hv?'<span class="hb" style="background:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[hv]+'">'+hv+'</span>':'')+'</span>'};
+    const all=p.zhu.concat(p.aux.filter(s=>JI6.includes(s)),p.sha,p.aux.filter(s=>!JI6.includes(s)));
+    d.innerHTML='<div class="stars">'+(all.map(star).join('')||'<span style="opacity:.3;font-size:9px">空宮</span>')+'</div>'
+      +'<div class="nums">流年:'+(z.ln[i]||[]).slice(0,5).join(',')+'<br>小限:'+(z.xx[i]||[]).slice(0,5).join(',')+'</div>'
+      +'<div class="shen12">'+(z.bs[i]||'')+'　'+(z.jq[i]||'')+'　'+(z.sq[i]||'')+'</div>'
+      +'<div class="palft"><span class="dx">'+dx[0]+'~'+dx[1]+'</span>'
+      +'<span style="text-align:right"><span class="cs">'+(z.cs[i]||'')+'</span> <span class="gz">'+z.gongGan(i)+BR[i]+'</span><br><span class="gname">'+z.gname[i]+'</span></span></div>';
     el.appendChild(d);cells[i]=d;
   }
   const ctr=document.createElement('div');ctr.className='center';
@@ -354,35 +420,81 @@ function render(){
     +'<div style="font-size:11px;opacity:.7">四化:'+z.yGan+'干 '+z.sihua[0]+'祿 '+z.sihua[1]+'權 '+z.sihua[2]+'科 '+z.sihua[3]+'忌</div>'
     +'<div style="font-size:11px;opacity:.7">大限'+(z.fw?'順行':'逆行')+'・現年 '+age+' 歲(虛歲)</div>';
   el.appendChild(ctr);
-  // 詳解
+  // ═══ 詳解 ═══
   const dtl=document.getElementById('detail');
-  const mingStars=mp.zhu.length?mp.zhu:z.P[(z.ming+6)%12].zhu;
-  const borrow=!mp.zhu.length;
   const dxNow=Object.entries(z.dx).find(([i,v])=>age>=v[0]&&age<=v[1]);
-  let h2='<h2>命宮主星解讀</h2>';
-  if(borrow)h2+='<div class="tag">命宮無主星,借對宮('+BR[(z.ming+6)%12]+'遷移宮)之星論</div>';
-  h2+=mingStars.map(s=>'<div style="padding:5px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
-    +'<b style="color:var(--gold);font-size:15px">'+s+'</b>'+(mp.hua[s]?' <span class="hua '+({'祿':'lu','權':'quan','科':'ke','忌':'ji'})[mp.hua[s]]+'">化'+mp.hua[s]+'</span>':'')
-    +'<div style="font-size:13.5px;line-height:1.8">'+(STAR_TXT[s]||'')+'</div></div>').join('');
-  h2+='<h2>四化飛星落宮</h2>';
-  const huaPos=t=>{for(let i=0;i<12;i++)for(const nm of Object.keys(z.P[i].hua))if(z.P[i].hua[nm]===t)return[nm,z.gname[i],BR[i]];return null};
-  h2+=['祿','權','科','忌'].map(t=>{const r=huaPos(t);
-    return r?'<div class="row2"><span><b>化'+t+'</b> '+r[0]+'</span><b>落 '+r[1]+'宮('+r[2]+')・'+HUA_TXT[t]+'</b></div>':''}).join('');
+  const JI6='文昌文曲左輔右弼天魁天鉞祿存天馬';
+  const huaOf=i=>Object.entries(z.P[i].hua).map(([n,t])=>n+'化'+t);
+  const sfOf=i=>[(i+6)%12,(i+4)%12,(i+8)%12]; // 對宮+三合
+  const starsIn=i=>z.P[i].zhu.length?z.P[i].zhu:[];
+  let h2='';
+  // 一、格局
+  const pats=patterns(z);
+  h2+='<h2>一、格局判定(大師論法之綱)</h2>';
+  h2+=pats.length?pats.map(([n,d,lv])=>
+    '<div style="padding:6px 0;border-bottom:1px dashed rgba(160,140,90,.3)">'
+    +'<b style="font-size:15px;color:'+(lv==='吉'?'var(--green)':lv==='凶'?'var(--red)':'var(--gold)')+'">【'+n+'】</b>'
+    +'<div style="font-size:13.5px;line-height:1.8">'+d+'</div></div>').join('')
+    :'<div style="font-size:13px;opacity:.7">未成特殊格局,以本命主星與三方四正論之。</div>';
+  // 二、四化
+  h2+='<h2>二、四化飛星落宮(論吉凶之樞)</h2>';
+  const huaPos=t=>{for(let i=0;i<12;i++)for(const nm of Object.keys(z.P[i].hua))if(z.P[i].hua[nm]===t)return[nm,z.gname[i],BR[i],i];return null};
+  const HUA_DEEP={'祿':'財源與機緣所在,此宮之事最能順遂得利','權':'掌控與能力所在,此宮之事能主導、宜積極','科':'名聲與貴人所在,此宮之事得美名、逢凶能解','忌':'執著與糾結所在,此宮之事最耗心力,亦是此生功課'};
+  h2+=['祿','權','科','忌'].map(t=>{const r=huaPos(t);if(!r)return '';
+    return '<div style="padding:5px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
+    +'<b style="color:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[t]+';font-size:14.5px">'+r[0]+'化'+t+' → 入'+r[1]+'宮('+r[2]+')</b>'
+    +'<div style="font-size:13px;line-height:1.75">'+HUA_DEEP[t]+'。'
+    +(t==='忌'?'忌星所落之宮為一生最放不下之處,亦主此宮之人事易生變故;化解之道在「捨」與「轉念」,不在強求。':'')
+    +'</div></div>'}).join('');
+  // 三、十二宮深論
+  h2+='<h2>三、十二宮深論</h2>';
+  h2+=GONG12.map(g=>{
+    const i=+Object.keys(z.gname).find(k=>z.gname[k]===g);
+    const p=z.P[i];
+    const gi=GONG12.indexOf(g);
+    const borrow=!p.zhu.length;
+    const useStars=borrow?z.P[(i+6)%12].zhu:p.zhu;
+    const sf=sfOf(i);
+    const meets=[...new Set(sf.flatMap(j=>z.P[j].zhu))];
+    const jiIn=p.aux.filter(s=>JI6.includes(s));
+    const shaIn=p.sha;
+    const hu=huaOf(i);
+    let body=useStars.map(s=>{
+      const t=(SG[s]||[])[gi];
+      return t?'<div style="padding:3px 0"><b style="color:var(--gold)">'+s+brOf(s,i)+'</b>:'+t+'</div>':''}).join('');
+    if(!body)body='<div style="padding:3px 0;opacity:.75">本宮無主星,借對宮論;主此宮之事隨外緣而動,自主性較弱。</div>';
+    // 吉煞加論
+    let extra='';
+    if(jiIn.length)extra+='<div style="font-size:12.5px;color:var(--green)">◎ 得<b>'+jiIn.join('、')+'</b>同宮:此宮多助力貴人,遇事有轉圜、能借力使力。</div>';
+    if(shaIn.length)extra+='<div style="font-size:12.5px;color:var(--red)">⚠ 見<b>'+shaIn.join('、')+'</b>:此宮之事多阻礙磨鍊、易生波折;然煞星亦主激發,能吃苦者反成專才,忌與人爭強。</div>';
+    if(hu.length)extra+='<div style="font-size:12.5px;color:var(--blue)">✦ 本宮帶<b>'+hu.join('、')+'</b>:'+hu.map(x=>HUA_TXT[x.slice(-1)]).join(';')+'。</div>';
+    if(meets.length)extra+='<div style="font-size:12px;opacity:.72">三方四正會照:'+meets.join('、')+'——本宮吉凶須合此數星參看,不可獨論一宮。</div>';
+    const isMing=i===z.ming,isShen=i===z.shen;
+    const inDx=dxNow&&+dxNow[0]===i;
+    return '<div style="border:1px solid #e6dcc3;border-radius:10px;padding:8px 10px;margin:6px 0;background:'+(isMing?'rgba(201,169,106,.12)':'#fff')+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">'
+      +'<b style="font-family:\'Noto Serif TC\',serif;font-size:16px;color:var(--gold)">'+g+'宮</b>'
+      +'<span style="font-size:12px;opacity:.7">'+z.gongGan(i)+BR[i]
+      +(isMing?'・命':'')+(isShen?'・身':'')+(inDx?'・現行大限':'')+'</span></div>'
+      +body+extra+'</div>';
+  }).join('');
+  // 四、現行大限
   if(dxNow){
     const di=+dxNow[0],dp=z.P[di];
-    h2+='<h2>現行大限('+dxNow[1][0]+'-'+dxNow[1][1]+'歲)</h2>'
-      +'<div class="row2"><span>大限宮位</span><b>'+z.gname[di]+'宮('+z.gongGan(di)+BR[di]+')</b></div>'
-      +'<div class="row2"><span>大限主星</span><b>'+(dp.zhu.join('、')||'空宮')+'</b></div>'
-      +'<div style="font-size:13px;line-height:1.8;margin-top:4px">'+(dp.zhu.map(s=>s+':'+(STAR_TXT[s]||'').split(';')[0]).join('<br>')||'借對宮論之')+'</div>'
-      +(dp.sha.length?'<div style="font-size:12.5px;color:var(--red);margin-top:3px">本限見煞:'+dp.sha.join('、')+',宜謹慎;逢煞亦主激發,得吉星同宮可解</div>':'')
-      +(dp.aux.length?'<div style="font-size:12.5px;color:var(--green)">本限得助:'+dp.aux.join('、')+'</div>':'');
+    const dss=dp.zhu.length?dp.zhu:z.P[(di+6)%12].zhu;
+    const gi=GONG12.indexOf(z.gname[di]);
+    h2+='<h2>四、現行大限 '+dxNow[1][0]+'~'+dxNow[1][1]+' 歲(走'+z.gname[di]+'宮)</h2>'
+      +'<div style="font-size:13.5px;line-height:1.85">'
+      +'<b>限宮:</b>'+z.gongGan(di)+BR[di]+'('+z.gname[di]+'宮)　<b>限內主星:</b>'+(dss.join('、')||'借對宮')+'<br>'
+      +'此十年以「'+z.gname[di]+'」之事為人生主軸——'
+      +({'命宮':'重新確立自我方向與定位,是轉型立命之十年','兄弟':'手足、同儕、合夥關係為重心,人和則事順','夫妻':'感情婚姻與伴侶關係為本限核心,宜經營不宜輕動','子女':'子女教育、部屬、創作力為主軸,亦主投資之得失','財帛':'財務為本限重點,理財得法則積累可觀','疾厄':'健康與身心調養為要務,宜定期檢查、勿透支','遷移':'外出、遷移、環境變動為主,動則有得','僕役':'人際交友與部屬關係影響最大,擇友為第一要務','官祿':'事業運勢最為關鍵,是立業揚名之十年','田宅':'不動產與家庭為重心,置產守成之期','福德':'精神生活、享受與心境為主,宜修身養性','父母':'長輩、上司、文書契約為重,宜敬長守法'})[z.gname[di]]+'。<br>'
+      +dss.map(s=>{const t=(SG[s]||[])[gi];return t?'<b>'+s+'</b>入此限:'+t:''}).filter(Boolean).join('<br>')
+      +'</div>'
+      +(dp.sha.length?'<div style="font-size:13px;color:var(--red);margin-top:4px">⚠ 本限見<b>'+dp.sha.join('、')+'</b>:十年間必有磨鍊考驗,宜守成不宜躁進;然煞能激發潛力,能撐過者後運轉強。</div>':'')
+      +(dp.aux.filter(s=>JI6.includes(s)).length?'<div style="font-size:13px;color:var(--green)">◎ 本限得<b>'+dp.aux.filter(s=>JI6.includes(s)).join('、')+'</b>:貴人助力顯著,宜把握機緣。</div>':'')
+      +(huaOf(di).length?'<div style="font-size:13px;color:var(--blue)">✦ 本限帶<b>'+huaOf(di).join('、')+'</b>,此為十年吉凶之關鍵所在。</div>':'');
   }
-  h2+='<h2>十二宮速覽</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">'
-   +GONG12.map(g=>{const i=+Object.keys(z.gname).find(k=>z.gname[k]===g);const p=z.P[i];
-     return '<div style="font-size:12px;border:1px solid #e6dcc3;border-radius:8px;padding:4px 6px;background:#fff">'
-     +'<b style="color:var(--gold)">'+g+'</b> <span style="opacity:.6">'+BR[i]+'</span><br>'
-     +(p.zhu.join('、')||'<span style="opacity:.4">空宮</span>')+'</div>'}).join('')+'</div>';
-  h2+='<div class="note">安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷、雜曜與流年飛星另議;論命仍須綜合三方四正、格局與大限流年合參。</div>';
+  h2+='<div class="note">論法要旨:一看格局成敗、二看四化流向、三看三方四正會照、四看大限流年引動。單宮獨論易失偏頗,必須「宮宮相參、星星互看」。<br>安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷各派微異,重大論斷請以師承為準。</div>';
   dtl.innerHTML=h2;
   window.fscP&&window.fscP('ziwei','chart',z.yGZ+'/'+JU_NAME[z.ju]);
 }
