@@ -266,8 +266,8 @@ function heHun(){
 document.getElementById('hhBtn').onclick=heHun;
 // ═══ 專業強化模組 ═══
 // ── 納音六十甲子 ──
-const NAYIN=['海中金','爐中火','大林木','路旁土','劍鋒金','山頭火','澗下水','城頭土','白蠟金','楊柳木','泉中水','屋上土','霹靂火','松柏木','長流水','沙中金','山下火','平地木','壁上土','金箔金','覆燈火','天河水','大驛土','釵釧金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
-const nayinOf=i=>NAYIN[Math.floor((((i%60)+60)%60)/2)];
+const NAYIN_B=['海中金','爐中火','大林木','路旁土','劍鋒金','山頭火','澗下水','城頭土','白蠟金','楊柳木','泉中水','屋上土','霹靂火','松柏木','長流水','沙中金','山下火','平地木','壁上土','金箔金','覆燈火','天河水','大驛土','釵釧金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+const nayinOf=i=>NAYIN_B[Math.floor((((i%60)+60)%60)/2)];
 // ── 調候用神(窮通寶鑑・日主×月令)──
 const TIAOHOU={
 '甲':['丙癸','庚丙丁戊','庚丁壬','癸丁庚','癸丁庚','癸丁庚','庚丁壬','庚丁丙','庚甲丁壬','庚丁丙戊','丁庚丙','丁庚丙'],
@@ -376,14 +376,14 @@ function geju(p,st){
 }
 function TIANEHOU_get(dm,mi){return (TIAOHOU[dm]||[])[mi]||''}
 // ── 刑沖合害 ──
-const LIUHE={'子':'丑','丑':'子','寅':'亥','亥':'寅','卯':'戌','戌':'卯','辰':'酉','酉':'辰','巳':'申','申':'巳','午':'未','未':'午'};
-const LIUCHONG={'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
-const LIUHAI={'子':'未','未':'子','丑':'午','午':'丑','寅':'巳','巳':'寅','卯':'辰','辰':'卯','申':'亥','亥':'申','酉':'戌','戌':'酉'};
+const B_HE={'子':'丑','丑':'子','寅':'亥','亥':'寅','卯':'戌','戌':'卯','辰':'酉','酉':'辰','巳':'申','申':'巳','午':'未','未':'午'};
+const B_CHONG={'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
+const B_HAI={'子':'未','未':'子','丑':'午','午':'丑','寅':'巳','巳':'寅','卯':'辰','辰':'卯','申':'亥','亥':'申','酉':'戌','戌':'酉'};
 const TG_HE={'甲':'己','己':'甲','乙':'庚','庚':'乙','丙':'辛','辛':'丙','丁':'壬','壬':'丁','戊':'癸','癸':'戊'};
 const TG_CHONG={'甲':'庚','庚':'甲','乙':'辛','辛':'乙','丙':'壬','壬':'丙','丁':'癸','癸':'丁'};
 const HE_HUA={'甲己':'土','乙庚':'金','丙辛':'水','丁壬':'木','戊癸':'火'};
-const SANHE=[['申子辰','水'],['寅午戌','火'],['巳酉丑','金'],['亥卯未','木']];
-const SANHUI=[['寅卯辰','木'],['巳午未','火'],['申酉戌','金'],['亥子丑','水']];
+const B_SANHE=[['申子辰','水'],['寅午戌','火'],['巳酉丑','金'],['亥卯未','木']];
+const B_SANHUI=[['寅卯辰','木'],['巳午未','火'],['申酉戌','金'],['亥子丑','水']];
 function xingChong(p){
   const names=['年','月','日','時'];
   const ss=[ST[p.year%10],ST[p.month%10],ST[p.day%10],ST[p.hour%10]];
@@ -392,16 +392,16 @@ function xingChong(p){
   for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
     if(TG_HE[ss[i]]===ss[j])out.push(['合','天干',names[i]+ss[i]+'合'+names[j]+ss[j],'化'+(HE_HUA[ss[i]+ss[j]]||HE_HUA[ss[j]+ss[i]])+';主情義相牽、合則有情']);
     if(TG_CHONG[ss[i]]===ss[j])out.push(['沖','天干',names[i]+ss[i]+'沖'+names[j]+ss[j],'主意見相左、變動不安']);
-    if(LIUHE[bs[i]]===bs[j])out.push(['合','地支六合',names[i]+bs[i]+'合'+names[j]+bs[j],'和合有情,主人緣助力;過多則牽絆']);
-    if(LIUCHONG[bs[i]]===bs[j])out.push(['沖','地支六沖',names[i]+bs[i]+'沖'+names[j]+bs[j],
+    if(B_HE[bs[i]]===bs[j])out.push(['合','地支六合',names[i]+bs[i]+'合'+names[j]+bs[j],'和合有情,主人緣助力;過多則牽絆']);
+    if(B_CHONG[bs[i]]===bs[j])out.push(['沖','地支六沖',names[i]+bs[i]+'沖'+names[j]+bs[j],
       (i===0&&j===2)?'年日相沖:與長輩緣薄、婚姻多波折':(i===1&&j===3)?'月時相沖:中晚年變動、與子女聚少':'主動盪遷移、宮位所主之事不安']);
-    if(LIUHAI[bs[i]]===bs[j])out.push(['害','六害',names[i]+bs[i]+'害'+names[j]+bs[j],'主暗損、六親不和,恩中招怨']);
+    if(B_HAI[bs[i]]===bs[j])out.push(['害','六害',names[i]+bs[i]+'害'+names[j]+bs[j],'主暗損、六親不和,恩中招怨']);
   }
   // 三合三會
-  for(const[k,wx]of SANHE){const idx=[...k].map(c=>bs.indexOf(c));
+  for(const[k,wx]of B_SANHE){const idx=[...k].map(c=>bs.indexOf(c));
     if(idx.every(x=>x>=0))out.push(['合','三合局',k+'合'+wx+'局','三合成局,'+wx+'氣大盛,主此五行之事得力']);
     else{const two=[...k].filter(c=>bs.includes(c));if(two.length===2&&(two.includes(k[1])))out.push(['合','半合',two.join('')+'半合'+wx,'半合有情,'+wx+'氣增強']);}}
-  for(const[k,wx]of SANHUI){const idx=[...k].map(c=>bs.indexOf(c));
+  for(const[k,wx]of B_SANHUI){const idx=[...k].map(c=>bs.indexOf(c));
     if(idx.every(x=>x>=0))out.push(['合','三會方',k+'會'+wx+'方','三會成方,'+wx+'氣極旺']);}
   // 三刑自刑
   const has=c=>bs.includes(c);
@@ -503,14 +503,14 @@ function render(){
   const pn=['年柱(祖上少年)','月柱(父母事業)','日柱(自身配偶)','時柱(子女晚年)'];
   const inter=[];
   bsArr.forEach((b,i)=>{
-    if(LIUCHONG[b]===lB)inter.push(['沖','流年'+lB+'沖'+pn[i]+b,'該宮之事動盪:'+(i===2?'夫妻感情、健康須留意':i===0?'長輩、根基變動':i===1?'工作事業變動、搬遷':'子女、居所變動')]);
-    if(LIUHE[b]===lB)inter.push(['合','流年'+lB+'合'+pn[i]+b,'該宮有情:'+(i===2?'利感情婚姻、合作':'人事和合、機會來')]);
-    if(LIUHAI[b]===lB)inter.push(['害','流年'+lB+'害'+pn[i]+b,'該宮暗損,防小人與是非']);
+    if(B_CHONG[b]===lB)inter.push(['沖','流年'+lB+'沖'+pn[i]+b,'該宮之事動盪:'+(i===2?'夫妻感情、健康須留意':i===0?'長輩、根基變動':i===1?'工作事業變動、搬遷':'子女、居所變動')]);
+    if(B_HE[b]===lB)inter.push(['合','流年'+lB+'合'+pn[i]+b,'該宮有情:'+(i===2?'利感情婚姻、合作':'人事和合、機會來')]);
+    if(B_HAI[b]===lB)inter.push(['害','流年'+lB+'害'+pn[i]+b,'該宮暗損,防小人與是非']);
   });
   if(TG_HE[ST[dmS]]===lS)inter.push(['合','流年'+lS+'合日主','主有牽絆羈絆、易受人情左右;亦主機緣']);
   if(TG_CHONG[ST[dmS]]===lS)inter.push(['沖','流年'+lS+'剋沖日主','壓力增大、易衝動,宜守不宜攻']);
   if(lB===BR[p.year%12])inter.push(['值','流年值太歲(本命年)','犯太歲之年,宜安不宜動;可安太歲、行善積福']);
-  if(LIUCHONG[BR[p.year%12]]===lB)inter.push(['沖','流年沖太歲(歲破)','變動最大之年,忌重大投資與婚喪動土']);
+  if(B_CHONG[BR[p.year%12]]===lB)inter.push(['沖','流年沖太歲(歲破)','變動最大之年,忌重大投資與婚喪動土']);
   document.getElementById('liunian').innerHTML=
     '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
     +'<b style="font-family:\'Noto Serif TC\',serif;font-size:20px;color:var(--gold)">'+ly+' '+lS+lB+'年</b>'
