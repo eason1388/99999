@@ -1,0 +1,296 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>紫微斗數</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6D3F;--gold2:#C9A96A;--ink:#2b2418;--card:#fffdf7;--red:#A63A2E;--green:#4A6B4F;--bg:#f4efe4;--blue:#3E5C76;--pur:#8e6bb5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold)}
+.box{background:var(--card);border:1px solid #e6dcc3;border-radius:16px;padding:12px 14px;width:min(760px,97vw);box-shadow:0 2px 10px rgba(120,90,40,.08)}
+input,select{padding:7px 9px;border:1.5px solid var(--gold2);border-radius:10px;background:#fff;color:var(--ink);font-size:14px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.big{background:var(--gold);color:#fff;border:0;border-radius:12px;padding:10px 20px;font-size:15.5px;font-weight:700;cursor:pointer}
+h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:10px 0 8px}
+/* 命盤 4x4 */
+#chart{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(96px,auto));gap:3px;margin-top:6px}
+.pal{background:#fff;border:1px solid #e0d5ba;border-radius:8px;padding:3px 4px;font-size:10.5px;position:relative;overflow:hidden}
+.pal.ming{border:2px solid var(--gold);background:rgba(201,169,106,.12)}
+.pal.shen{box-shadow:inset 0 0 0 2px rgba(62,92,118,.45)}
+.pal.daxian{background:rgba(74,107,79,.1)}
+.pal .zhu{font-weight:700;font-size:12.5px;color:var(--ink);line-height:1.3}
+.pal .aux{color:#6b5427;line-height:1.3}
+.pal .sha{color:var(--red);line-height:1.3}
+.pal .ft{position:absolute;bottom:2px;left:4px;right:4px;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px}
+.pal .gname{font-weight:700;color:var(--gold);font-size:11.5px}
+.pal .gz{color:#8a8072}
+.pal .dx{color:var(--green);font-size:9.5px}
+.center{grid-column:2/4;grid-row:2/4;background:#fffdf7;border:1px solid var(--gold2);border-radius:10px;padding:8px;font-size:12px;line-height:1.75}
+.hua{display:inline-block;border-radius:3px;padding:0 3px;font-size:9.5px;font-weight:700;margin-left:1px;color:#fff}
+.hua.lu{background:var(--green)}.hua.quan{background:#c9944a}.hua.ke{background:var(--blue)}.hua.ji{background:var(--red)}
+.tag{display:inline-block;border-radius:99px;padding:1px 9px;font-size:11.5px;margin:1px 2px;background:#f2ead6;color:#6b5427}
+.note{font-size:11.5px;opacity:.65;margin-top:6px}
+.row2{display:flex;justify-content:space-between;gap:8px;padding:3px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13px}
+@media(max-width:560px){#chart{grid-template-rows:repeat(4,minmax(86px,auto))}.pal{font-size:9.5px}.pal .zhu{font-size:11px}}
+</style></head><body>
+<h1>✴ 紫微斗數</h1>
+<div class="box">
+<div class="row">
+ 出生 <input id="bd" type="date" value="1975-07-16"> <input id="bt" type="time" value="05:30">
+ <select id="sex"><option value="1">男</option><option value="0">女</option></select>
+ <button class="big" id="go">排盤</button>
+</div>
+<div class="row" style="font-size:12.5px">
+ <span id="lunarInfo" style="color:var(--gold);font-weight:700"></span>
+</div>
+</div>
+<div class="box"><div id="chart"></div></div>
+<div class="box" id="detail"></div>
+<script>
+const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const deltaT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:y>=1986?63.86+.3345*(y-2000)-.060374*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t,M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+// 求指定黃經之時刻(JD,UT);hint 為起始估計
+function termJD(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
+  for(let i=0;i<8;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-0.5)jd-=365.2422;
+  if(jd<jdn(y,1,1)-0.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
+// ── 朔(新月)Meeus 49 ──
+function newMoonJD(k){
+  const T=k/1236.85,rad=Math.PI/180;
+  let jde=2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T+0.00000000073*Math.pow(T,4);
+  const E=1-0.002516*T-0.0000074*T*T;
+  const M=(2.5534+29.10535670*k-0.0000014*T*T-0.00000011*T*T*T)*rad;
+  const Mp=(201.5643+385.81693528*k+0.0107582*T*T+0.00001238*T*T*T-0.000000058*Math.pow(T,4))*rad;
+  const F=(160.7108+390.67050284*k-0.0016118*T*T-0.00000227*T*T*T+0.000000011*Math.pow(T,4))*rad;
+  const O=(124.7746-1.56375588*k+0.0020672*T*T+0.00000215*T*T*T)*rad;
+  jde+=-0.40720*Math.sin(Mp)+0.17241*E*Math.sin(M)+0.01608*Math.sin(2*Mp)+0.01039*Math.sin(2*F)
+   +0.00739*E*Math.sin(Mp-M)-0.00514*E*Math.sin(Mp+M)+0.00208*E*E*Math.sin(2*M)
+   -0.00111*Math.sin(Mp-2*F)-0.00057*Math.sin(Mp+2*F)+0.00056*E*Math.sin(2*Mp+M)
+   -0.00042*Math.sin(3*Mp)+0.00042*E*Math.sin(M+2*F)+0.00038*E*Math.sin(M-2*F)
+   -0.00024*E*Math.sin(2*Mp-M)-0.00017*Math.sin(O)-0.00007*Math.sin(Mp+2*M)
+   +0.00004*Math.sin(2*Mp-2*F)+0.00004*Math.sin(3*M)+0.00003*Math.sin(Mp+M-2*F)
+   +0.00003*Math.sin(2*Mp+2*F)-0.00003*Math.sin(Mp+M+2*F)+0.00003*Math.sin(Mp-M+2*F)
+   -0.00002*Math.sin(Mp-M-2*F)-0.00002*Math.sin(3*Mp+M)+0.00002*Math.sin(4*Mp);
+  const yy=2000+k/12.3685;
+  return jde-deltaT(yy)/86400; // → UT
+}
+const localDay=jd=>Math.floor(jd+8/24+0.5); // UT JD → 東八區曆日 JDN
+// ── 農曆換算(冬至定月十一,無中氣置閏)──
+function toLunar(Y,M,D){
+  const jd=jdn(Y,M,D);
+  // 上一個冬至(黃經270°)
+  let wsY=Y,ws=localDay(termJD(Y,270));
+  if(ws>jd){wsY=Y-1;ws=localDay(termJD(Y-1,270));}
+  // 冬至所在朔日(=十一月朔)
+  const kApprox=(ws-2451550.09766)/29.530588861;
+  let k=Math.floor(kApprox)+2;
+  while(localDay(newMoonJD(k))>ws)k--;
+  const m11k=k;
+  // 下一個冬至的十一月朔
+  const ws2=localDay(termJD(wsY+1,270));
+  let k2=Math.floor((ws2-2451550.09766)/29.530588861)+2;
+  while(localDay(newMoonJD(k2))>ws2)k2--;
+  const nMonths=k2-m11k;         // 12 或 13
+  // 建立月份表
+  const months=[];
+  for(let i=0;i<=nMonths;i++){
+    const s=localDay(newMoonJD(m11k+i)),e=localDay(newMoonJD(m11k+i+1));
+    months.push({s,e,idx:i,leap:false});
+  }
+  if(nMonths===13){ // 閏年:第一個無中氣之月為閏
+    for(let i=1;i<nMonths;i++){
+      const m=months[i];let has=false;
+      for(let t=0;t<12;t++){const lon=(270+t*30)%360;
+        for(const yy of [wsY,wsY+1]){const tj=localDay(termJD(yy,lon));
+          if(tj>=m.s&&tj<m.e){has=true;break}}
+        if(has)break}
+      if(!has){m.leap=true;break}
+    }
+  }
+  // 命名:十一月起算,閏月沿用前一月號
+  let n=11;
+  for(const m of months){
+    if(m.leap){m.name=n===1?12:n-1;m.isLeap=true;}
+    else{m.name=n;m.isLeap=false;n=n%12+1;}
+  }
+  const cur=months.find(m=>jd>=m.s&&jd<m.e)||months[0];
+  return{month:cur.name,day:jd-cur.s+1,isLeap:cur.isLeap,
+    yearGZ:null};
+}
+// ── 四柱年干支(立春為界)──
+function yearGZ(Y,M,D,h){
+  const J=jdn(Y,M,D)+(h-12)/24-8/24;
+  const lc=termJD(Y,315);
+  const sui=(J>=lc)?Y:Y-1;
+  return{i:((sui-1984)%60+60)%60,sui};
+}
+// ═══ 紫微安星 ═══
+const ZHU14=['紫微','天機','太陽','武曲','天同','廉貞','天府','太陰','貪狼','巨門','天相','天梁','七殺','破軍'];
+const GONG12=['命宮','兄弟','夫妻','子女','財帛','疾厄','遷移','僕役','官祿','田宅','福德','父母'];
+const JU_NAME={2:'水二局',3:'木三局',4:'金四局',5:'土五局',6:'火六局'};
+// 納音五行局(60甲子→局數)
+// 甲子海中金4→乙丑4→丙寅爐中火6→丁卯6→戊辰大林木3…(30 為一循環,重複兩次)
+const NAYIN_JU=(()=>{const a=[4,4,6,6,3,3,5,5,4,4,6,6,2,2,5,5,4,4,3,3,2,2,5,5,6,6,3,3,2,2];return a.concat(a)})();
+const SIHUA={'甲':['廉貞','破軍','武曲','太陽'],'乙':['天機','天梁','紫微','太陰'],
+'丙':['天同','天機','文昌','廉貞'],'丁':['太陰','天同','天機','巨門'],
+'戊':['貪狼','太陰','右弼','天機'],'己':['武曲','貪狼','天梁','文曲'],
+'庚':['太陽','武曲','太陰','天同'],'辛':['巨門','太陽','文曲','文昌'],
+'壬':['天梁','紫微','左輔','武曲'],'癸':['破軍','巨門','太陰','貪狼']};
+const KUIYUE={'甲':[1,7],'戊':[1,7],'庚':[1,7],'乙':[0,8],'己':[0,8],
+'丙':[11,9],'丁':[11,9],'壬':[3,5],'癸':[3,5],'辛':[6,2]};
+const LUCUN={'甲':2,'乙':3,'丙':5,'戊':5,'丁':6,'己':6,'庚':8,'辛':9,'壬':11,'癸':0};
+const HUOLING={'寅午戌':[1,3],'申子辰':[2,10],'巳酉丑':[3,10],'亥卯未':[9,10]};
+const STAR_TXT={
+'紫微':'帝王之星,尊貴領導、自尊心強;善統御但易孤高,喜左右昌曲來輔,無輔則孤君',
+'天機':'智慧星,機謀善變、心思細密;宜企劃參謀、五術,主動盪多變,坐命者不安於現狀',
+'太陽':'光明博愛、熱心付出、不計回報;主父星與名聲,廟旺主貴,落陷則勞而少功',
+'武曲':'財星、剛毅果決、執行力強;宜金融軍警財經,個性剛直欠圓融,女命剛強',
+'天同':'福星,溫和樂天、有口福享受;情緒細膩、缺衝勁,逢煞反能激發',
+'廉貞':'囚星亦次桃花,個性複雜、能公能私;宜企劃公關,見煞則感情糾葛官非',
+'天府':'庫星、穩重保守、善守成理財;宜管理財務,格局大但欠開創,忌空庫',
+'太陰':'富星、母星,溫柔細膩、重感情、有藝術品味;夜生人更佳,落陷則多愁',
+'貪狼':'桃花星兼慾望星,才藝多、應酬強、人緣佳;宜交際演藝,忌沉迷酒色',
+'巨門':'暗星、口舌星,口才佳、擅分析批評;宜律師教師業務,是非多、宜修口德',
+'天相':'印星,忠厚有禮、重形象、善輔佐;宜副手幕僚,受夾宮好壞影響大',
+'天梁':'蔭星、老人星,正直有原則、逢凶化吉;宜醫藥公職宗教,愛管事、易老成',
+'七殺':'將星,肅殺果斷、獨立開創、行動派;宜軍警業務創業,一生起伏大、宜動不宜靜',
+'破軍':'耗星,破舊立新、衝勁十足、不守成規;宜開創變革之業,主變動破耗、先破後立'};
+const HUA_TXT={'祿':'得財順遂、機會來','權':'掌權能幹、增強勢','科':'名聲貴人、逢凶解','忌':'執著阻礙、宜化解'};
+function ziwei(Y,M,D,h,male){
+  const lu=toLunar(Y,M,D);
+  const hB=Math.floor((h+1)/2)%12;
+  const yg=yearGZ(Y,M,D,h);
+  const yGan=ST[yg.i%10],yZhi=BR[yg.i%12];
+  // 命宮/身宮
+  const ming=((2+(lu.month-1)-hB)%12+12)%12;
+  const shen=((2+(lu.month-1)+hB)%12)%12;
+  // 宮干(五虎遁:年干→寅宮干)
+  const yinGan={'甲':2,'己':2,'乙':4,'庚':4,'丙':6,'辛':6,'丁':8,'壬':8,'戊':0,'癸':0}[yGan];
+  const gongGan=i=>ST[(yinGan+((i-2)%12+12)%12)%10];
+  // 五行局(命宮干支納音)
+  const mGan=gongGan(ming),mZhi=BR[ming];
+  const mGZ=(()=>{for(let i=0;i<60;i++)if(ST[i%10]===mGan&&BR[i%12]===mZhi)return i;return 0})();
+  const ju=NAYIN_JU[mGZ];
+  // 紫微
+  const d=lu.day;
+  const r=(ju-d%ju)%ju, n=(d+r)/ju;
+  let zw=(2+(n-1))%12;
+  zw=r%2===0?(zw+r)%12:((zw-r)%12+12)%12;
+  const P=[...Array(12)].map(()=>({zhu:[],aux:[],sha:[],hua:{}}));
+  const put=(i,arr,name)=>P[((i%12)+12)%12][arr].push(name);
+  // 紫微星系(逆)
+  put(zw,'zhu','紫微');put(zw-1,'zhu','天機');put(zw-3,'zhu','太陽');
+  put(zw-4,'zhu','武曲');put(zw-5,'zhu','天同');put(zw-8,'zhu','廉貞');
+  // 天府星系(順)
+  const tf=((4-zw)%12+12)%12;
+  put(tf,'zhu','天府');put(tf+1,'zhu','太陰');put(tf+2,'zhu','貪狼');
+  put(tf+3,'zhu','巨門');put(tf+4,'zhu','天相');put(tf+5,'zhu','天梁');
+  put(tf+6,'zhu','七殺');put(tf+10,'zhu','破軍');
+  // 六吉
+  put(4+(lu.month-1),'aux','左輔');put(10-(lu.month-1),'aux','右弼');
+  put(10-hB,'aux','文昌');put(4+hB,'aux','文曲');
+  const[kui,yue]=KUIYUE[yGan];put(kui,'aux','天魁');put(yue,'aux','天鉞');
+  // 祿存・羊陀
+  const lc2=LUCUN[yGan];put(lc2,'aux','祿存');
+  put(lc2+1,'sha','擎羊');put(lc2-1,'sha','陀羅');
+  // 火鈴(年支三合起,順數生時)
+  for(const[k,v]of Object.entries(HUOLING))if(k.includes(yZhi)){
+    put(v[0]+hB,'sha','火星');put(v[1]+hB,'sha','鈴星');break}
+  // 空劫
+  put(11-hB,'sha','地空');put(11+hB,'sha','地劫');
+  // 四化
+  const[lu4,quan,ke,ji]=SIHUA[yGan];
+  const mark=(nm,t)=>{for(let i=0;i<12;i++){
+    if(P[i].zhu.includes(nm)||P[i].aux.includes(nm)||P[i].sha.includes(nm))P[i].hua[nm]=t}};
+  mark(lu4,'祿');mark(quan,'權');mark(ke,'科');mark(ji,'忌');
+  // 十二宮(逆佈)
+  const gname={};for(let g=0;g<12;g++)gname[((ming-g)%12+12)%12]=GONG12[g];
+  // 大限(陽男陰女順,陰男陽女逆)
+  const yangY=(yg.i%10)%2===0;
+  const fw=(yangY===male);
+  const dx={};for(let s=0;s<12;s++){
+    const i=((ming+(fw?s:-s))%12+12)%12;
+    dx[i]=[ju+s*10,ju+s*10+9]}
+  return{lu,hB,yGan,yZhi,yGZ:yGan+yZhi,ming,shen,ju,zw,P,gname,gongGan,dx,fw,sihua:[lu4,quan,ke,ji]};
+}
+// ── 渲染 ──
+const POS=[[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1]]; // 地支→格
+document.getElementById('go').onclick=render;
+function render(){
+  const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
+  const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
+  const male=document.getElementById('sex').value==='1';
+  let z;try{z=ziwei(Y,M,D,h+mn/60,male)}catch(e){alert('排盤錯誤:'+e.message);return}
+  document.getElementById('lunarInfo').textContent=
+    '農曆 '+(z.lu.isLeap?'閏':'')+z.lu.month+'月'+z.lu.day+'日 ・'+z.yGZ+'年 ・'+BR[z.hB]+'時 ・'+JU_NAME[z.ju];
+  const cur=new Date().getFullYear(),age=cur-Y+1;
+  const el=document.getElementById('chart');el.innerHTML='';
+  const cells={};
+  for(let i=0;i<12;i++){
+    const[r,c]=POS[i];
+    const p=z.P[i];const dx=z.dx[i];
+    const inDx=age>=dx[0]&&age<=dx[1];
+    const d=document.createElement('div');
+    d.className='pal'+(i===z.ming?' ming':'')+(i===z.shen?' shen':'')+(inDx?' daxian':'');
+    d.style.gridRow=r+1;d.style.gridColumn=c+1;
+    const hua=nm=>p.hua[nm]?'<span class="hua '+({'祿':'lu','權':'quan','科':'ke','忌':'ji'})[p.hua[nm]]+'">'+p.hua[nm]+'</span>':'';
+    d.innerHTML='<div class="zhu">'+(p.zhu.map(s=>s+hua(s)).join(' ')||'<span style="opacity:.35">—</span>')+'</div>'
+      +(p.aux.length?'<div class="aux">'+p.aux.map(s=>s+hua(s)).join(' ')+'</div>':'')
+      +(p.sha.length?'<div class="sha">'+p.sha.map(s=>s+hua(s)).join(' ')+'</div>':'')
+      +'<div class="ft"><span class="dx">'+dx[0]+'-'+dx[1]+'</span>'
+      +'<span><span class="gname">'+z.gname[i]+(i===z.shen?'・身':'')+'</span> <span class="gz">'+z.gongGan(i)+BR[i]+'</span></span></div>';
+    el.appendChild(d);cells[i]=d;
+  }
+  const ctr=document.createElement('div');ctr.className='center';
+  const mp=z.P[z.ming];
+  ctr.innerHTML='<b style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:var(--gold)">命盤</b>'
+    +'<div>'+Y+'/'+M+'/'+D+' '+String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0')+' '+(male?'乾造(男)':'坤造(女)')+'</div>'
+    +'<div>農曆 '+(z.lu.isLeap?'閏':'')+z.lu.month+'月'+z.lu.day+'日 '+BR[z.hB]+'時</div>'
+    +'<div>'+z.yGZ+'年生・<b>'+JU_NAME[z.ju]+'</b></div>'
+    +'<div>命宮 <b style="color:var(--gold)">'+BR[z.ming]+'</b>・身宮 <b style="color:var(--blue)">'+BR[z.shen]+'</b></div>'
+    +'<div>命主星:<b>'+(mp.zhu.join('、')||'空宮(借對宮)')+'</b></div>'
+    +'<div style="font-size:11px;opacity:.7">四化:'+z.yGan+'干 '+z.sihua[0]+'祿 '+z.sihua[1]+'權 '+z.sihua[2]+'科 '+z.sihua[3]+'忌</div>'
+    +'<div style="font-size:11px;opacity:.7">大限'+(z.fw?'順行':'逆行')+'・現年 '+age+' 歲(虛歲)</div>';
+  el.appendChild(ctr);
+  // 詳解
+  const dtl=document.getElementById('detail');
+  const mingStars=mp.zhu.length?mp.zhu:z.P[(z.ming+6)%12].zhu;
+  const borrow=!mp.zhu.length;
+  const dxNow=Object.entries(z.dx).find(([i,v])=>age>=v[0]&&age<=v[1]);
+  let h2='<h2>命宮主星解讀</h2>';
+  if(borrow)h2+='<div class="tag">命宮無主星,借對宮('+BR[(z.ming+6)%12]+'遷移宮)之星論</div>';
+  h2+=mingStars.map(s=>'<div style="padding:5px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
+    +'<b style="color:var(--gold);font-size:15px">'+s+'</b>'+(mp.hua[s]?' <span class="hua '+({'祿':'lu','權':'quan','科':'ke','忌':'ji'})[mp.hua[s]]+'">化'+mp.hua[s]+'</span>':'')
+    +'<div style="font-size:13.5px;line-height:1.8">'+(STAR_TXT[s]||'')+'</div></div>').join('');
+  h2+='<h2>四化飛星落宮</h2>';
+  const huaPos=t=>{for(let i=0;i<12;i++)for(const nm of Object.keys(z.P[i].hua))if(z.P[i].hua[nm]===t)return[nm,z.gname[i],BR[i]];return null};
+  h2+=['祿','權','科','忌'].map(t=>{const r=huaPos(t);
+    return r?'<div class="row2"><span><b>化'+t+'</b> '+r[0]+'</span><b>落 '+r[1]+'宮('+r[2]+')・'+HUA_TXT[t]+'</b></div>':''}).join('');
+  if(dxNow){
+    const di=+dxNow[0],dp=z.P[di];
+    h2+='<h2>現行大限('+dxNow[1][0]+'-'+dxNow[1][1]+'歲)</h2>'
+      +'<div class="row2"><span>大限宮位</span><b>'+z.gname[di]+'宮('+z.gongGan(di)+BR[di]+')</b></div>'
+      +'<div class="row2"><span>大限主星</span><b>'+(dp.zhu.join('、')||'空宮')+'</b></div>'
+      +'<div style="font-size:13px;line-height:1.8;margin-top:4px">'+(dp.zhu.map(s=>s+':'+(STAR_TXT[s]||'').split(';')[0]).join('<br>')||'借對宮論之')+'</div>'
+      +(dp.sha.length?'<div style="font-size:12.5px;color:var(--red);margin-top:3px">本限見煞:'+dp.sha.join('、')+',宜謹慎;逢煞亦主激發,得吉星同宮可解</div>':'')
+      +(dp.aux.length?'<div style="font-size:12.5px;color:var(--green)">本限得助:'+dp.aux.join('、')+'</div>':'');
+  }
+  h2+='<h2>十二宮速覽</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">'
+   +GONG12.map(g=>{const i=+Object.keys(z.gname).find(k=>z.gname[k]===g);const p=z.P[i];
+     return '<div style="font-size:12px;border:1px solid #e6dcc3;border-radius:8px;padding:4px 6px;background:#fff">'
+     +'<b style="color:var(--gold)">'+g+'</b> <span style="opacity:.6">'+BR[i]+'</span><br>'
+     +(p.zhu.join('、')||'<span style="opacity:.4">空宮</span>')+'</div>'}).join('')+'</div>';
+  h2+='<div class="note">安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷、雜曜與流年飛星另議;論命仍須綜合三方四正、格局與大限流年合參。</div>';
+  dtl.innerHTML=h2;
+  window.fscP&&window.fscP('ziwei','chart',z.yGZ+'/'+JU_NAME[z.ju]);
+}
+render();
+</script></body></html>
