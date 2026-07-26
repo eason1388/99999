@@ -275,7 +275,9 @@ function ziwei(Y,M,D,h,male){
   const[jk1,jk2]=JIEKONG[yGan];zaAdd(jk1,'副截');zaAdd(jk2,'截空');
   const dayGZ=(()=>{let civ=jdn(Y,M,D);if(h>=23)civ+=1;return((civ-11)%60+60)%60})();
   const xun=Math.floor(dayGZ/10)*10;
-  zaAdd((xun+10)%12,'旬空');zaAdd((xun+11)%12,'副旬');
+  zaAdd((xun+11)%12,'旬空');zaAdd((xun+10)%12,'副旬');
+  zaAdd(6+hB,'臺輔');zaAdd(2+hB,'封誥');
+  zaAdd({'甲':5,'乙':6,'丙':0,'丁':5,'戊':6,'己':8,'庚':2,'辛':6,'壬':9,'癸':11}[yGan],'天廚');
   zaAdd(((ming-7)%12+12)%12,'天傷');zaAdd(((ming-5)%12+12)%12,'天使');
   zaAdd(yb+5,'月德');
   // 十二宮(逆佈)
