@@ -164,6 +164,46 @@ const STAR_TXT={
 '七殺':'將星,肅殺果斷、獨立開創、行動派;宜軍警業務創業,一生起伏大、宜動不宜靜',
 '破軍':'耗星,破舊立新、衝勁十足、不守成規;宜開創變革之業,主變動破耗、先破後立'};
 const HUA_TXT={'祿':'得財順遂、機會來','權':'掌權能幹、增強勢','科':'名聲貴人、逢凶解','忌':'執著阻礙、宜化解'};
+// ── 星曜廟旺利陷(通行表;子丑寅卯辰巳午未申酉戌亥)──
+const BRIGHT={
+'紫微':'平廟廟旺陷旺廟廟旺平陷旺','天機':'廟陷得旺利平廟陷得旺利平',
+'太陽':'陷陷旺廟旺旺廟得得平陷陷','武曲':'旺廟得利廟平旺廟得利廟平',
+'天同':'旺陷利廟平廟陷陷旺平平廟','廉貞':'平利廟平利陷平利廟平利陷',
+'天府':'廟廟廟得廟得旺廟得旺廟得','太陰':'廟廟旺陷陷陷陷平利旺廟廟',
+'貪狼':'旺廟平利廟陷旺廟平利廟陷','巨門':'旺陷廟廟陷廟旺陷廟廟陷旺',
+'天相':'廟廟廟陷得得廟得廟陷得得','天梁':'廟旺廟廟廟陷廟旺陷得廟陷',
+'七殺':'旺廟廟旺廟平旺廟廟旺廟平','破軍':'廟旺得陷旺平廟旺得陷旺平',
+'文昌':'旺廟陷利得廟陷利得廟陷平','文曲':'旺廟平旺得廟陷旺得廟陷平',
+'左輔':'平廟廟陷廟平旺廟廟陷廟平','右弼':'旺廟陷平廟平旺廟陷平廟旺',
+'天魁':'旺廟旺廟旺廟旺廟廟旺廟旺','天鉞':'旺廟旺廟旺廟旺廟廟旺廟旺',
+'祿存':'廟廟廟廟廟廟廟廟廟廟廟廟','擎羊':'陷廟陷陷廟陷陷廟陷陷廟陷',
+'陀羅':'陷廟陷陷廟陷陷廟陷陷廟陷','火星':'陷利廟利陷廟廟利陷利陷平',
+'鈴星':'陷得廟利陷廟廟得陷利陷平','地空':'陷陷廟陷陷廟陷陷廟陷陷廟',
+'地劫':'陷陷平陷陷廟陷陷平陷陷廟','天馬':'平平旺平平平旺平旺平平旺',
+'紅鸞':'廟旺廟旺廟旺廟旺廟旺廟旺','天喜':'旺廟旺廟旺廟旺廟旺廟旺廟',
+'天刑':'平廟廟陷陷廟平廟平陷陷廟','天姚':'廟平陷平廟廟平廟廟平陷廟'};
+const brOf=(s,i)=>BRIGHT[s]?BRIGHT[s][i]:'';
+// 命主(依命宮支)・身主(依年支)
+const MINGZHU=['貪狼','巨門','祿存','文曲','廉貞','武曲','破軍','武曲','廉貞','文曲','祿存','巨門'];
+const SHENZHU=['火星','天相','天梁','天同','文昌','天機','火星','天相','天梁','天同','文昌','天機'];
+// 十二神系統
+const CHANGSHENG=['長生','沐浴','冠帶','臨官','帝旺','衰','病','死','墓','絕','胎','養'];
+const CS_START={2:8,3:11,4:5,5:8,6:2}; // 水二申・木三亥・金四巳・土五申・火六寅
+const BOSHI=['博士','力士','青龍','小耗','將軍','奏書','飛廉','喜神','病符','大耗','伏兵','官府'];
+const SUIQIAN=['歲建','晦氣','喪門','貫索','官符','小耗','歲破','龍德','白虎','天德','弔客','病符'];
+const JIANGQIAN=['將星','攀鞍','歲驛','息神','華蓋','劫煞','災煞','天煞','指背','咸池','月煞','亡神'];
+const JIANG_START={'申子辰':0,'寅午戌':6,'巳酉丑':9,'亥卯未':3};
+const XIAOXIAN_START={'寅午戌':4,'申子辰':10,'巳酉丑':7,'亥卯未':1};
+// 雜曜依年干
+const TIANGUAN={'甲':7,'乙':4,'丙':5,'丁':2,'戊':3,'己':9,'庚':11,'辛':9,'壬':10,'癸':6};
+const TIANFU_S={'甲':9,'乙':8,'丙':0,'丁':11,'戊':3,'己':2,'庚':6,'辛':5,'壬':6,'癸':5};
+const JIEKONG={'甲':[8,9],'己':[8,9],'乙':[6,7],'庚':[6,7],'丙':[4,5],'辛':[4,5],'丁':[2,3],'壬':[2,3],'戊':[0,1],'癸':[0,1]};
+const TIANWU=[5,8,2,11,5,8,2,11,5,8,2,11];   // 正月起(巳申寅亥循環)
+const TIANYUE=[10,5,4,2,7,3,11,7,2,6,10,2];  // 正月起
+const YINSHA=[2,0,10,8,6,4,2,0,10,8,6,4];    // 正月起
+const YUEJIE=[8,8,10,10,0,0,2,2,4,4,6,6];    // 月解神:正二申・三四戌…
+const GUAGUA={'亥子丑':[2,10],'寅卯辰':[5,1],'巳午未':[8,4],'申酉戌':[11,7]};
+const FEILIAN={'子丑寅':[8,9,10],'卯辰巳':[5,6,7],'午未申':[2,3,4],'酉戌亥':[11,0,1]};
 function ziwei(Y,M,D,h,male){
   const lu=toLunar(Y,M,D);
   const hB=Math.floor((h+1)/2)%12;
@@ -211,6 +251,33 @@ function ziwei(Y,M,D,h,male){
   const mark=(nm,t)=>{for(let i=0;i<12;i++){
     if(P[i].zhu.includes(nm)||P[i].aux.includes(nm)||P[i].sha.includes(nm))P[i].hua[nm]=t}};
   mark(lu4,'祿');mark(quan,'權');mark(ke,'科');mark(ji,'忌');
+  // ── 雜曜 ──
+  const yb=BR.indexOf(yZhi),lm=lu.month,ld=lu.day;
+  const zaAdd=(i,nm)=>P[((i%12)+12)%12].aux.push(nm);
+  for(const[k,v]of Object.entries(JIANG_START))if(k.includes(yZhi)){
+    zaAdd([8,2,11,5][Object.keys(JIANG_START).indexOf(k)],'天馬');break}
+  zaAdd(3-yb,'紅鸞');zaAdd(3-yb+6,'天喜');
+  zaAdd(9+(lm-1),'天刑');zaAdd(1+(lm-1),'天姚');
+  const lfPos=((4+(lm-1))%12+12)%12, rbPos=((10-(lm-1))%12+12)%12;
+  const wcPos=((10-hB)%12+12)%12, wqPos=(4+hB)%12;
+  zaAdd(lfPos+(ld-1),'三臺');zaAdd(rbPos-(ld-1),'八座');
+  zaAdd(wcPos+(ld-1)-1,'恩光');zaAdd(wqPos+(ld-1)-1,'天貴');
+  zaAdd(4+yb,'龍池');zaAdd(10-yb,'鳳閣');
+  zaAdd(6-yb,'天哭');zaAdd(6+yb,'天虛');
+  zaAdd(TIANGUAN[yGan],'天官');zaAdd(TIANFU_S[yGan],'天福');
+  zaAdd(TIANWU[lm-1],'天巫');zaAdd(TIANYUE[lm-1],'天月');
+  zaAdd(YINSHA[lm-1],'陰煞');zaAdd(YUEJIE[lm-1],'解神');
+  zaAdd(yb+1,'天空');zaAdd(10-yb,'年解');
+  zaAdd(ming+yb,'天才');zaAdd(shen+yb,'天壽');
+  for(const[k,v]of Object.entries(GUAGUA))if(k.includes(yZhi)){zaAdd(v[0],'孤辰');zaAdd(v[1],'寡宿');break}
+  for(const[k,v]of Object.entries(FEILIAN))if(k.includes(yZhi)){zaAdd(v[k.indexOf(yZhi)],'蜚廉');break}
+  zaAdd({0:5,6:5,3:5,9:5,2:9,8:9,5:9,11:9,4:1,10:1,1:1,7:1}[yb],'破碎');
+  const[jk1,jk2]=JIEKONG[yGan];zaAdd(jk1,'副截');zaAdd(jk2,'截空');
+  const dayGZ=(()=>{let civ=jdn(Y,M,D);if(h>=23)civ+=1;return((civ-11)%60+60)%60})();
+  const xun=Math.floor(dayGZ/10)*10;
+  zaAdd((xun+10)%12,'旬空');zaAdd((xun+11)%12,'副旬');
+  zaAdd(((ming-7)%12+12)%12,'天傷');zaAdd(((ming-5)%12+12)%12,'天使');
+  zaAdd(yb+5,'月德');
   // 十二宮(逆佈)
   const gname={};for(let g=0;g<12;g++)gname[((ming-g)%12+12)%12]=GONG12[g];
   // 大限(陽男陰女順,陰男陽女逆)
@@ -219,10 +286,30 @@ function ziwei(Y,M,D,h,male){
   const dx={};for(let s=0;s<12;s++){
     const i=((ming+(fw?s:-s))%12+12)%12;
     dx[i]=[ju+s*10,ju+s*10+9]}
-  return{lu,hB,yGan,yZhi,yGZ:yGan+yZhi,ming,shen,ju,zw,P,gname,gongGan,dx,fw,sihua:[lu4,quan,ke,ji]};
+  // 四大十二神
+  const cs={},bs={},sq={},jq={};
+  const csS=CS_START[ju];
+  for(let s=0;s<12;s++){
+    cs[((csS+(fw?s:-s))%12+12)%12]=CHANGSHENG[s];
+    bs[((lc2+(fw?s:-s))%12+12)%12]=BOSHI[s];
+    sq[(yb+s)%12]=SUIQIAN[s];
+  }
+  for(const[k,v]of Object.entries(JIANG_START))if(k.includes(yZhi)){
+    for(let s=0;s<12;s++)jq[(v+s)%12]=JIANGQIAN[s];break}
+  // 小限(年支三合起,男順女逆)+ 流年虛歲
+  const xx={},ln={};
+  let xs=0;for(const[k,v]of Object.entries(XIAOXIAN_START))if(k.includes(yZhi)){xs=v;break}
+  for(let a=1;a<=72;a++){
+    const i=((xs+(male?a-1:-(a-1)))%12+12)%12;(xx[i]=xx[i]||[]).push(a);
+    const j=((yb+a-1)%12+12)%12;(ln[j]=ln[j]||[]).push(a);
+  }
+  return{lu,hB,yGan,yZhi,yGZ:yGan+yZhi,ming,shen,ju,zw,P,gname,gongGan,dx,fw,
+    sihua:[lu4,quan,ke,ji],cs,bs,sq,jq,xx,ln,
+    mingZhu:MINGZHU[ming],shenZhu:SHENZHU[yb],ziDou:BR[((10-hB)%12+12)%12]};
 }
 // ── 渲染 ──
-const POS=[[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1]]; // 地支→格
+// 傳統盤面:巳午未申(上排左→右)、酉戌亥(右排下行)、子丑寅(下排右→左)、卯辰(左排上行)
+const POS=[[3,2],[3,1],[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3]]; // 地支(子=0)→[列,行]
 document.getElementById('go').onclick=render;
 function render(){
   const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
@@ -242,11 +329,15 @@ function render(){
     d.className='pal'+(i===z.ming?' ming':'')+(i===z.shen?' shen':'')+(inDx?' daxian':'');
     d.style.gridRow=r+1;d.style.gridColumn=c+1;
     const hua=nm=>p.hua[nm]?'<span class="hua '+({'祿':'lu','權':'quan','科':'ke','忌':'ji'})[p.hua[nm]]+'">'+p.hua[nm]+'</span>':'';
-    d.innerHTML='<div class="zhu">'+(p.zhu.map(s=>s+hua(s)).join(' ')||'<span style="opacity:.35">—</span>')+'</div>'
-      +(p.aux.length?'<div class="aux">'+p.aux.map(s=>s+hua(s)).join(' ')+'</div>':'')
-      +(p.sha.length?'<div class="sha">'+p.sha.map(s=>s+hua(s)).join(' ')+'</div>':'')
-      +'<div class="ft"><span class="dx">'+dx[0]+'-'+dx[1]+'</span>'
-      +'<span><span class="gname">'+z.gname[i]+(i===z.shen?'・身':'')+'</span> <span class="gz">'+z.gongGan(i)+BR[i]+'</span></span></div>';
+    const br=nm=>{const b=brOf(nm,i);return b?'<span style="font-size:8.5px;opacity:.55">'+b+'</span>':''};
+    const fmt=s=>s+br(s)+hua(s);
+    d.innerHTML='<div class="zhu">'+(p.zhu.map(fmt).join(' ')||'<span style="opacity:.35">—</span>')+'</div>'
+      +(p.aux.length?'<div class="aux">'+p.aux.map(fmt).join(' ')+'</div>':'')
+      +(p.sha.length?'<div class="sha">'+p.sha.map(fmt).join(' ')+'</div>':'')
+      +'<div style="font-size:8.5px;color:#9a9184;line-height:1.25;margin-top:2px">'
+        +(z.bs[i]||'')+' '+(z.cs[i]||'')+'<br>'+(z.jq[i]||'')+' '+(z.sq[i]||'')+'</div>'
+      +'<div class="ft"><span class="dx">'+dx[0]+'-'+dx[1]+'<br><span style="font-size:8px;opacity:.75">小'+(z.xx[i]||[]).slice(0,4).join(',')+'</span></span>'
+      +'<span style="text-align:right"><span class="gname">'+z.gname[i]+(i===z.shen?'・身':'')+'</span><br><span class="gz">'+z.gongGan(i)+BR[i]+'</span></span></div>';
     el.appendChild(d);cells[i]=d;
   }
   const ctr=document.createElement('div');ctr.className='center';
@@ -256,6 +347,7 @@ function render(){
     +'<div>農曆 '+(z.lu.isLeap?'閏':'')+z.lu.month+'月'+z.lu.day+'日 '+BR[z.hB]+'時</div>'
     +'<div>'+z.yGZ+'年生・<b>'+JU_NAME[z.ju]+'</b></div>'
     +'<div>命宮 <b style="color:var(--gold)">'+BR[z.ming]+'</b>・身宮 <b style="color:var(--blue)">'+BR[z.shen]+'</b></div>'
+    +'<div>命主:<b>'+z.mingZhu+'</b>　身主:<b>'+z.shenZhu+'</b>　子斗:'+z.ziDou+'</div>'
     +'<div>命主星:<b>'+(mp.zhu.join('、')||'空宮(借對宮)')+'</b></div>'
     +'<div style="font-size:11px;opacity:.7">四化:'+z.yGan+'干 '+z.sihua[0]+'祿 '+z.sihua[1]+'權 '+z.sihua[2]+'科 '+z.sihua[3]+'忌</div>'
     +'<div style="font-size:11px;opacity:.7">大限'+(z.fw?'順行':'逆行')+'・現年 '+age+' 歲(虛歲)</div>';
