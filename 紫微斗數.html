@@ -217,6 +217,41 @@ function sfDeep(stars){
   if(any('天機','天同','天梁','太陰'))return '此宮星性偏柔和穩健,主循序漸進、以柔克剛,不宜強求急進';
   return '此宮吉凶須合會照諸星參看——本宮為體、三方為用,單論一宮易失偏頗';
 }
+// ═══ 天紀(倪海廈)論法 ═══
+// 子午流注:地支→臟腑(倪師疾厄獨門論法——不看疾厄宮之星,看煞星落於何支)
+const ZIWU=[['膽','子時開膽;煞聚此宮主膽疾、膽結石、膽囊炎'],['肝','丑時開肝;煞聚此宮主肝病、肝硬化、脂肪肝,忌熬夜飲酒'],
+['肺','寅時開肺;煞聚此宮主肺疾、氣喘、呼吸道慢性病'],['大腸','卯時開大腸;煞聚此宮主腸疾、便祕、大腸病變'],
+['胃','辰時開胃;煞聚此宮主胃病、胃潰瘍、胃部病變'],['脾','巳時開脾;煞聚此宮主脾胃虛弱、消化吸收不良、血糖'],
+['心臟(先天)','午時開心;煞聚此宮主先天心臟問題——生下來心臟即有隱患'],['小腸','未時開小腸;煞聚此宮主小腸吸收、腹疾'],
+['膀胱','申時開膀胱;煞聚此宮主泌尿、膀胱、攝護腺'],['腎','酉時開腎;煞聚此宮主腎臟、腰疾、內分泌'],
+['心包(後天)','戌時開心包;煞聚此宮主後天心臟病——中年後之心血管病變,與先天不同'],
+['三焦','亥時開三焦;三焦為身之膜腔,煞聚此宮主糖尿病、代謝症候群、內傷']];
+const NI_SHA='擎羊陀羅火星鈴星地空地劫';
+function niLun(z){
+  // 一、疾厄致命傷:掃十二宮煞忌
+  const score=[];
+  for(let i=0;i<12;i++){
+    let n=0;const items=[];
+    z.P[i].sha.forEach(s=>{if(NI_SHA.includes(s)){n+=1;items.push(s)}});
+    Object.entries(z.P[i].hua).forEach(([nm,t])=>{if(t==='忌'){n+=1.5;items.push(nm+'化忌')}});
+    score.push({i,n,items});
+  }
+  const mx=Math.max(...score.map(s=>s.n));
+  const worst=score.filter(s=>s.n===mx&&mx>0);
+  // 二、先天財 / 後天財
+  const CAIXING='武曲天府太陰祿存';
+  const inG=(i,arr)=>z.P[i].zhu.concat(z.P[i].aux).filter(s=>arr.includes(s));
+  const gIdx=n=>+Object.keys(z.gname).find(k=>z.gname[k]===n);
+  const mi=z.ming, cai=gIdx('財帛'), guan=gIdx('官祿'), qian=gIdx('遷移');
+  const hasLu=i=>Object.values(z.P[i].hua).includes('祿');
+  const xian=inG(mi,CAIXING).concat(inG(cai,CAIXING)).length+(hasLu(mi)||hasLu(cai)?1:0);
+  const hou=inG(qian,CAIXING).concat(inG(guan,CAIXING)).length+(hasLu(qian)||hasLu(guan)?1:0);
+  // 三、財帛 vs 官祿 何者旺
+  const wgt=i=>z.P[i].zhu.length*2+inG(i,'文昌文曲左輔右弼天魁天鉞祿存').length+(hasLu(i)?2:0)
+             +(Object.values(z.P[i].hua).includes('權')?2:0)-z.P[i].sha.filter(s=>NI_SHA.includes(s)).length;
+  return{worst,xian,hou,caiW:wgt(cai),guanW:wgt(guan),qianW:wgt(qian),cai,guan,qian,
+    fu:gIdx('福德'),qi:gIdx('夫妻'),xiong:gIdx('兄弟'),ji:gIdx('疾厄')};
+}
 // ═══ 格局判定 ═══
 function patterns(z){
   const R=[],has=(i,s)=>z.P[i].zhu.includes(s)||z.P[i].aux.includes(s)||z.P[i].sha.includes(s);
@@ -498,8 +533,73 @@ function render(){
     if(jiP[3]===luP[3])h2+='<div style="font-size:13px;background:rgba(201,169,106,.15);padding:6px 9px;border-radius:8px;margin-top:4px"><b>【祿忌同宮】</b>此宮福禍相倚、得失並存——正是一生用力最深也最糾結之處;能看破則祿存忌消,執著則兩失。</div>';
     else if((jiP[3]+6)%12===luP[3])h2+='<div style="font-size:13px;background:rgba(166,58,46,.1);padding:6px 9px;border-radius:8px;margin-top:4px"><b>【祿忌相沖】</b>財機與阻礙成對立之勢,主大起大落、成敗相隨;宜取捨分明,不可兩頭皆抓。</div>';
   }
-  // 三、十二宮深論
-  h2+='<h2>三、十二宮深論</h2>';
+  // ═══ 天紀(倪海廈)論法 ═══
+  const NL=niLun(z);
+  h2+='<h2 style="border-color:#8e6bb5;color:#8e6bb5">三、天紀(倪海廈)一派論法</h2>';
+  h2+='<div style="background:rgba(142,107,181,.07);border-left:3px solid #8e6bb5;border-radius:0 10px 10px 0;padding:9px 12px;font-size:13.5px;line-height:1.85">';
+  // 1 疾厄致命傷
+  h2+='<b style="color:#8e6bb5;font-size:14.5px">① 致命傷:子午流注定臟腑</b><br>'
+   +'<span style="opacity:.85">倪師論疾厄不看疾厄宮之星,而以<b>子午流注</b>定臟腑——「肺寅大卯胃辰宮,脾巳心午小未中;膀申腎酉心包戌,亥三子膽丑肝通」。看<b>煞星與化忌聚於哪一個地支宮</b>,該地支所主之臟腑即是此生<b>致命傷</b>。書上寫「七殺在疾厄主痔瘡」這種論法沒有用——算命要講致命傷。</span><br>';
+  if(NL.worst.length){
+    h2+=NL.worst.map(w=>'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+      +'<b style="color:var(--red);font-size:14.5px">'+BR[w.i]+'宮 → '+ZIWU[w.i][0]+'</b>'
+      +' <span style="font-size:12px;opacity:.7">(見'+w.items.join('、')+')</span>'
+      +'<div style="font-size:13px">'+ZIWU[w.i][1]+'</div></div>').join('');
+    h2+='<span style="font-size:12.5px;opacity:.8">若兩宮並重,則主兩臟同病(如肝腎並見);發病之年須看大限流年行至該宮引動——倪師案例:辰宮化忌主胃,大小限行至 37 歲,誤診兩次終確診胃癌。</span><br>';
+  }else h2+='<div style="margin:4px 0">十二宮煞忌分散,無明顯集中之處——先天體質尚均衡,無特定致命傷;仍宜依一般養生原則保養。</div>';
+  // 2 夫妻必看福德
+  const fuP=z.P[NL.fu],qiP=z.P[NL.qi];
+  const bad=p=>p.sha.filter(s=>NI_SHA.includes(s)).length+(Object.values(p.hua).includes('忌')?2:0);
+  const good=p=>p.aux.filter(s=>'文昌文曲左輔右弼天魁天鉞祿存'.includes(s)).length+(Object.values(p.hua).includes('祿')?2:0)+(Object.values(p.hua).includes('科')?1:0);
+  const fuNet=good(fuP)-bad(fuP), qiNet=good(qiP)-bad(qiP);
+  h2+='<br><b style="color:#8e6bb5;font-size:14.5px">② 論婚姻必合福德宮</b><br>'
+   +'<span style="opacity:.85">倪師言:「看婚姻光看夫妻宮,大錯特錯——一定要看福德宮。」福德宮者,<b>一輩子的福祿</b>也,亦代表夫妻關係與一世財祿事業。<b>夫妻宮好而福德宮壞者,終究要散。</b></span><br>'
+   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +'夫妻宮('+BR[NL.qi]+'):'+(qiP.zhu.join('、')||'空宮')+(qiP.sha.length?' <span style="color:var(--red)">見'+qiP.sha.join('、')+'</span>':'')+'<br>'
+   +'福德宮('+BR[NL.fu]+'):'+(fuP.zhu.join('、')||'空宮')+(fuP.sha.length?' <span style="color:var(--red)">見'+fuP.sha.join('、')+'</span>':'')+'<br>'
+   +'<b>合參:</b>'+(qiNet>=0&&fuNet>=0?'夫妻與福德皆得力,婚姻根基穩固,可白首偕老。':
+      qiNet>=0&&fuNet<0?'<span style="color:var(--red)">夫妻宮尚可而福德宮受剋——此正倪師所謂「夫妻宮好、福德宮爛,散!」表面和睦而內心不安,須自福德(心性、慾望、價值觀)著手化解,否則久必生變。</span>':
+      qiNet<0&&fuNet>=0?'夫妻宮見剋而福德宮尚厚,婚姻有波折而根柢未斷;宜晚婚、宜包容,福德能撐住則不至於散。':
+      '<span style="color:var(--red)">夫妻與福德俱受剋,婚姻課題最重;宜晚婚、宜修心,並以陽宅(夫妻宜居西北乾位)輔助調整。</span>')+'</div>';
+  // 3 三方:命宮兼看財官遷
+  h2+='<br><b style="color:#8e6bb5;font-size:14.5px">③ 命宮必兼看財帛・官祿・遷移</b><br>'
+   +'<span style="opacity:.85">「看命宮一定要同時兼看三個宮:財帛、官祿、遷移。」財帛主自營為老闆,官祿主公職受薪;何者旺即知其發展方向。遷移則定其「該不該離鄉」——有人須外出方發,有人出去繞一圈回來才好,有人非留本地不可。</span><br>'
+   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +'財帛('+BR[NL.cai]+'):'+(z.P[NL.cai].zhu.join('、')||'空宮')+'　勢 '+NL.caiW+'<br>'
+   +'官祿('+BR[NL.guan]+'):'+(z.P[NL.guan].zhu.join('、')||'空宮')+'　勢 '+NL.guanW+'<br>'
+   +'遷移('+BR[NL.qian]+'):'+(z.P[NL.qian].zhu.join('、')||'空宮')+'　勢 '+NL.qianW+'<br>'
+   +'<b>取向:</b>'+(NL.caiW>NL.guanW+1?'財帛勝於官祿——<b>宜自營經商、私人企業掌權</b>,不宜死守固定薪水。':
+      NL.guanW>NL.caiW+1?'官祿勝於財帛——<b>宜公職、大機構、受薪專業</b>,自行創業反多辛勞。':'財官相當——受薪或自營皆可行,宜依興趣與時機選擇,或先受薪後自立。')
+   +'<br><b>遷移:</b>'+(NL.qianW>Math.max(NL.caiW,NL.guanW)?'<b>遷移宮最旺——命中注定要往外走</b>,離鄉背井、異地他國方能大發;守在本地必受屈。':
+      NL.qianW>=Math.max(NL.caiW,NL.guanW)-1?'遷移有力——宜出外歷練一圈再回本地發展,先動後定為佳。':'遷移平平——發於本地即可,不必刻意遠走。')+'</div>';
+  // 4 先天財 vs 後天財
+  h2+='<br><b style="color:#8e6bb5;font-size:14.5px">④ 先天財與後天財</b><br>'
+   +'<span style="opacity:.85">「命宮、財帛都是財星者,生下來就有家業,此先天之財;命宮空空,而財星在遷移或官祿者,是後天自己賺來的。」</span><br>'
+   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +(NL.xian>NL.hou?'<b>先天財勝</b>('+NL.xian+' : '+NL.hou+')——財星聚於命財之位,主有祖蔭家業可承,起步較他人輕鬆;然守成不易,仍須自立。':
+     NL.hou>NL.xian?'<b>後天財勝</b>('+NL.xian+' : '+NL.hou+')——財星在遷移官祿,主白手起家、自力更生;家中未必有助,但憑本事與外緣可致富,愈動愈發。':
+     '先後天財相當——祖蔭有限而自力可成,宜半守半創。')+'</div>';
+  // 5 兄弟宮化忌三解
+  const xP=z.P[NL.xiong];
+  if(Object.values(xP.hua).includes('忌')||xP.sha.filter(s=>NI_SHA.includes(s)).length>=2){
+    h2+='<br><b style="color:#8e6bb5;font-size:14.5px">⑤ 兄弟宮見忌煞——倪師三解</b><br>'
+     +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+     +'兄弟宮('+BR[NL.xiong]+')見'+(Object.entries(xP.hua).filter(([,t])=>t==='忌').map(([n])=>n+'化忌').concat(xP.sha.filter(s=>NI_SHA.includes(s))).join('、'))+',依倪師之法有三解:<br>'
+     +'<b>一</b>、有兄弟而<b>不和</b>——非常不睦;<b>二</b>、有兄弟而<b>夭折</b>;<b>三</b>、與<b>兄弟合夥必破財</b>。<br>'
+     +'<span style="font-size:12.5px;opacity:.8">三者取何,須以面相佐證:眉毛雜亂顛倒主兄弟不和,眉有斷缺主手足有損(左眉主兄弟、右眉主姊妹)。斗數批六親本就較弱,倪師主張以相輔之。</span></div>';
+  }
+  // 6 改運法
+  h2+='<br><b style="color:#8e6bb5;font-size:14.5px">⑥ 三才改命:天一分、人一分、地一分</b><br>'
+   +'<span style="opacity:.85">倪師核心主張:<b>天命佔三分之一、人事佔三分之一、地理佔三分之一。</b>算命是看天,知其脈絡、預知將發生何事;知道以後,用<b>地理位置(陽宅)</b>為他化解——為什麼地理能化解?因為<b>換了位置就換了念,念一改,想法就改、做法就改,命就改了</b>。再加上人事(明白人間道之理,懂得判斷事情),人與地合起來是三分之二,自然大於天命的三分之一。<br>此非畫符念咒、買魚缸做法之類——<b>無理之事讀書人不接受;有理則走遍天下</b>。</span>'
+   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px;font-size:13px">'
+   +'<b>本盤化解方向:</b>'
+   +(NL.worst.length?'健康上以<b>'+NL.worst.map(w=>ZIWU[w.i][0]).join('、')+'</b>為終身要害,宜及早以中醫調養、定期檢查;':'')
+   +(fuNet<0?'福德受剋者,調整之要在<b>心念與慾望</b>,可配合陽宅福德方位佈置靜穩;':'')
+   +'陽宅方面請至「羅盤」頁之「家人配位(易卦派)」與「開運佈局」,依本命所缺調整居住方位——<b>此即天紀「以地理補天命」之實作</b>。</div>';
+  h2+='<div style="font-size:11.5px;opacity:.65;margin-top:6px">以上依《天紀・天機道》公開授課內容之意旨整理表述,非逐字引用;各派傳承或有出入,請以師承為準。</div>';
+  h2+='</div>';
+  // 十二宮深論
+  h2+='<h2>四、十二宮深論</h2>';
   h2+=GONG12.map(g=>{
     const i=+Object.keys(z.gname).find(k=>z.gname[k]===g);
     const p=z.P[i];
@@ -536,7 +636,7 @@ function render(){
     const di=+dxNow[0],dp=z.P[di];
     const dss=dp.zhu.length?dp.zhu:z.P[(di+6)%12].zhu;
     const gi=GONG12.indexOf(z.gname[di]);
-    h2+='<h2>四、現行大限 '+dxNow[1][0]+'~'+dxNow[1][1]+' 歲(走'+z.gname[di]+'宮)</h2>'
+    h2+='<h2>五、現行大限 '+dxNow[1][0]+'~'+dxNow[1][1]+' 歲(走'+z.gname[di]+'宮)</h2>'
       +'<div style="font-size:13.5px;line-height:1.85">'
       +'<b>限宮:</b>'+z.gongGan(di)+BR[di]+'('+z.gname[di]+'宮)　<b>限內主星:</b>'+(dss.join('、')||'借對宮')+'<br>'
       +'此十年以「'+z.gname[di]+'」之事為人生主軸——'
@@ -561,13 +661,13 @@ function render(){
   const xxGong=Object.keys(z.xx).find(i=>(z.xx[i]||[]).includes(vAge));
   const lp=z.P[lyMing];
   const lyStars=lp.zhu.length?lp.zhu:z.P[(lyMing+6)%12].zhu;
-  h2+='<h2>五、'+LY+' 年('+lGan+lZhi+')流年運程</h2>';
+  h2+='<h2>六、'+LY+' 年('+lGan+lZhi+')流年運程</h2>';
   h2+='<div style="font-size:13.5px;line-height:1.85">'
     +'<b>流年命宮:</b>'+lZhi+'宮(本命<b style="color:var(--gold)">'+z.gname[lyMing]+'宮</b>)　<b>虛歲</b>'+vAge
     +(lyDx?'　<b>大限:</b>'+lyDx[1][0]+'~'+lyDx[1][1]+'歲走'+z.gname[+lyDx[0]]+'宮':'')
     +(xxGong!==undefined?'　<b>小限:</b>'+BR[xxGong]+'宮('+z.gname[xxGong]+')':'')+'<br>'
-    +'<b>本年主軸:</b>流年命宮落在本命「'+z.gname[lyMing]+'宮」——'
-    +({'命宮':'本年即本命年之能量重演,凡事回歸自身;是立志、轉型、重新定位的一年','兄弟':'本年重心在手足、同儕、合夥與人和;成敗多繫於身邊之人','夫妻':'感情婚姻為本年主題,已婚者夫妻關係起變化,未婚者易有姻緣或分合','子女':'子女、晚輩、投資、創作為本年重點;亦主桃花與合作機會','財帛':'本年財務動盪明顯,收支變化大;理財得法則豐,失序則耗','疾厄':'健康為本年首要,身體會發出訊號;宜檢查調養,勿硬撐','遷移':'本年宜動不宜靜,遷移、外出、換環境之機顯著;動則有變、變中有機','僕役':'人際交友為本年關鍵,貴人小人並見;擇友為第一要務','官祿':'事業運為本年主戰場,升遷、轉職、創業之機在此;宜積極表現','田宅':'不動產、家宅、家人為本年重心;易有搬遷、裝修、置產之事','福德':'本年重心在心境與精神層面,亦主享受消費;宜修心不宜放縱','父母':'長輩、上司、文書契約為本年主題;宜敬長守法,契約細看'})[z.gname[lyMing]]+'。<br>'
+    +'<b>本年主軸(倪師「宮性」論):</b>流年落在本命「'+z.gname[lyMing]+'宮」,<b>今年的阻力與課題即在此宮之事</b>——'
+    +({'命宮':'本年即本命年之能量重演,凡事回歸自身;是立志、轉型、重新定位的一年','兄弟':'本年重心在手足、同儕、合夥與人和;成敗多繫於身邊之人','夫妻':'感情婚姻為本年主題,已婚者夫妻關係起變化,未婚者易有姻緣或分合','子女':'子女、晚輩、投資、創作為本年重點;亦主桃花與合作機會','財帛':'本年財務動盪明顯,收支變化大;理財得法則豐,失序則耗','疾厄':'健康為本年首要,身體會發出訊號;宜檢查調養,勿硬撐','遷移':'本年宜動不宜靜——倪師言「流年進入遷移宮,驛馬即動,不必等天馬星」;遷移、外出、換環境之機顯著','僕役':'人際交友為本年關鍵,貴人小人並見;擇友為第一要務','官祿':'事業運為本年主戰場,升遷、轉職、創業之機在此;宜積極表現','田宅':'不動產、家宅、家人為本年重心;易有搬遷、裝修、置產之事','福德':'本年重心在心境與精神層面,亦主享受消費;宜修心不宜放縱','父母':'長輩、上司、文書契約為本年主題;宜敬長守法,契約細看'})[z.gname[lyMing]]+'。<br>'
     +'<b>流年宮內主星:</b>'+(lyStars.join('、')||'空宮(借對宮)')+'<br>'
     +lyStars.map(s=>{const t=(SG[s]||[])[GONG12.indexOf(z.gname[lyMing])];return t?'　・<b>'+s+'</b>:'+t:''}).filter(Boolean).join('<br>')
     +'</div>';
