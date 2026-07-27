@@ -36,14 +36,16 @@ button{font-family:inherit}
 <b style="color:#8C6D3F">怎麼用?(三步)</b>
 <span style="float:right;cursor:pointer;opacity:.5;font-size:12px" id="hideHow">收起 ✕</span><br>
 <b>① 按「📍我的位置」</b>——地圖跳到你現在的位置(手機會問你要不要允許定位,按允許)<br>
-<b>② 按「畫龍脈線」</b>,然後<b>沿著山脊由高往低</b>一路點下去(點 5～10 個點),<b>雙擊</b>結束<br>
-　 → 下方會出現地形剖面圖,自動標出<b>過峽(束氣處)</b>與<b>起伏節數</b><br>
+<b>② 按「① 畫龍脈線」</b>,<b>沿著山脊由高往低</b>一路點下去(至少 2 點,建議 5～10 點)<br>
+　 點完按<b style="color:#4A6B4F">「📈 產生剖面圖」</b>(電腦也可直接雙擊地圖)<br>
+　 → 下方出現地形剖面圖,自動標出<b>過峽(束氣處)</b>與<b>起伏節數</b><br>
 <b>③ 按「點穴」</b>,再點你要看的位置 → 顯示該處<b>坐向與朝案方位(24山)</b><br>
 <span style="opacity:.7;font-size:12.5px">找不到山?用左上角 <b>+ −</b> 縮放,或用手指拖曳移動地圖。棕色細線是等高線,線愈密代表愈陡。</span>
 </div>
 <div class="row">
   <button class="chip" id="locBtn" style="background:#8C6D3F;color:#fff;border-color:#8C6D3F">📍 我的位置</button>
   <button class="chip on" data-t="dragon">① 畫龍脈線</button>
+  <button class="chip" id="goProfile" style="background:#4A6B4F;color:#fff;border-color:#4A6B4F">📈 產生剖面圖</button>
   <button class="chip" data-t="xue">② 點穴</button>
   <button class="chip" data-t="clear">清除</button>
 </div>
@@ -111,12 +113,18 @@ function quality(elev){
 let tool='dragon',pts=[],layer=L.layerGroup().addTo(map),xue=null,lastElev=null,lastLine=null;
 document.querySelectorAll('.chip[data-t]').forEach(b=>b.onclick=()=>{
   if(b.dataset.t==='clear'){pts=[];layer.clearLayers();xue=null;lastElev=null;
-    document.getElementById('result').textContent='已清除。';draw([],[]);return}
-  tool=b.dataset.t;document.querySelectorAll('.chip[data-t]').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+    document.getElementById('result').textContent='已清除。';
+    document.getElementById('status').textContent='已清除,可重新按「① 畫龍脈線」開始';draw([],[]);return}
+  tool=b.dataset.t;document.querySelectorAll('.chip[data-t]').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  document.getElementById('status').textContent=b.dataset.t==='dragon'
+    ?'沿山脊由高往低點選(目前 '+pts.length+' 點);點完按「📈 產生剖面圖」'
+    :'請在地圖上點選穴場位置'});
 map.on('click',e=>{
   if(tool==='dragon'){pts.push(e.latlng);
-    L.circleMarker(e.latlng,{radius:4,color:'#8C6D3F'}).addTo(layer);
-    if(pts.length>1)L.polyline(pts.slice(-2),{color:'#8C6D3F',weight:3}).addTo(layer)}
+    L.circleMarker(e.latlng,{radius:5,color:'#8C6D3F',fillColor:'#8C6D3F',fillOpacity:.9}).addTo(layer);
+    if(pts.length>1)L.polyline(pts.slice(-2),{color:'#8C6D3F',weight:3}).addTo(layer);
+    document.getElementById('status').innerHTML='已點 <b>'+pts.length+'</b> 點'
+      +(pts.length<2?'(至少再點 1 點)':' — 可繼續點,或按 <b style="color:#4A6B4F">📈 產生剖面圖</b>');}
   else if(tool==='xue'){xue=e.latlng;
     L.marker(e.latlng,{title:'穴'}).addTo(layer);
     if(pts.length>=2){
@@ -126,9 +134,12 @@ map.on('click',e=>{
         '穴場:坐'+mountain(sit)+'向'+mountain(fac)+'(來龍 '+lai.toFixed(1)+'°)';
       L.polyline([xue,pts[0]],{color:'#3E5C76',weight:2,dashArray:'5 5'}).addTo(layer)}
   }});
-map.on('dblclick',async e=>{
-  if(tool!=='dragon'||pts.length<2)return;
-  document.getElementById('result').textContent='取樣高程中…';
+map.on('dblclick',()=>makeProfile());
+document.getElementById('goProfile').onclick=()=>makeProfile();
+async function makeProfile(){
+  const res=document.getElementById('result');
+  if(pts.length<2){res.innerHTML='<span class="tag warn">請先按「① 畫龍脈線」,在地圖上沿山脊點至少 2 個點</span>';return}
+  res.textContent='取樣高程中…(約需 3～10 秒)';
   // 沿線等距取 60 點
   const samples=[];const seg=[];let total=0;
   for(let i=1;i<pts.length;i++){const d=map.distance(pts[i-1],pts[i]);seg.push(d);total+=d}
@@ -150,12 +161,13 @@ map.on('dblclick',async e=>{
       +Q.notes.map(n=>'<span class="tag '+(n.includes('適中')||n.includes('結穴')?'good':(n.includes('過平')||n.includes('過險')||n.includes('未見')?'warn':''))+'">'+n+'</span>').join('')
       +'<div class="note">評分規則:起伏節數(每對峰峽+15,上限60)+落差適中(50–500m,+20)+末段緩降(+20)。巒頭通則之量化輔助,非取代目力。</div>';
   }catch(err){
-    document.getElementById('result').innerHTML='<span class="tag warn">高程 API 無法連線(需網路)。</span> 以示範資料展示:';
+    document.getElementById('result').innerHTML='<span class="tag warn">高程服務暫時無法連線('+err.message+'),以下為示範資料:</span>';
     lastElev=[...Array(60)].map((_,i)=>300-i*2.5+40*((i%20<10)?(i%10)/10:(10-i%10)/10));
     const Q=quality(lastElev);draw(lastElev,Q.feats);
-    document.getElementById('result').innerHTML+='<span class="score">'+Q.score+'</span>/100 '+Q.notes.map(n=>'<span class="tag">'+n+'</span>').join('');
+    document.getElementById('result').innerHTML+='<span class="score">'+Q.score+'</span>/100 '+Q.notes.map(n=>'<span class="tag">'+n+'</span>').join('')
+      +'<div class="note">高程需連網取得(open-elevation 公開服務,偶有壅塞);請稍候再按一次「產生剖面圖」。</div>';
   }
-});
+}
 function draw(elev,feats){
   const cv=document.getElementById('profile'),ctx=cv.getContext('2d');
   cv.width=cv.clientWidth*devicePixelRatio;cv.height=170*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);
