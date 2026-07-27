@@ -45,9 +45,13 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 <h1>✴ 紫微斗數</h1>
 <div class="box">
 <div class="row">
- 出生 <input id="bd" type="date" value="1975-07-16"> <input id="bt" type="time" value="05:30">
+ 出生 <input id="bd" type="date" value="1990-01-01"> <input id="bt" type="time" value="12:00">
  <select id="sex"><option value="1">男</option><option value="0">女</option></select>
  <button class="big" id="go">排盤</button>
+</div>
+<div class="row" style="font-size:13.5px">
+ 流年 <input id="ly" type="number" style="width:86px"> 年
+ <span style="opacity:.6;font-size:12px">(輸入欲論之年份,按排盤更新)</span>
 </div>
 <div class="row" style="font-size:12.5px">
  <span id="lunarInfo" style="color:var(--gold);font-weight:700"></span>
@@ -190,6 +194,29 @@ const SG={
 '天梁':['蔭星、老人星,正直有原則、逢凶化吉、好管閒事;宜醫藥、公職、宗教、司法;易老成孤高、愛照顧人','兄長如父、有照顧之責;手足間為長者或受長者蔭','配偶年長或成熟穩重、能照顧自己;婚姻宜姊弟或有年齡差','子女懂事早熟、有長者風;親子如友','財自專業與名望而來,宜穩健;不主暴發,遇困有貴人解','主肝與消化、慢性病;有病能遇良醫,逢凶化吉','出外遇難有救、得長輩貴人;宜外地發展','朋友多長者與正派之士;能得年長者提攜','事業宜醫藥、公職、法律、教育、宗教、監察;主清貴','祖產可承、住宅穩固;不動產得長輩之助','清高有原則、重精神修養;晚年好宗教哲學,福厚','父母慈祥有德、庇蔭深厚;受父母恩澤多'],
 '七殺':['將星,肅殺果斷、獨立開創、行動派、不受拘束;宜軍警業務創業,一生起伏大宜動不宜靜;見吉化為權威,見煞主刑傷','兄弟個性剛烈獨立、各自發展;情分淡而不失義','配偶個性剛強獨立、主見強;宜晚婚、聚少離多反佳','子女獨立早熟、不受管束;宜放手不宜緊迫','財自開創競爭而得,大起大落;宜專業技術或創業,忌合夥','主肺、外傷、意外;宜防手術與交通意外','出外開創有成、宜遠地打拚;動中生財,在家反悶','朋友多剛烈江湖之士;交友重義氣,防受連累','事業宜開創競爭之業:業務、軍警、外科、工程、創業;能獨當一面','家宅變動大、不易久守;置產宜謹慎','個性剛不服輸、閒不住;精神壓力大,宜學放鬆','與父母緣分較淡、早年離家;性格與父母相異'],
 '破軍':['耗星,破舊立新、衝勁十足、不守成規、敢冒險;宜開創變革之業,主變動破耗、先破後立;見祿權則大成','兄弟各行其是、聚散無常;不宜合夥共財','配偶個性獨特、婚姻多變動;宜晚婚,忌閃婚閃離','子女個性強、想法獨特;教養宜順勢引導','財來財去、破而後立;宜變動性行業,忌保守死守','主生殖與消耗性疾病;體力透支須調養','出外變動大、宜遠離出生地發展;動中求變','朋友來去無常、少長久;交友宜看清再深交','事業宜開創、變革、拆除重建、業務、海運、軍警;不宜守成之業','家宅屢遷、舊屋翻新;不動產先破後成','慾望強、閒不住、喜新厭舊;精神起伏大,宜安定心性','與父母緣薄或早年離家;親子觀念差距大']};
+// ═══ 四化入十二宮深論(序:命兄夫子財疾遷僕官田福父)═══
+const HG={
+'祿':['一生財源不缺、機緣自來,個性樂觀圓融,凡事逢凶化吉;然福厚易生惰性,須自我鞭策方不虛度','兄弟有成、能得手足之助與財;宜合夥、亦主母親福厚;唯錢財往來仍須明算','配偶帶財、婚姻美滿有助益,因妻(夫)得財得福;感情順遂,家庭為助力而非負擔','子女有福有出息、投資合夥得利;桃花人緣旺,晚輩緣厚,亦主創作得財','財源廣進、賺錢相對輕鬆,正偏財兼得;一生不缺花用,宜開源亦須節流免財來財去','身體健康、心寬體胖、口福佳;然易發福,須留意三高與代謝,福中藏憂','出外得財、機緣皆在外方;宜遠行、外派、跨區發展,離鄉背井反成大器','朋友得力、部屬能幹,因友得財;唯亦主財為友用,慷慨中須有分寸','事業順遂、工作愉快,升遷有望;宜開創主導,此為財官雙美之象','家中富足、能置產守產,不動產得利;家運興旺,置業為一生財庫所在','一生享福、心境安樂、懂得享受,精神物質俱足;唯忌沉溺安逸失卻進取','父母有福、上司賞識,得長輩財蔭;文書契約順利,學業考運佳'],
+'權':['個性主觀強勢、能力出眾、好勝不服輸,具領導才;宜自行創業或掌實權,忌屈居人下生怨','兄弟能幹掌權、具主導性;易受手足壓制或須為其承擔,宜分工不宜共權','配偶強勢能幹、主導家庭事務;宜尊重不宜爭權,晚婚或有年齡差反佳','子女個性強、主見多不易管教;投資敢下重注,教養宜疏導不宜壓制','賺錢有魄力、能掌握財權,主動創造財富;宜大進大出之業,忌保守觀望','體格強健但脾氣急躁;病來勢猛,易有炎症、血壓、肝火之疾,宜緩心','出外有威權、能開創局面,在外能主事;宜外地掌權、遠方發展','部屬能幹卻難駕馭、朋友強勢;宜以德服人,忌硬性壓制致反彈','事業有權位、能獨當一面,掌實權;宜管理決策、專業技術領頭,此為立業之本','家中掌權、能置大產,不動產交易積極主動;主家中話事人','主觀強、對享受有堅持、精神上不易妥協;宜培養彈性,免自苦','父母嚴厲有威、上司強勢;易受管束,宜順勢不宜逆衝'],
+'科':['名聲佳、風度好、有貴人扶持,一生逢凶化吉;宜以名立身,清譽勝於厚利','兄弟有名望、能互相支援;手足和諧有面子,可借其名助','配偶有名氣氣質佳、婚姻受祝福;夫妻互相扶持,對外有體面','子女聰明有才名、學業佳;易得子女之光,亦主創作揚名','財來得體面、以名得利、理財有度;不主大富而一生不缺','病能遇良醫、逢凶化吉;體質中和,有貴人相助解厄','出外有名聲、易得貴人,在外形象佳;宜以專業立足異鄉','朋友有名望、交往體面;能得友之名助,人脈為無形資產','事業有名聲受人肯定;宜專業、學術、公職、文教,以名得利最順','住宅體面、家世有名;不動產得來正當,居所為門面所在','精神生活高雅有品味、心境平和;好文藝哲學,晚年清福','父母有名望、上司賞識;文書契約順利,學歷考運俱佳'],
+'忌':['一生勞碌多操煩、自我要求極高,凡事親力親為;易鑽牛角尖與自我否定。此為本命最大功課——學會「放下」與「授權」,方能解此結','與手足緣薄或多爭執;最忌合夥共財、借貸作保,親兄弟更須明算帳','感情多波折、配偶多憂;易聚少離多或性格不合。宜晚婚、宜包容,忌因小事積怨成仇','子女緣薄或為子女操心;投資易失利、不宜合夥;晚輩易生變數','為錢辛苦、財來財去,易有金錢糾紛;最忌投機、借貸、作保。宜量入為出、專守一業','身體多病痛須長期調養;宜定期健檢、忌熬夜勞累。此宮忌星是身體給的提醒,不可輕忽','出外多阻礙、在外辛苦,不宜遠行投資;交通宜小心,環境變動易生耗損','交友不慎易受連累、部屬不力;宜擇友慎交,絕不為人作保背書','事業多阻礙變動、壓力大;宜專精一行深耕,最忌頻繁轉業、見異思遷','家宅不寧或不動產有損;置產宜謹慎、易有修繕漏水之事,家人聚少','心緒不寧、思慮過度想不開;精神壓力大。宜修心養性、接觸宗教哲學藝術,此為福德之藥','與父母緣薄或父母多病;文書契約易出問題,忌作保背書、忌與長輩上司硬碰']};
+// 三方四正組合深論
+function sfDeep(stars){
+  const s=new Set(stars);
+  const has=(...a)=>a.every(x=>s.has(x));
+  const any=(...a)=>a.some(x=>s.has(x));
+  if(has('七殺','破軍','貪狼'))return '此宮走「殺破狼」動盪之路,一生變化起伏大;宜順勢而動、以變應變,靜守反招困';
+  if(has('天機','太陰','天同','天梁'))return '「機月同梁」之組合,主穩健規劃、宜受薪專業與幕僚之路,不宜冒進投機';
+  if(has('紫微','天府'))return '帝星庫星並照,格局厚實有守成之力;主此宮之事有貴氣、有底蘊';
+  if(has('天府','天相'))return '「府相朝垣」之會,主此宮衣祿豐足、行事有分寸,能守成得安穩';
+  if(has('太陽','太陰'))return '日月並照,陰陽調和;主此宮之事光明中有細膩,唯忌日月落陷則勞而少得';
+  if(has('太陽','巨門'))return '巨日相會,主以言語專業取勝;此宮之事宜攤在陽光下處理,忌暗中運作生是非';
+  if(has('武曲','貪狼'))return '武貪相會,主先難後易、三十後漸入佳境;此宮之事宜厚積薄發';
+  if(has('廉貞','七殺'))return '廉殺相會,主此宮多變數與競爭,需魄力承擔;見煞則防意外官非';
+  if(any('七殺','破軍','貪狼'))return '此宮見殺破狼之一,主動盪與開創並存;宜主動求變,不宜消極等待';
+  if(any('天機','天同','天梁','太陰'))return '此宮星性偏柔和穩健,主循序漸進、以柔克剛,不宜強求急進';
+  return '此宮吉凶須合會照諸星參看——本宮為體、三方為用,單論一宮易失偏頗';
+}
 // ═══ 格局判定 ═══
 function patterns(z){
   const R=[],has=(i,s)=>z.P[i].zhu.includes(s)||z.P[i].aux.includes(s)||z.P[i].sha.includes(s);
@@ -459,11 +486,18 @@ function render(){
   const huaPos=t=>{for(let i=0;i<12;i++)for(const nm of Object.keys(z.P[i].hua))if(z.P[i].hua[nm]===t)return[nm,z.gname[i],BR[i],i];return null};
   const HUA_DEEP={'祿':'財源與機緣所在,此宮之事最能順遂得利','權':'掌控與能力所在,此宮之事能主導、宜積極','科':'名聲與貴人所在,此宮之事得美名、逢凶能解','忌':'執著與糾結所在,此宮之事最耗心力,亦是此生功課'};
   h2+=['祿','權','科','忌'].map(t=>{const r=huaPos(t);if(!r)return '';
-    return '<div style="padding:5px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
-    +'<b style="color:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[t]+';font-size:14.5px">'+r[0]+'化'+t+' → 入'+r[1]+'宮('+r[2]+')</b>'
-    +'<div style="font-size:13px;line-height:1.75">'+HUA_DEEP[t]+'。'
-    +(t==='忌'?'忌星所落之宮為一生最放不下之處,亦主此宮之人事易生變故;化解之道在「捨」與「轉念」,不在強求。':'')
-    +'</div></div>'}).join('');
+    const gi=GONG12.indexOf(r[1]);
+    return '<div style="padding:7px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
+    +'<b style="color:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[t]+';font-size:15px">'+r[0]+'化'+t+' → 入'+r[1]+'宮('+r[2]+')</b>'
+    +'<div style="font-size:13.5px;line-height:1.85;margin-top:2px">'+(HG[t]||[])[gi]+'</div>'
+    +'<div style="font-size:12.5px;opacity:.72;margin-top:2px">【樞機】'+HUA_DEEP[t]+'。'
+    +(t==='忌'?'忌之對宮亦受牽動('+z.gname[(r[3]+6)%12]+'宮),此謂「忌沖」——凡忌所沖之宮,其事亦難順遂,論命不可只看忌落何宮而忽略其所沖。':'')+'</div></div>'}).join('');
+  // 四化互涉
+  const jiP=huaPos('忌'),luP=huaPos('祿');
+  if(jiP&&luP){
+    if(jiP[3]===luP[3])h2+='<div style="font-size:13px;background:rgba(201,169,106,.15);padding:6px 9px;border-radius:8px;margin-top:4px"><b>【祿忌同宮】</b>此宮福禍相倚、得失並存——正是一生用力最深也最糾結之處;能看破則祿存忌消,執著則兩失。</div>';
+    else if((jiP[3]+6)%12===luP[3])h2+='<div style="font-size:13px;background:rgba(166,58,46,.1);padding:6px 9px;border-radius:8px;margin-top:4px"><b>【祿忌相沖】</b>財機與阻礙成對立之勢,主大起大落、成敗相隨;宜取捨分明,不可兩頭皆抓。</div>';
+  }
   // 三、十二宮深論
   h2+='<h2>三、十二宮深論</h2>';
   h2+=GONG12.map(g=>{
@@ -485,8 +519,9 @@ function render(){
     let extra='';
     if(jiIn.length)extra+='<div style="font-size:12.5px;color:var(--green)">◎ 得<b>'+jiIn.join('、')+'</b>同宮:此宮多助力貴人,遇事有轉圜、能借力使力。</div>';
     if(shaIn.length)extra+='<div style="font-size:12.5px;color:var(--red)">⚠ 見<b>'+shaIn.join('、')+'</b>:此宮之事多阻礙磨鍊、易生波折;然煞星亦主激發,能吃苦者反成專才,忌與人爭強。</div>';
-    if(hu.length)extra+='<div style="font-size:12.5px;color:var(--blue)">✦ 本宮帶<b>'+hu.join('、')+'</b>:'+hu.map(x=>HUA_TXT[x.slice(-1)]).join(';')+'。</div>';
-    if(meets.length)extra+='<div style="font-size:12px;opacity:.72">三方四正會照:'+meets.join('、')+'——本宮吉凶須合此數星參看,不可獨論一宮。</div>';
+    if(hu.length)extra+=hu.map(x=>{const t=x.slice(-1);
+      return '<div style="font-size:12.5px;color:var(--blue);line-height:1.75">✦ 本宮<b>'+x+'</b>:'+(HG[t]||[])[gi]+'</div>'}).join('');
+    if(meets.length)extra+='<div style="font-size:12.5px;opacity:.8;line-height:1.7;margin-top:2px">三方四正會照 <b>'+meets.join('、')+'</b><br>'+sfDeep(meets.concat(useStars))+'。</div>';
     const isMing=i===z.ming,isShen=i===z.shen;
     const inDx=dxNow&&+dxNow[0]===i;
     return '<div style="border:1px solid #e6dcc3;border-radius:10px;padding:8px 10px;margin:6px 0;background:'+(isMing?'rgba(201,169,106,.12)':'#fff')+'">'
@@ -512,7 +547,49 @@ function render(){
       +(dp.aux.filter(s=>JI6.includes(s)).length?'<div style="font-size:13px;color:var(--green)">◎ 本限得<b>'+dp.aux.filter(s=>JI6.includes(s)).join('、')+'</b>:貴人助力顯著,宜把握機緣。</div>':'')
       +(huaOf(di).length?'<div style="font-size:13px;color:var(--blue)">✦ 本限帶<b>'+huaOf(di).join('、')+'</b>,此為十年吉凶之關鍵所在。</div>':'');
   }
-  h2+='<div class="note">論法要旨:一看格局成敗、二看四化流向、三看三方四正會照、四看大限流年引動。單宮獨論易失偏頗,必須「宮宮相參、星星互看」。<br>安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷各派微異,重大論斷請以師承為準。</div>';
+  // ═══ 五、流年 ═══
+  const lyIn=document.getElementById('ly');
+  if(!lyIn.value)lyIn.value=new Date().getFullYear();
+  const LY=+lyIn.value||new Date().getFullYear();
+  const lgz=((LY-1984)%60+60)%60, lGan=ST[lgz%10], lZhi=BR[lgz%12];
+  const lyMing=lgz%12;                                   // 流年命宮=太歲落宮
+  const lyName={};for(let g=0;g<12;g++)lyName[((lyMing-g)%12+12)%12]=GONG12[g];
+  const[l4a,l4b,l4c,l4d]=SIHUA[lGan];
+  const findStar=nm=>{for(let i=0;i<12;i++)if(z.P[i].zhu.includes(nm)||z.P[i].aux.includes(nm)||z.P[i].sha.includes(nm))return i;return -1};
+  const vAge=LY-Y+1;
+  const lyDx=Object.entries(z.dx).find(([i,v])=>vAge>=v[0]&&vAge<=v[1]);
+  const xxGong=Object.keys(z.xx).find(i=>(z.xx[i]||[]).includes(vAge));
+  const lp=z.P[lyMing];
+  const lyStars=lp.zhu.length?lp.zhu:z.P[(lyMing+6)%12].zhu;
+  h2+='<h2>五、'+LY+' 年('+lGan+lZhi+')流年運程</h2>';
+  h2+='<div style="font-size:13.5px;line-height:1.85">'
+    +'<b>流年命宮:</b>'+lZhi+'宮(本命<b style="color:var(--gold)">'+z.gname[lyMing]+'宮</b>)　<b>虛歲</b>'+vAge
+    +(lyDx?'　<b>大限:</b>'+lyDx[1][0]+'~'+lyDx[1][1]+'歲走'+z.gname[+lyDx[0]]+'宮':'')
+    +(xxGong!==undefined?'　<b>小限:</b>'+BR[xxGong]+'宮('+z.gname[xxGong]+')':'')+'<br>'
+    +'<b>本年主軸:</b>流年命宮落在本命「'+z.gname[lyMing]+'宮」——'
+    +({'命宮':'本年即本命年之能量重演,凡事回歸自身;是立志、轉型、重新定位的一年','兄弟':'本年重心在手足、同儕、合夥與人和;成敗多繫於身邊之人','夫妻':'感情婚姻為本年主題,已婚者夫妻關係起變化,未婚者易有姻緣或分合','子女':'子女、晚輩、投資、創作為本年重點;亦主桃花與合作機會','財帛':'本年財務動盪明顯,收支變化大;理財得法則豐,失序則耗','疾厄':'健康為本年首要,身體會發出訊號;宜檢查調養,勿硬撐','遷移':'本年宜動不宜靜,遷移、外出、換環境之機顯著;動則有變、變中有機','僕役':'人際交友為本年關鍵,貴人小人並見;擇友為第一要務','官祿':'事業運為本年主戰場,升遷、轉職、創業之機在此;宜積極表現','田宅':'不動產、家宅、家人為本年重心;易有搬遷、裝修、置產之事','福德':'本年重心在心境與精神層面,亦主享受消費;宜修心不宜放縱','父母':'長輩、上司、文書契約為本年主題;宜敬長守法,契約細看'})[z.gname[lyMing]]+'。<br>'
+    +'<b>流年宮內主星:</b>'+(lyStars.join('、')||'空宮(借對宮)')+'<br>'
+    +lyStars.map(s=>{const t=(SG[s]||[])[GONG12.indexOf(z.gname[lyMing])];return t?'　・<b>'+s+'</b>:'+t:''}).filter(Boolean).join('<br>')
+    +'</div>';
+  h2+='<div style="margin-top:6px"><b style="color:var(--gold)">流年四化(依'+lGan+'干)</b></div>';
+  h2+=[[l4a,'祿'],[l4b,'權'],[l4c,'科'],[l4d,'忌']].map(([nm,t])=>{
+    const pi=findStar(nm);
+    if(pi<0)return '<div class="row2"><span>'+nm+'化'+t+'</span><b>本盤未見此星</b></div>';
+    const bg=z.gname[pi], gi=GONG12.indexOf(bg);
+    return '<div style="padding:6px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
+      +'<b style="color:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[t]+';font-size:14px">'+nm+'化'+t+' → 入本命'+bg+'宮('+BR[pi]+')　流年'+lyName[pi]+'宮</b>'
+      +'<div style="font-size:13px;line-height:1.8">'+(HG[t]||[])[gi]+'</div>'
+      +(t==='忌'?'<div style="font-size:12.5px;color:var(--red)">⚠ 本年忌星所落之宮為最需留意處,且沖'+z.gname[(pi+6)%12]+'宮;此二宮之事今年宜守不宜攻。</div>':'')
+      +'</div>'}).join('');
+  // 流年與本命四化交會
+  const benJi=huaPos('忌');
+  if(benJi&&findStar(l4d)===benJi[3])
+    h2+='<div style="font-size:13px;background:rgba(166,58,46,.12);padding:7px 10px;border-radius:8px;margin-top:5px"><b>【流年忌沖本命忌】</b>本年流忌與本命忌疊於同宮,謂之「雙忌臨門」——此宮之事今年壓力最重、最易出狀況;宜提前防範、以退為進,切忌強行推進。</div>';
+  if(benJi&&findStar(l4a)===benJi[3])
+    h2+='<div style="font-size:13px;background:rgba(74,107,79,.12);padding:7px 10px;border-radius:8px;margin-top:5px"><b>【流祿解本命忌】</b>本年流年化祿入本命忌宮,主長年之結今年得解;宜把握此機會處理積壓已久之事。</div>';
+  h2+='<div style="font-size:12.5px;opacity:.78;line-height:1.8;margin-top:6px">'
+    +'<b>【流年論法次第】</b>先看流年命宮落本命何宮,定本年主軸;次看流年四化入本命十二宮,定吉凶著力點;再合大限之勢——大限為十年之體、流年為一年之用,限吉年凶則波折有限,限凶年凶則須格外謹慎。小限與流年可互參,以流年為主、小限為輔。</div>';
+  h2+='<div class="note">論法要旨:一看格局成敗、二看四化流向、三看三方四正會照、四看大限流年引動。單宮獨論易失偏頗,必須「宮宮相參、星星互看」;吉中須察其凶、凶中須尋其解,方為完整論法。<br>安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷與四化各派微異,重大論斷請以師承為準。</div>';
   dtl.innerHTML=h2;
   window.fscP&&window.fscP('ziwei','chart',z.yGZ+'/'+JU_NAME[z.ju]);
 }
