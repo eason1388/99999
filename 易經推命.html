@@ -128,8 +128,10 @@ function tuiMing(Y,M,D,h,male){
   const tian=nums.filter(n=>n%2===1).reduce((a,b)=>a+b,0);
   const di=nums.filter(n=>n%2===0).reduce((a,b)=>a+b,0);
   // 餘數(天基25、地基30)
-  const redT=n=>{let x=n;if(x>25)x-=25;if(x>=10)x=x%10;return x};
-  const redD=n=>{if(n===30)return 3;let x=n;if(x>30)x-=30;if(x>=10)x=x%10;return x};
+  // 「遇十不用,只用零位數」;零位為 0 者取十位(書例:地數三十→只用三數)
+  const cut=(n,base)=>{let x=n;while(x>base)x-=base;
+    if(x>=10)x=(x%10!==0)?x%10:Math.floor(x/10);return x};
+  const redT=n=>cut(n,25), redD=n=>cut(n,30);
   let rt=redT(tian), rd=redD(di);
   // 五數寄宮(元運)
   const yb=p.year%12, yangCmd=[0,2,4,6,8,10].includes(yb); // 子寅辰午申戌=陽命
@@ -143,7 +145,7 @@ function tuiMing(Y,M,D,h,male){
     const yangP=(male&&yangCmd)||(!male&&!yangCmd);
     return yangP?'艮':'坤';
   };
-  const tGua=ji(rt)||LUOSHU[rt]||'—', dGua=ji(rd)||LUOSHU[rd]||'—';
+  const tGua=ji(rt)||LUOSHU[rt]||'坤', dGua=ji(rd)||LUOSHU[rd]||'坤';
   // 八卦相盪:陽男陰女→天上地下;陰男陽女→天下地上
   const tianShang=(male&&yangCmd)||(!male&&!yangCmd);
   const up=tianShang?tGua:dGua, lo=tianShang?dGua:tGua;
