@@ -21,22 +21,36 @@ input[type=range]{width:min(400px,80vw);accent-color:var(--gold)}
 .note{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6}
 </style></head><body>
 <h1>平面圖疊盤</h1>
-<div class="sub">① 選擇/拍下平面圖 ② 轉「北向」對齊 ③ 點「設立極」再點圖中心 ④ 切「標房間」逐格點擊指定房間 → 吉凶直接畫在你家圖上</div>
+<div id="howto" style="background:#fffdf7;border:1px solid #e6dcc3;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:10px 13px;margin:6px 0 10px;font-size:13.5px;line-height:1.95;color:var(--ink)">
+<b style="color:var(--gold)">四步驟(照順序做就對了)</b><span style="float:right;cursor:pointer;opacity:.5;font-size:12px" id="hideHow">收起 ✕</span><br>
+<b>①</b> 按「📁 選擇平面圖」→ 挑照片或直接拍你家的平面圖<br>
+<b>②</b> 圖太大太小?<b>用兩指縮放、單指拖曳移動</b>(或用下方「縮放」滑桿)<br>
+<b>③</b> 轉「北向」滑桿,讓<b>圖的真實北方朝上</b>(不確定就填你量到的度數)<br>
+<b>④</b> 按「📍 設立極」→ <b>點一下房子的正中心</b> → 九宮吉凶立刻疊上去<br>
+<b>⑤</b> 按「🏷 標房間」→ 點格子指定大門/主臥/廚房…(<b>重複點會循環切換</b>)<br>
+<span style="opacity:.72;font-size:12.5px">立極點設錯?再按一次「設立極」重點即可。綠格=吉方、紅格=凶方、⚠=今年五黃二黑。</span>
+</div>
 <div class="row">
  <button class="mchip on" id="pick">📁 選擇平面圖 / 拍照</button>
  <input type="file" id="fileIn" accept="image/*" hidden>
  <select id="sit"></select><select id="per"></select>
 </div>
 <div class="row">
- <span style="font-size:13px;color:var(--dim)">圖上方=北向</span>
- <input type="range" id="north" min="0" max="359" value="0" step="1">
- <input type="number" id="northN" min="0" max="359" value="0" style="width:74px">°
+ <span style="font-size:13px;color:var(--dim)">北向</span>
+ <input type="range" id="north" min="0" max="359" value="0" step="1" style="flex:1;min-width:120px">
+ <input type="number" id="northN" min="0" max="359" value="0" style="width:70px">°
+</div>
+<div class="row">
+ <span style="font-size:13px;color:var(--dim)">縮放</span>
+ <input type="range" id="zoom" min="50" max="300" value="100" step="1" style="flex:1;min-width:120px">
+ <button class="mchip" id="resetView" style="padding:6px 12px;font-size:13px">↺ 復位</button>
 </div>
 <div class="row">
  <button class="mchip on" id="mJi">📍 設立極</button>
- <button class="mchip" id="mRoom">🏷 標房間(點擊循環)</button>
+ <button class="mchip" id="mRoom">🏷 標房間</button>
  <button class="mchip" id="expBtn">⬇ 匯出圖</button>
 </div>
+<div class="row"><span id="hint" style="font-size:13px;color:var(--gold);font-weight:700">① 請先選擇或拍下平面圖</span></div>
 <canvas id="cv"></canvas>
 <div class="panel"><h2>檢核結果</h2><div id="out" class="note" style="font-size:13.5px">先完成上方步驟。</div>
 <div class="note">飛星:每宮「山/向」;著色:綠=八宅吉方、紅=凶方;⚠=流年五黃/二黑加臨。標房間循環:大門→主臥→廚房→書桌→廁所→神位→清除。</div></div>
@@ -104,7 +118,10 @@ perS.onchange=e=>{per=+e.target.value;draw()};
 document.getElementById('pick').onclick=()=>document.getElementById('fileIn').click();
 document.getElementById('fileIn').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
-  const im=new Image();im.onload=()=>{img=im;jiji=null;rooms={};fit();draw()};
+  const im=new Image();im.onload=()=>{img=im;jiji=null;rooms={};
+    vz=1;vx=0;vy=0;document.getElementById('zoom').value=100;
+    fit();draw();
+    document.getElementById('hint').textContent='② 兩指縮放/單指拖曳調整位置 → ③ 轉北向 → ④ 按「📍設立極」點房子中心';};
   im.src=URL.createObjectURL(f);};
 function fit(){
   const maxW=Math.min(640,window.innerWidth-24);
@@ -115,14 +132,55 @@ function fit(){
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);}
 document.getElementById('north').oninput=e=>{north=+e.target.value;document.getElementById('northN').value=north;draw()};
 document.getElementById('northN').onchange=e=>{north=((+e.target.value)%360+360)%360;document.getElementById('north').value=north;draw()};
-document.getElementById('mJi').onclick=e=>{mode='ji';e.target.classList.add('on');document.getElementById('mRoom').classList.remove('on')};
-document.getElementById('mRoom').onclick=e=>{mode='room';e.target.classList.add('on');document.getElementById('mJi').classList.remove('on')};
+document.getElementById('mJi').onclick=e=>{mode='ji';e.target.classList.add('on');document.getElementById('mRoom').classList.remove('on');
+  document.getElementById('hint').textContent='📍 請點一下平面圖上「房子的正中心」'};
+document.getElementById('mRoom').onclick=e=>{mode='room';e.target.classList.add('on');document.getElementById('mJi').classList.remove('on');
+  document.getElementById('hint').textContent='🏷 點格子指定房間(重複點循環:大門→主臥→廚房→書桌→廁所→神位→清除)'};
+// ── 拖曳/縮放(單指拖移、雙指縮放、滑桿縮放)──
+let vz=1,vx=0,vy=0;                    // 縮放與位移
+let dragging=false,moved=0,lastP=null,pinch=null;
+const zoomEl=document.getElementById('zoom');
+const hint=document.getElementById('hint');
+function setHint(t){hint.textContent=t}
+document.getElementById('hideHow').onclick=()=>{document.getElementById('howto').style.display='none'};
+zoomEl.oninput=e=>{vz=+e.target.value/100;draw()};
+document.getElementById('resetView').onclick=()=>{vz=1;vx=0;vy=0;zoomEl.value=100;draw()};
+const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+cv.style.touchAction='none';
+cv.addEventListener('pointerdown',e=>{if(!img)return;
+  dragging=true;moved=0;lastP=pt(e);try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{if(!dragging||!lastP)return;
+  const p=pt(e),dx=p.x-lastP.x,dy=p.y-lastP.y;
+  moved+=Math.abs(dx)+Math.abs(dy);
+  if(moved>6){vx+=dx;vy+=dy;lastP=p;draw()}});
+const endDrag=()=>{dragging=false;lastP=null};
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('lostpointercapture',endDrag);
+// 雙指縮放
+cv.addEventListener('touchstart',e=>{if(e.touches.length===2){
+  dragging=false;
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  pinch={d,z:vz}}},{passive:true});
+cv.addEventListener('touchmove',e=>{if(e.touches.length===2&&pinch){
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  vz=Math.max(.5,Math.min(3,pinch.z*d/pinch.d));zoomEl.value=Math.round(vz*100);draw()}},{passive:true});
+cv.addEventListener('touchend',()=>{pinch=null},{passive:true});
+// 滑鼠滾輪縮放
+cv.addEventListener('wheel',e=>{if(!img)return;e.preventDefault();
+  vz=Math.max(.5,Math.min(3,vz*(e.deltaY<0?1.1:0.9)));zoomEl.value=Math.round(vz*100);draw()},{passive:false});
+// 畫面座標 → 圖面座標(反解縮放位移)
+const toImg=(x,y)=>{const w=cv.width/devicePixelRatio,h=cv.height/devicePixelRatio;
+  return{x:(x-w/2-vx)/vz+w/2, y:(y-h/2-vy)/vz+h/2}};
 cv.addEventListener('click',e=>{
   if(!img)return;
+  if(moved>6){moved=0;return}          // 剛才是拖曳,不當作點擊
   const r=cv.getBoundingClientRect();
-  const x=e.clientX-r.left,y=e.clientY-r.top;
-  if(mode==='ji'){jiji={x,y};draw();verdicts();return}
-  if(!jiji)return;
+  const p=toImg(e.clientX-r.left,e.clientY-r.top);
+  const x=p.x,y=p.y;
+  if(mode==='ji'){jiji={x,y};draw();verdicts();
+    setHint('✓ 立極完成。接著按「🏷 標房間」點格子指定房間;要改立極再按一次「設立極」');return}
+  if(!jiji){setHint('⚠ 請先按「📍 設立極」並點一下房子中心');return}
   const b=((Math.atan2(x-jiji.x,-(y-jiji.y))*180/Math.PI)+north+360)%360;
   const g=GONG8[Math.floor(((b+22.5)%360)/45)%8];
   const cur=rooms[g];const i=cur?ROOMS.indexOf(cur):-1;
@@ -130,9 +188,12 @@ cv.addEventListener('click',e=>{
   draw();verdicts();});
 function draw(){
   const w=cv.width/devicePixelRatio,h=cv.height/devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   ctx.clearRect(0,0,w,h);
   if(!img){ctx.fillStyle='#8f887b';ctx.font='14px "Noto Sans TC"';ctx.textAlign='center';
     ctx.fillText('請先選擇平面圖或拍照',w/2,h/2);return}
+  // 套用使用者的縮放與位移(以畫布中心為基準)
+  ctx.translate(w/2+vx,h/2+vy);ctx.scale(vz,vz);ctx.translate(-w/2,-h/2);
   ctx.drawImage(img,0,0,w,h);
   if(!jiji)return;
   const c=xkChart(per,sit),zhai=palaceOf(sit);
@@ -172,13 +233,18 @@ function draw(){
   // 立極點
   ctx.fillStyle='#C9A96A';ctx.beginPath();ctx.arc(jiji.x,jiji.y,6,0,7);ctx.fill();
   ctx.strokeStyle='#141110';ctx.lineWidth=2;ctx.stroke();
-  // 北向箭頭(圖角)
+  // 北向箭頭(固定在畫面左上角,不隨圖縮放位移)
   const na=(-north-90)*Math.PI/180;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   ctx.save();ctx.translate(34,34);ctx.rotate(na+Math.PI/2);
   ctx.fillStyle='rgba(224,122,106,.95)';
   ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(-7,6);ctx.lineTo(7,6);ctx.closePath();ctx.fill();
   ctx.fillStyle='#fff';ctx.font='700 11px sans-serif';ctx.textAlign='center';ctx.fillText('N',0,20);
   ctx.restore();
+  // 縮放倍率提示
+  if(vz!==1){ctx.fillStyle='rgba(20,17,16,.7)';ctx.fillRect(w-64,6,58,20);
+    ctx.fillStyle='#EDE7DA';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText(Math.round(vz*100)+'%',w-35,20)}
 }
 function verdicts(){
   if(!jiji){return}

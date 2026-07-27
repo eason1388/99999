@@ -32,12 +32,22 @@ button{font-family:inherit}
 </style></head><body>
 <h1>地理尋龍</h1>
 <div class="sub">龍脈剖面|過峽偵測|穴場方位</div>
-<div class="row">
-  <button class="chip on" data-t="dragon">畫龍脈線</button>
-  <button class="chip" data-t="xue">點穴</button>
-  <button class="chip" data-t="clear">清除</button>
-  <span style="font-size:13px;align-self:center" id="status">沿山脊逐點點擊,雙擊結束取剖面</span>
+<div id="howto" style="background:#fffdf7;border:1px solid #e6dcc3;border-left:4px solid #8C6D3F;border-radius:0 12px 12px 0;padding:10px 13px;margin-bottom:8px;font-size:13.5px;line-height:1.9">
+<b style="color:#8C6D3F">怎麼用?(三步)</b>
+<span style="float:right;cursor:pointer;opacity:.5;font-size:12px" id="hideHow">收起 ✕</span><br>
+<b>① 按「📍我的位置」</b>——地圖跳到你現在的位置(手機會問你要不要允許定位,按允許)<br>
+<b>② 按「畫龍脈線」</b>,然後<b>沿著山脊由高往低</b>一路點下去(點 5～10 個點),<b>雙擊</b>結束<br>
+　 → 下方會出現地形剖面圖,自動標出<b>過峽(束氣處)</b>與<b>起伏節數</b><br>
+<b>③ 按「點穴」</b>,再點你要看的位置 → 顯示該處<b>坐向與朝案方位(24山)</b><br>
+<span style="opacity:.7;font-size:12.5px">找不到山?用左上角 <b>+ −</b> 縮放,或用手指拖曳移動地圖。棕色細線是等高線,線愈密代表愈陡。</span>
 </div>
+<div class="row">
+  <button class="chip" id="locBtn" style="background:#8C6D3F;color:#fff;border-color:#8C6D3F">📍 我的位置</button>
+  <button class="chip on" data-t="dragon">① 畫龍脈線</button>
+  <button class="chip" data-t="xue">② 點穴</button>
+  <button class="chip" data-t="clear">清除</button>
+</div>
+<div class="row"><span style="font-size:13px" id="status">請先按「📍我的位置」或直接拖曳地圖找到目標山區</span></div>
 <div id="map"></div>
 <div id="panel">
   <canvas id="profile"></canvas>
@@ -47,9 +57,30 @@ button{font-family:inherit}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
-const map=L.map('map').setView([24.18,120.85],13); // 台灣中部山區
+const map=L.map('map').setView([24.18,120.85],13); // 預設台灣中部山區
 L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:16,attribution:'© OpenTopoMap © OSM'}).addTo(map);
 map.doubleClickZoom.disable();
+// ── 定位到目前位置 ──
+let meMarker=null;
+document.getElementById('hideHow').onclick=()=>{document.getElementById('howto').style.display='none'};
+function locate(auto){
+  const st=document.getElementById('status');
+  if(!navigator.geolocation){st.textContent='此裝置不支援定位,請手動拖曳地圖';return}
+  st.textContent='定位中…(手機請按「允許」)';
+  navigator.geolocation.getCurrentPosition(p=>{
+    const ll=[p.coords.latitude,p.coords.longitude];
+    map.setView(ll,15);
+    if(meMarker)map.removeLayer(meMarker);
+    meMarker=L.circleMarker(ll,{radius:8,color:'#A63A2E',fillColor:'#A63A2E',fillOpacity:.85,weight:2}).addTo(map)
+      .bindTooltip('我的位置',{permanent:false});
+    st.textContent='已定位到你的位置(精度約 '+Math.round(p.coords.accuracy)+' 公尺)。接著按「① 畫龍脈線」沿山脊點選。';
+    window.fscP&&window.fscP('dragon','locate','ok');
+  },err=>{
+    st.innerHTML='<span style="color:#A63A2E">定位失敗:'+({1:'你拒絕了定位權限——請至 設定→Safari→位置 開啟,或手動拖曳地圖',2:'目前取得不到位置訊號,請到空曠處再試',3:'定位逾時,請再按一次'}[err.code]||err.message)+'</span>';
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+}
+document.getElementById('locBtn').onclick=()=>locate(false);
+setTimeout(()=>{try{if(navigator.permissions)navigator.permissions.query({name:'geolocation'}).then(s=>{if(s.state==='granted')locate(true)})}catch(e){}},600);
 const R=d=>d*Math.PI/180,D=r=>r*180/Math.PI;
 function bearing(a,b){const f1=R(a.lat),f2=R(b.lat),dl=R(b.lng-a.lng);
   const y=Math.sin(dl)*Math.cos(f2),x=Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl);
