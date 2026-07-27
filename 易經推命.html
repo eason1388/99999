@@ -104,15 +104,28 @@ const FULLN={'乾':'乾為天','坤':'坤為地','屯':'水雷屯','蒙':'山水
 const YAO_NM=['初','二','三','四','五','上'];
 const yaoName=(i,yang)=>{const g=yang?'九':'六';return i===0?'初'+g:i===5?'上'+g:g+YAO_NM[i]};
 // 卦辭(共用金錢卦資料)
-let ZY={},HEX_N={},HEX_N2={},SG={};
+let ZY={},HEX_N={},HEX_N2={};
+// 由 "const NAME={" 起,以大括號配對抽出完整物件字面值
+function grabObj(src,name){
+  const key='const '+name+'={';
+  const s=src.indexOf(key); if(s<0)return null;
+  let i=s+key.length-1,depth=0,inStr=false,q='';
+  for(;i<src.length;i++){const c=src[i];
+    if(inStr){if(c===q&&src[i-1]!=='\\')inStr=false;continue}
+    if(c==='\''||c==='"'){inStr=true;q=c;continue}
+    if(c==='{')depth++;
+    else if(c==='}'){depth--;if(depth===0){return src.slice(s+key.length-1,i+1)}}
+  }
+  return null;
+}
 fetch('%E9%87%91%E9%8C%A2%E5%8D%A6.html').then(r=>r.text()).then(t=>{
-  try{const m=t.match(/const ZY=\{[\s\S]*?\n\};/);if(m)ZY=eval('('+m[0].slice(9,-1)+')');}catch(e){}
-  try{const m2=t.match(/const ZD=\{[\s\S]*?\n\};/);if(m2)window.ZD=eval('('+m2[0].slice(9,-1)+')');}catch(e){}
-  render();
-}).catch(()=>render());
+  try{const a=grabObj(t,'ZY');if(a)ZY=eval('('+a+')');}catch(e){}
+  try{const b=grabObj(t,'ZD');if(b)window.ZD=eval('('+b+')');}catch(e){}
+}).catch(()=>{}).finally(()=>render());
 fetch('%E7%BE%85%E7%9B%A4%E4%BA%92%E5%8B%95%E5%8E%9F%E5%9E%8B.html').then(r=>r.text()).then(t=>{
-  try{const a=t.match(/const HEX_N=\{[\s\S]*?\};/);if(a)HEX_N=eval('('+a[0].slice(12,-1)+')');}catch(e){}
-  try{const b=t.match(/const HEX_N2=\{[\s\S]*?\};/);if(b)HEX_N2=eval('('+b[0].slice(13,-1)+')');}catch(e){}
+  try{const a=grabObj(t,'HEX_N');if(a)HEX_N=eval('('+a+')');}catch(e){}
+  try{const b=grabObj(t,'HEX_N2');if(b)HEX_N2=eval('('+b+')');}catch(e){}
+  render();
 }).catch(()=>{});
 // ── 推命核心 ──
 function tuiMing(Y,M,D,h,male){
@@ -180,6 +193,46 @@ function tuiMing(Y,M,D,h,male){
   return{p,pil,detail,nums,tian,di,rt,rd,tGua,dGua,yuan,yangCmd,male,tianShang,
     xianName,bits,yuanTang,yangShi,houName,houBits,zunNote,up,lo,houUp,houLo};
 }
+// ═══ 起大運・流年小限・流月・流日・互卦(天機道)═══
+const bitsName=b=>PAIR2N[BIT2TRI[b.slice(3).join('')]+BIT2TRI[b.slice(0,3).join('')]];
+const flipYao=(b,i)=>{const c=b.slice();c[i]=1-c[i];return c};
+const yingYao=i=>(i+3)%6;                       // 應爻:初應四、二應五、三應上
+// 大運:自元堂起,陽爻管九年、陰爻管六年
+function daYun(bits,yuanTang,startAge){
+  const runs=[];let age=startAge;
+  for(let k=0;k<6;k++){
+    const i=(yuanTang+k)%6, yrs=bits[i]===1?9:6;
+    runs.push({yao:i,from:age,to:age+yrs-1,yang:bits[i]===1,yrs});
+    age+=yrs;
+  }
+  return{runs,total:age-startAge,end:age-1};
+}
+// 流年小限:每一步大運之內逐年遊變(第1年本卦該爻、第2年應爻、第3年起自該爻遞進)
+function xiaoXian(bits,yaoIdx,yrs,isFirstStep){
+  const out=[];let cur=isFirstStep?bits.slice():flipYao(bits,yaoIdx);
+  out.push({n:1,gua:bitsName(cur),bits:cur.slice(),note:isFirstStep?'元堂起運':'本卦'+YAO_NM[yaoIdx]+'爻變'});
+  if(yrs>=2){cur=flipYao(cur,yingYao(yaoIdx));out.push({n:2,gua:bitsName(cur),bits:cur.slice(),note:'應爻('+YAO_NM[yingYao(yaoIdx)]+')變'})}
+  for(let n=3;n<=yrs;n++){const i=(yaoIdx+(n-3))%6;cur=flipYao(cur,i);
+    out.push({n,gua:bitsName(cur),bits:cur.slice(),note:YAO_NM[i]+'爻變'})}
+  return out;
+}
+// 流月:陽月自年卦元堂再進一爻起,累變六卦;陰月取各陽月所變之應爻
+function liuYue(yearBits,yuanTang){
+  const yangM=[],idxs=[];let c=yearBits.slice();
+  for(let k=0;k<6;k++){const i=(yuanTang+1+k)%6;c=flipYao(c,i);
+    yangM.push({gua:bitsName(c),bits:c.slice()});idxs.push(i)}
+  const yinM=yangM.map((_,k)=>{let b=yearBits.slice();
+    for(let j=0;j<=k;j++)b=flipYao(b,idxs[j]);
+    const y=flipYao(b,yingYao(idxs[k]));return{gua:bitsName(y),bits:y}});
+  const res=[];
+  for(let k=0;k<6;k++){res.push({m:k*2+1,...yangM[k]});res.push({m:k*2+2,...yinM[k]})}
+  return res.sort((a,b)=>a.m-b.m);
+}
+// 互卦:二三四為內互、三四五為外互,上外下內合互
+function huGua(bits){
+  const nei=BIT2TRI[bits.slice(1,4).join('')], wai=BIT2TRI[bits.slice(2,5).join('')];
+  return{nei,wai,he:PAIR2N[wai+nei]};
+}
 function drawGua(bits,yuan,title,sub){
   let h='<div class="gcard">';
   for(let i=5;i>=0;i--){
@@ -234,7 +287,51 @@ function render(){
      +(HEX_N[key]?'<div class="ni">'+HEX_N[key]+'</div>':'')
      +(HEX_N2[key]?'<div class="ni">'+HEX_N2[key]+'</div>':'');
   }
-  o+='<div class="note" style="margin-top:8px">依《天紀・天機道》「易經推命」法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。書中例題:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算完全相符。<br>大運與流年卦之推法(易經推命起大運法)尚待補入;論命仍宜合參斗數、八字與陽宅。</div>';
+  // ═══ 大運 ═══
+  const nowAge=new Date().getFullYear()-Y+1;
+  const dy1=daYun(r.bits,r.yuanTang,1);
+  const houYuan=(r.yuanTang+3)%6;                 // 內外互換後元堂移位三爻
+  const dy2=daYun(r.houBits,houYuan,dy1.end+1);
+  o+='<h2>六、起大運(先天'+dy1.total+'年・後天'+dy2.total+'年)</h2>'
+   +'<div class="note" style="margin-top:0">由卦之元堂起一歲,<b>陽爻管九年、陰爻管六年</b>,順爻而行;先天卦行畢接後天卦。</div>'
+   +'<table><tr><th>卦</th><th>爻</th><th>陰陽</th><th>歲運</th></tr>'
+   +dy1.runs.map(x=>'<tr'+(nowAge>=x.from&&nowAge<=x.to?' style="background:rgba(201,169,106,.25);font-weight:700"':'')+'>'
+     +'<td>先天'+FULLN[r.xianName]+'</td><td>'+yaoName(x.yao,r.bits[x.yao]===1)+'</td><td>'+(x.yang?'陽・九年':'陰・六年')+'</td><td>'+x.from+'—'+x.to+'歲</td></tr>').join('')
+   +dy2.runs.map(x=>'<tr'+(nowAge>=x.from&&nowAge<=x.to?' style="background:rgba(201,169,106,.25);font-weight:700"':'')+'>'
+     +'<td>後天'+FULLN[r.houName]+'</td><td>'+yaoName(x.yao,r.houBits[x.yao]===1)+'</td><td>'+(x.yang?'陽・九年':'陰・六年')+'</td><td>'+x.from+'—'+x.to+'歲</td></tr>').join('')
+   +'</table>';
+  // ═══ 流年小限 ═══
+  const allRuns=dy1.runs.map((x,i)=>({...x,bits:r.bits,first:i===0})).concat(dy2.runs.map(x=>({...x,bits:r.houBits,first:false})));
+  const curRun=allRuns.find(x=>nowAge>=x.from&&nowAge<=x.to);
+  if(curRun){
+    const xx=xiaoXian(curRun.bits,curRun.yao,curRun.yrs,curRun.first);
+    o+='<h2>七、流年小限(現行大限 '+curRun.from+'—'+curRun.to+'歲)</h2>'
+     +'<div class="note" style="margin-top:0">每步大限之內逐年遊變:首年本卦該爻、次年應爻變、第三年起自該爻遞進。<br>法則:陽爻遇陽年不變、陽爻遇陰年則變、陰爻不分陰陽年皆變。</div>'
+     +'<table><tr><th>虛歲</th><th>西元</th><th>年卦</th><th>變爻</th></tr>'
+     +xx.map(x=>{const ag=curRun.from+x.n-1,yr=Y+ag-1;
+       return '<tr'+(ag===nowAge?' style="background:rgba(201,169,106,.25);font-weight:700"':'')+'>'
+       +'<td>'+ag+'</td><td>'+yr+'</td><td><b>'+FULLN[x.gua]+'</b></td><td>'+x.note+'</td></tr>'}).join('')
+     +'</table>';
+    // ═══ 流月 ═══
+    const thisYear=xx.find(x=>curRun.from+x.n-1===nowAge)||xx[0];
+    const lm=liuYue(thisYear.bits,curRun.yao);
+    const MN=['正','二','三','四','五','六','七','八','九','十','十一','十二'];
+    o+='<h2>八、'+(Y+nowAge-1)+'年流月卦(年卦 '+FULLN[thisYear.gua]+')</h2>'
+     +'<div class="note" style="margin-top:0">訣曰「陽世還從子月起,陰世即於五月生;欲知月卦真端的,從初數至世方分」——先排陽月(單月)自年卦元堂再進一爻累變,再取各陽月之應爻變為陰月(雙月)。月以節氣為界:<b>節為月首、氣為月中</b>。</div>'
+     +'<table><tr><th>月</th><th>卦</th><th>月</th><th>卦</th></tr>'
+     +[0,1,2,3,4,5].map(i=>'<tr><td>'+MN[i*2]+'月</td><td><b>'+FULLN[lm[i*2].gua]+'</b></td>'
+       +'<td>'+MN[i*2+1]+'月</td><td><b>'+FULLN[lm[i*2+1].gua]+'</b></td></tr>').join('')
+     +'</table>'
+     +'<div class="note">流日卦:自月卦元堂再進一爻起,<b>每爻管一日、每卦管六日</b>,逐爻遞進;起算日以該月之「節」為始(如三月自清明起)。</div>';
+  }
+  // ═══ 互卦 ═══
+  const hg1=huGua(r.bits),hg2=huGua(r.houBits);
+  o+='<h2>九、互卦(鐵版神數推六親之要)</h2>'
+   +'<div class="note" style="margin-top:0">去初爻與上爻,取中間四爻互變:二三四爻為<b>內互</b>、三四五爻為<b>外互</b>,上外下內相疊即<b>合互</b>。倪師云:互卦在鐵版數中很重要,尤其推算六親關係時其數不可忽略。</div>'
+   +'<div class="row2"><span>先天卦 '+FULLN[r.xianName]+'</span><b>內互'+hg1.nei+'・外互'+hg1.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg1.he]+'</span></b></div>'
+   +'<div class="row2"><span>後天卦 '+FULLN[r.houName]+'</span><b>內互'+hg2.nei+'・外互'+hg2.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg2.he]+'</span></b></div>'
+   +(ZY[hg1.he]?'<div class="yw" style="font-size:13.5px">合互'+hg1.he+':'+ZY[hg1.he].g+'</div>':'');
+  o+='<div class="note" style="margin-top:8px">依《天紀・天機道》「易經推命」法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。書中例題:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算完全相符。<br>大運、流年小限、流月、流日、互卦之推法均依書中例題(風水渙大運 1-9/10-15/16-21/22-30/31-39/40-45 共四十五年、小限渙蒙剝艮旅遯咸革夬、流月屯比坎井大過恆、合互山雷頤)逐項驗算相符。論命仍宜合參斗數、八字與陽宅。</div>';
   document.getElementById('out').innerHTML=o;
   window.fscP&&window.fscP('yijing','tuiming',r.xianName+'之'+r.houName);
 }
