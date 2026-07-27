@@ -193,6 +193,76 @@ function tuiMing(Y,M,D,h,male){
   return{p,pil,detail,nums,tian,di,rt,rd,tGua,dGua,yuan,yangCmd,male,tianShang,
     xianName,bits,yuanTang,yangShi,houName,houBits,zunNote,up,lo,houUp,houLo};
 }
+// ═══ 六十四卦・本命性格解讀(白話)═══
+const MING={
+'乾':'天生領袖性格,自尊心強、企圖心旺,不甘居人下;一生自強不息,靠自己打拚出局面。宜主導、忌屈居人下;過剛易折,學會柔軟是一生功課。',
+'坤':'天生厚道包容,能忍能容、默默耕耘;適合輔佐、承載、守成。不擅出頭但福澤深厚,愈是配合他人愈得利;忌硬要逞強出頭。',
+'屯':'起步較難,凡事都要多繞幾圈才成;但韌性強、耐磨。中年後漸入佳境,忌急躁,守正待時必有所成。',
+'蒙':'早年懵懂、需要人引導,一生貴在遇明師。學習力強,開竅之後成就可觀;忌自作聰明、不懂裝懂。',
+'需':'天生懂得等待,不急不躁、沉得住氣,時機到了自然水到渠成。宜蓄積實力,忌躁進強求。',
+'訟':'一生較多爭執是非,個性直、不服輸;宜以理服人,忌興訟到底。適合法律、談判、仲裁之路。',
+'師':'有領導統御之才,能帶人做事、扛得起責任;一生勞碌但眾望所歸。行事宜正派,忌用權謀。',
+'比':'天生人緣好、善結交,靠人脈成事;宜合作結盟,不宜單打獨鬥。忌交友不慎、跟錯人。',
+'小畜':'力量尚小,常有「就差那麼一點」之憾;宜積小成大、耐心蓄積。忌好高騖遠,守住本分反有成。',
+'履':'一生如履薄冰,凡事謹慎有禮、懂進退知分寸;以禮待人能化險為夷,忌逞強冒進。',
+'泰':'天生運氣好、通達順遂,人緣佳、上下和睦,一生少大坎坷。但盛極須防轉衰,忌得意忘形。',
+'否':'早年多阻滯不順,常有懷才不遇之感;宜守正待時,勿枉道求進。中晚年轉機必至——「否極泰來」正是此命。',
+'同人':'心胸開闊、擅與人合作,能結交志同道合之友;宜團隊、合夥事業。忌私心偏袒。',
+'大有':'天生格局大、能得大財大名,是豐盛之命。忌自滿驕縱,懂得謙退則能長保。',
+'謙':'天生謙和不爭,人緣厚、口碑好,愈低調愈得利。此為六十四卦中唯一六爻皆吉之卦,一生無往不利。',
+'豫':'性情樂觀、懂得享受生活,人緣佳;宜文娛、企劃之業。忌耽於安逸而失卻進取心。',
+'隨':'隨和好相處、適應力強;成敗在於跟對人、選對行。忌盲從、沒主見。',
+'蠱':'一生常要收拾舊局、整頓爛攤子,辛苦但有成就感;宜整頓、改革、修復性質的工作。忌積弊不理。',
+'臨':'能親臨事務、擅管理帶人,運勢漸入佳境。忌盛時放縱——「至於八月有凶」,須防樂極生悲。',
+'觀':'善觀察、有洞見,適合研究、教育、宗教;缺點是易想多做少。忌空談,想好了就去做。',
+'噬嗑':'一生多阻礙需要排除,行事果決明快;宜司法、稽核、醫療。忌姑息拖延。',
+'賁':'重形象、有品味、擅包裝;宜設計、美學、公關。忌華而不實,充實內在為要。',
+'剝':'早年多剝損耗費、根基易動搖;宜守不宜攻,先保住根本再談發展。「碩果不食」——留得一線終能復起。',
+'復':'一陽來復,主轉機與重生;跌倒了能再起來,愈挫愈勇。宜把握轉折點,循序漸進。',
+'无妄':'天性率真、不虛偽;守正則吉,投機必生災。宜本分經營,忌貪快貪多。',
+'大畜':'能積蓄實力與學養,厚積薄發;宜學術、專業、資產累積。屬大器晚成之命。',
+'頤':'重養生、重口福,亦重言語;宜飲食、醫養、教育。忌貪食多言——慎言節食即是養命。',
+'大過':'一生擔子重、責任大,常要做超乎自己能力的事;扛得起則成大器,扛不起則被壓垮。宜量力而為、忌硬撐。',
+'坎':'一生險阻較多,常在困境中打轉;然而愈險愈能磨出真本事。守住誠信、持續前行必能出險,忌停滯自陷。',
+'離':'聰明外顯、光彩照人,宜文化、傳媒、藝術;唯火性急躁。附麗得正則亨通,跟錯人則受傷。',
+'咸':'感情豐富、善感應人心,人緣桃花俱佳,利婚嫁。忌感情用事。',
+'恆':'個性穩定持久、有恆心;宜長期經營,婚姻穩定。忌一成不變、失去彈性。',
+'遯':'懂得急流勇退、明哲保身;宜退居幕後、專業顧問。忌戀棧不去。',
+'大壯':'氣勢強、行動力足,宜開創競爭之業。忌恃強逞勇——壯而不正只是強猛而已。',
+'晉':'一生向上進取、易得提拔;宜公職、大機構,循正道而升。忌躁進。',
+'明夷':'才華易被埋沒,常有懷才不遇之感;宜韜光養晦、內心明白而外表柔順。忌鋒芒太露招人忌。',
+'家人':'重家庭、以家為本;宜家族事業、內部管理。齊家則諸事順,忌家事不寧。',
+'睽':'個性獨特、與眾不同,常有格格不入之感;宜專精獨特領域。忌與人硬爭,求同存異為上。',
+'蹇':'一生阻礙較多、常進退兩難;宜求助貴人、反身修德。忌獨力硬撐。',
+'解':'能化解困境、擅排難解紛;宜調解、諮商、危機處理。宜把握解凍時機,忌拖延。',
+'損':'先付出後收穫,懂得取捨;宜節制、克制脾氣與慾望。忌只想拿不想給。',
+'益':'一生多助力、易得增益;宜積極進取、乘勢而為。見善則學、有過則改,福自然厚。',
+'夬':'果決明快、敢下決斷,宜當機立斷之事。忌過剛決裂——決斷之中能保持和氣才是上策。',
+'姤':'易遇突發的緣分與變數;交友、感情須慎於開始。宜把握機遇,忌來者不拒。',
+'萃':'善於聚人聚財、號召力強;宜團體、群眾事業。聚必以正道,忌聚而不正反生亂。',
+'升':'循序漸進、步步高升;宜穩紮穩打、積小成大。忌躐等躁進。',
+'困':'一生較多困頓與不得志,說話不易取信於人;宜守正蓄力、少說多做。困到極處必然轉通。',
+'井':'守本分、養人利物,老實經營;宜技藝、服務、教育。井養不窮,忌變來變去。',
+'革':'一生多變革,能除舊佈新;宜改革、轉型之業。變動須有依據,忌倉促妄動。',
+'鼎':'能開創新局、地位穩固;宜文化、餐飲、器物、法制之業。正位凝命,格局尊貴。',
+'震':'反應快、行動力強,常遇驚變;知所恐懼則能修省致福。宜動態行業,忌暴躁。',
+'艮':'懂得適可而止、沉穩內斂;宜靜態、專精之業。該停就停、該走就走,忌固執停滯。',
+'漸':'凡事循序漸進、按部就班;婚嫁大吉,一生穩步向上。忌貪快抄捷徑。',
+'歸妹':'感情婚姻較易有波折,常因一時衝動而失序;宜守正、忌急就章。',
+'豐':'能致豐盛、聲名顯達,宜盛大事業。然日中則昃,盛時宜守、預留退路。',
+'旅':'一生漂泊變動、容易離鄉;宜外派、旅遊、貿易。在外宜柔順謹慎,忌久留戀棧。',
+'巽':'柔順善入、擅溝通滲透;宜業務、外交、傳播。忌優柔寡斷、隨風搖擺。',
+'兌':'口才好、人緣佳、討人喜歡;宜業務、演藝、教學。喜悅須合於正道,忌口舌是非。',
+'渙':'人心易散、財氣易失;宜凝聚向心力、建立共同信仰。忌各自為政。',
+'節':'懂節制、有分寸;宜財務、法規、養生。有節有度則亨通,忌苦節自虐。',
+'中孚':'至誠感人、信用卓著;宜金融、教育、宗教。以誠待人,無往不利。',
+'小過':'宜小不宜大、宜下不宜上;適合精細、專注之事。態度上寧可過恭、過儉,以過養正。',
+'既濟':'早年順遂、諸事已成;然而初吉終亂,守成比創業更難。宜居安思危、預先防患。',
+'未濟':'一生常在「將成未成」之間,最後一哩路最考驗人;慎終如始則能成事,忌半途而廢。'};
+// 後天卦框架語
+const HOUTXT={
+'體':'先天卦是「天生的你」——與生俱來的性情、根器與人生基調,一生不改。',
+'用':'後天卦是「後來的你」——由先天卦經元堂一變而來,代表後天的際遇、環境與做事方式,是你實際走出來的路。'};
 // ═══ 起大運・流年小限・流月・流日・互卦(天機道)═══
 const bitsName=b=>PAIR2N[BIT2TRI[b.slice(3).join('')]+BIT2TRI[b.slice(0,3).join('')]];
 const flipYao=(b,i)=>{const c=b.slice();c[i]=1-c[i];return c};
@@ -250,7 +320,13 @@ function render(){
   let r;try{r=tuiMing(Y,M,D,h+mn/60,male)}catch(e){document.getElementById('out').innerHTML='錯誤:'+e.message;return}
   const zb=ZY[r.xianName],zh=ZY[r.houName];
   const key=Object.keys(PAIR2N).find(k=>PAIR2N[k]===r.xianName);
-  let o='<h2>一、四柱與取數</h2>';
+  let o='<div class="ni" style="font-size:13.5px;margin-bottom:10px"><b>這頁在算什麼?</b>'
+   +'用你的出生年月日時排出四柱,再把干支換成數字,單數加總得「天數」、雙數加總得「地數」,兩個數各得一卦,上下相疊就是<b>先天卦</b>(天生的你);'
+   +'再依出生時辰找出一個關鍵爻叫<b>元堂</b>,把它陰陽翻轉、內外對調,得到<b>後天卦</b>(實際走的路)。'
+   +'兩卦再各自按爻推出一生的<b>大運</b>(陽爻管九年、陰爻管六年)、每年的<b>流年卦</b>、每月的<b>流月卦</b>。'
+   +'一句話:<b>先天卦看你是誰,後天卦看你走哪條路,大運流年看什麼時候發生什麼事。</b></div>';
+  o+='<h2>一、四柱與取數</h2>'
+   +'<div class="note" style="margin-top:0">這一步只是「把生日換成數字」——天干查洛書、地支查河圖,再分單雙相加。不必細究,看結果的卦即可。</div>';
   o+='<table><tr><th>柱</th><th>干支</th><th>天干數</th><th>地支數</th></tr>'
    +['年','月','日','時'].map((n,i)=>'<tr><td>'+n+'</td><td><b>'+r.detail[i].gz+'</b></td><td>'+r.detail[i].g+'</td><td>'+r.detail[i].z.join('、')+'</td></tr>').join('')
    +'</table>'
@@ -258,29 +334,42 @@ function render(){
    +'<div class="row2"><span>雙數相加 = <b>地數</b></span><b>'+r.di+' → 餘 '+r.rd+' → <span style="color:var(--gold)">'+r.dGua+'卦</span></b></div>'
    +'<div class="note">天干佈洛書之數、地支佈河圖之數;天數基數二十五、地數基數三十,超過則除之,餘十不用只取零位。'
    +(r.rt===5||r.rd===5?'<br><b>五數寄宮:</b>'+r.yuan+'('+(r.p.sui-1911)+'年次),'+(r.male?'男':'女')+'命 → 依表寄宮。':'')+'</div>';
-  o+='<h2>二、八卦相盪成先天卦</h2>'
+  o+='<h2>二、兩卦相疊 → 先天卦</h2>'
+   +'<div class="note" style="margin-top:0">天數之卦與地數之卦上下相疊即成本命卦。誰在上誰在下,依你的年支陰陽與性別而定。</div>'
    +'<div class="row2"><span>命屬</span><b>'+(r.yangCmd?'陽命':'陰命')+'('+BR[r.p.year%12]+'年生)・'+(r.male?'男':'女')+'</b></div>'
    +'<div class="row2"><span>相盪法</span><b>'+(r.tianShang?'陽男陰女:天數在上、地數在下':'陰男陽女:天數在下、地數在上')+'</b></div>'
    +'<div class="gua">'+drawGua(r.bits,r.yuanTang,FULLN[r.xianName],'上'+r.up+'・下'+r.lo)
    +'<div style="font-size:22px;color:var(--gold)">→</div>'
    +drawGua(r.houBits,null,FULLN[r.houName],'上'+r.houUp+'・下'+r.houLo)+'</div>'
    +'<div style="text-align:center;font-size:12.5px;opacity:.7">先天卦 → 後天卦(紅色為元堂)</div>';
-  o+='<h2>三、元堂(動爻)</h2>'
+  o+='<h2>三、元堂 — 你的人生樞紐</h2>'
+   +'<div class="note" style="margin-top:0">元堂就像紫微的命宮,是六爻之中屬於你的那一爻;一生的大運從這一爻起算,後天卦也由它翻轉而來。此爻的爻辭,最能說中你這一生的關鍵。</div>'
    +'<div class="row2"><span>生時</span><b>'+BR[r.p.hB]+'時('+(r.yangShi?'陽時,取陽爻自子時數起':'陰時,取陰爻自午時數起')+')</b></div>'
    +'<div class="row2"><span>元堂爻位</span><b style="color:var(--red)">'+(r.yuanTang!==null?yaoName(r.yuanTang,r.bits[r.yuanTang]===1):'—')+'</b></div>'
    +(r.yuanTang!==null&&zb&&zb.y[r.yuanTang]?'<div class="hl yw">'+yaoName(r.yuanTang,r.bits[r.yuanTang]===1)+':'+zb.y[r.yuanTang]+'</div>':'')
    +'<div class="note">元堂者,如同命宮,亦名動爻,乃由先天卦變為後天卦之關鍵。此爻之爻辭最能顯本命之樞機。</div>'
    +(r.zunNote?'<div class="ni">☯ '+r.zunNote+'</div>':'');
-  o+='<h2>四、先天卦(本命格局)</h2>'
-   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:19px;color:var(--gold);font-weight:900">'+FULLN[r.xianName]+'</div>'
-   +(zb?'<div class="yw">'+r.xianName+':'+zb.g+'</div>':'')
-   +(window.ZD&&window.ZD[r.xianName]?'<div style="font-size:13.5px;line-height:1.8;margin-top:4px">'+window.ZD[r.xianName][4]+'</div>':'')
-   +'<div class="note">先天卦主本命之體——先天所稟、性情格局、一生大勢。</div>';
-  o+='<h2>五、後天卦(後天際遇)</h2>'
-   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:19px;color:var(--gold);font-weight:900">'+FULLN[r.houName]+'</div>'
-   +(zh?'<div class="yw">'+r.houName+':'+zh.g+'</div>':'')
-   +(window.ZD&&window.ZD[r.houName]?'<div style="font-size:13.5px;line-height:1.8;margin-top:4px">'+window.ZD[r.houName][4]+'</div>':'')
-   +'<div class="note">後天卦者,元堂之爻陰陽互變、再移外卦入內內卦出外——此「天旋地轉、更革」之象,主後天際遇、行事之用與人生轉折。</div>';
+  const ZD=window.ZD||{};
+  const sym={'吉':'◎','平':'○','慎':'△'};
+  const fourOf=g=>ZD[g]?'<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13.5px;margin:5px 0">'
+    +['財運','感情','事業','健康'].map((t,i)=>'<span>'+t+' <b style="color:'+(ZD[g][i]==='吉'?'var(--green)':ZD[g][i]==='慎'?'var(--red)':'var(--gold)')+'">'+sym[ZD[g][i]]+ZD[g][i]+'</b></span>').join('')+'</div>':'';
+  o+='<h2>四、先天卦 — 你天生是什麼樣的人</h2>'
+   +'<div class="note" style="margin-top:0">'+HOUTXT['體']+'</div>'
+   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:21px;color:var(--gold);font-weight:900">'+FULLN[r.xianName]+'</div>'
+   +'<div class="hl" style="font-size:14.5px;line-height:1.9">'+(MING[r.xianName]||'')+'</div>'
+   +fourOf(r.xianName)
+   +(ZD[r.xianName]?'<div style="font-size:13.5px;line-height:1.8"><b>一句話總斷:</b>'+ZD[r.xianName][4]+'</div>':'')
+   +(zb?'<div class="yw" style="font-size:13.5px;opacity:.8;margin-top:4px"><b>卦辭原文:</b>'+r.xianName+':'+zb.g+'</div>':'');
+  o+='<h2>五、後天卦 — 你實際走出來的路</h2>'
+   +'<div class="note" style="margin-top:0">'+HOUTXT['用']+'</div>'
+   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:21px;color:var(--gold);font-weight:900">'+FULLN[r.houName]+'</div>'
+   +'<div class="hl" style="font-size:14.5px;line-height:1.9">'+(MING[r.houName]||'')+'</div>'
+   +fourOf(r.houName)
+   +(ZD[r.houName]?'<div style="font-size:13.5px;line-height:1.8"><b>一句話總斷:</b>'+ZD[r.houName][4]+'</div>':'')
+   +(zh?'<div class="yw" style="font-size:13.5px;opacity:.8;margin-top:4px"><b>卦辭原文:</b>'+r.houName+':'+zh.g+'</div>':'')
+   +'<div class="ni" style="font-size:13px"><b>先天 × 後天合看:</b>你天生是「'+FULLN[r.xianName]+'」的性情,但實際走的是「'+FULLN[r.houName]+'」的路。'
+   +(r.xianName===r.houName?'兩卦相同,表示表裡如一、本性與際遇一致,人生方向明確少矛盾。'
+     :'兩者若性質相近,則一生順著本性走、事半功倍;若性質相反,則常有「想的跟做的不一樣」之感——此時當以後天卦為實際行事準則,以先天卦為修養根本。')+'</div>';
   // 天紀層
   if(key&&(HEX_N[key]||HEX_N2[key])){
     o+='<h2 style="border-color:var(--pur);color:var(--pur)">六、天紀(倪海廈)卦解・先天卦</h2>'
@@ -293,7 +382,7 @@ function render(){
   const houYuan=(r.yuanTang+3)%6;                 // 內外互換後元堂移位三爻
   const dy2=daYun(r.houBits,houYuan,dy1.end+1);
   o+='<h2>六、起大運(先天'+dy1.total+'年・後天'+dy2.total+'年)</h2>'
-   +'<div class="note" style="margin-top:0">由卦之元堂起一歲,<b>陽爻管九年、陰爻管六年</b>,順爻而行;先天卦行畢接後天卦。</div>'
+   +'<div class="note" style="margin-top:0">從元堂那一爻起算一歲,一爻管一段:<b>陽爻(實線)管九年、陰爻(斷線)管六年</b>,依序往上走完六爻;先天卦走完接後天卦。<b>金色那一列就是你現在所走的大運。</b></div>'
    +'<table><tr><th>卦</th><th>爻</th><th>陰陽</th><th>歲運</th></tr>'
    +dy1.runs.map(x=>'<tr'+(nowAge>=x.from&&nowAge<=x.to?' style="background:rgba(201,169,106,.25);font-weight:700"':'')+'>'
      +'<td>先天'+FULLN[r.xianName]+'</td><td>'+yaoName(x.yao,r.bits[x.yao]===1)+'</td><td>'+(x.yang?'陽・九年':'陰・六年')+'</td><td>'+x.from+'—'+x.to+'歲</td></tr>').join('')
@@ -306,18 +395,27 @@ function render(){
   if(curRun){
     const xx=xiaoXian(curRun.bits,curRun.yao,curRun.yrs,curRun.first);
     o+='<h2>七、流年小限(現行大限 '+curRun.from+'—'+curRun.to+'歲)</h2>'
-     +'<div class="note" style="margin-top:0">每步大限之內逐年遊變:首年本卦該爻、次年應爻變、第三年起自該爻遞進。<br>法則:陽爻遇陽年不變、陽爻遇陰年則變、陰爻不分陰陽年皆變。</div>'
-     +'<table><tr><th>虛歲</th><th>西元</th><th>年卦</th><th>變爻</th></tr>'
-     +xx.map(x=>{const ag=curRun.from+x.n-1,yr=Y+ag-1;
+     +'<div class="note" style="margin-top:0">在同一段大運裡,每一年都會再變出一個「年卦」——這就是那一年的運勢。金色列是今年。<br><span style="opacity:.75">推法:首年取本卦該爻、次年取應爻、第三年起自該爻逐年遞進;陽爻遇陽年不變、遇陰年則變,陰爻則陰陽年皆變。</span></div>'
+     +'<table><tr><th>虛歲</th><th>西元</th><th>年卦</th><th>該年運勢</th></tr>'
+     +xx.map(x=>{const ag=curRun.from+x.n-1,yr=Y+ag-1;const z4=ZD[x.gua];
+       const lv=z4?(z4.slice(0,4).filter(v=>v==='吉').length-z4.slice(0,4).filter(v=>v==='慎').length):0;
        return '<tr'+(ag===nowAge?' style="background:rgba(201,169,106,.25);font-weight:700"':'')+'>'
-       +'<td>'+ag+'</td><td>'+yr+'</td><td><b>'+FULLN[x.gua]+'</b></td><td>'+x.note+'</td></tr>'}).join('')
+       +'<td>'+ag+'</td><td>'+yr+'</td><td><b>'+FULLN[x.gua]+'</b></td>'
+       +'<td style="text-align:left;font-size:12px">'+(z4?'<b style="color:'+(lv>0?'var(--green)':lv<0?'var(--red)':'var(--gold)')+'">'+(lv>0?'順':lv<0?'慎':'平')+'</b>・'+z4[4]:x.note)+'</td></tr>'}).join('')
      +'</table>';
+    // 本年白話解
+    const nowY=xx.find(x=>curRun.from+x.n-1===nowAge);
+    if(nowY&&ZD[nowY.gua]){
+      o+='<div class="hl" style="font-size:14px;line-height:1.9"><b>今年('+(Y+nowAge-1)+'・虛歲'+nowAge+')走「'+FULLN[nowY.gua]+'」:</b>'
+       +(MING[nowY.gua]||'').replace(/^天生|^一生|^早年/,'今年')+'<br>'
+       +'<b>四項提示:</b>'+['財運','感情','事業','健康'].map((t,i)=>t+sym[ZD[nowY.gua][i]]+ZD[nowY.gua][i]).join('　')+'</div>';
+    }
     // ═══ 流月 ═══
     const thisYear=xx.find(x=>curRun.from+x.n-1===nowAge)||xx[0];
     const lm=liuYue(thisYear.bits,curRun.yao);
     const MN=['正','二','三','四','五','六','七','八','九','十','十一','十二'];
     o+='<h2>八、'+(Y+nowAge-1)+'年流月卦(年卦 '+FULLN[thisYear.gua]+')</h2>'
-     +'<div class="note" style="margin-top:0">訣曰「陽世還從子月起,陰世即於五月生;欲知月卦真端的,從初數至世方分」——先排陽月(單月)自年卦元堂再進一爻累變,再取各陽月之應爻變為陰月(雙月)。月以節氣為界:<b>節為月首、氣為月中</b>。</div>'
+     +'<div class="note" style="margin-top:0">今年十二個月各有一卦,可看該月宜靜宜動。<b>月份以節氣分界</b>(如三月從清明起算),不是從初一。<br><span style="opacity:.7">訣曰「陽世還從子月起,陰世即於五月生;欲知月卦真端的,從初數至世方分」——先排單月自年卦元堂再進一爻累變,再取各單月之應爻變為雙月。</span></div>'
      +'<table><tr><th>月</th><th>卦</th><th>月</th><th>卦</th></tr>'
      +[0,1,2,3,4,5].map(i=>'<tr><td>'+MN[i*2]+'月</td><td><b>'+FULLN[lm[i*2].gua]+'</b></td>'
        +'<td>'+MN[i*2+1]+'月</td><td><b>'+FULLN[lm[i*2+1].gua]+'</b></td></tr>').join('')
@@ -327,7 +425,7 @@ function render(){
   // ═══ 互卦 ═══
   const hg1=huGua(r.bits),hg2=huGua(r.houBits);
   o+='<h2>九、互卦(鐵版神數推六親之要)</h2>'
-   +'<div class="note" style="margin-top:0">去初爻與上爻,取中間四爻互變:二三四爻為<b>內互</b>、三四五爻為<b>外互</b>,上外下內相疊即<b>合互</b>。倪師云:互卦在鐵版數中很重要,尤其推算六親關係時其數不可忽略。</div>'
+   +'<div class="note" style="margin-top:0">互卦是<b>藏在卦裡面的卦</b>——代表事情的內情、隱藏的變化與六親(父母兄弟子女)的狀況,是表面看不到的那一層。倪師云:互卦在鐵版數中很重要,尤其推算六親關係時其數不可忽略。<br><span style="opacity:.7">取法:去掉最下與最上兩爻,二三四爻為內互、三四五爻為外互,上外下內相疊即合互。</span></div>'
    +'<div class="row2"><span>先天卦 '+FULLN[r.xianName]+'</span><b>內互'+hg1.nei+'・外互'+hg1.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg1.he]+'</span></b></div>'
    +'<div class="row2"><span>後天卦 '+FULLN[r.houName]+'</span><b>內互'+hg2.nei+'・外互'+hg2.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg2.he]+'</span></b></div>'
    +(ZY[hg1.he]?'<div class="yw" style="font-size:13.5px">合互'+hg1.he+':'+ZY[hg1.he].g+'</div>':'');
