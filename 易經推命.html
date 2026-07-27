@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>易經推命(四柱命卦)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6D3F;--gold2:#C9A96A;--ink:#2b2418;--card:#fffdf7;--red:#A63A2E;--green:#4A6B4F;--bg:#f4efe4;--pur:#8e6bb5;--blue:#3E5C76}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold)}
+.box{background:var(--card);border:1px solid #e6dcc3;border-radius:16px;padding:12px 14px;width:min(640px,96vw);box-shadow:0 2px 10px rgba(120,90,40,.08)}
+h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:10px 0 8px}
+input,select{padding:8px 10px;border:1.5px solid var(--gold2);border-radius:10px;background:#fff;color:var(--ink);font-size:14.5px}
+.big{background:var(--gold);color:#fff;border:0;border-radius:12px;padding:11px 22px;font-size:16px;font-weight:700;cursor:pointer}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:5px 0}
+.row2{display:flex;justify-content:space-between;gap:10px;padding:4px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13.5px}
+.tag{display:inline-block;border-radius:99px;padding:1px 10px;font-size:12px;margin:1px 3px;background:#f2ead6;color:#6b5427}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+th,td{border:1px solid #e0d5ba;padding:4px 6px;text-align:center}
+th{background:#f2ead6}
+.gua{display:flex;gap:16px;align-items:center;justify-content:center;margin:8px 0;flex-wrap:wrap}
+.gcard{text-align:center}
+.yao{width:76px;height:11px;margin:3px auto;display:flex;gap:7px}
+.yao i{flex:1;background:var(--ink);border-radius:2px}
+.yao.yin i:nth-child(2){background:transparent}
+.yao.yuan i{background:var(--red)}
+.gname{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:900;color:var(--gold);margin-top:5px}
+.yw{font-family:'Noto Serif TC',serif;font-size:15px;line-height:1.85}
+.hl{background:rgba(201,169,106,.22);border-left:3px solid var(--gold);padding:6px 10px;border-radius:0 8px 8px 0;margin:4px 0}
+.note{font-size:11.5px;opacity:.65;margin-top:6px}
+.ni{background:rgba(142,107,181,.08);border-left:3px solid var(--pur);border-radius:0 10px 10px 0;padding:8px 11px;font-size:13px;line-height:1.85;margin-top:6px}
+</style></head><body>
+<h1>☰ 易經推命(四柱命卦)</h1>
+<div class="box">
+<div class="row">
+ 出生 <input id="bd" type="date" value="1990-01-01"> <input id="bt" type="time" value="12:00">
+ <select id="sex"><option value="1">男</option><option value="0">女</option></select>
+ <button class="big" id="go">推命</button>
+</div>
+<div class="note">《天紀・天機道》易經推命法:排四柱→取干支數→天數地數→依洛書起卦→八卦相盪成先天卦→取元堂→變後天卦。此法市面罕見,倪師稱其與斗數、鐵版神數並列最精準之三術。</div>
+</div>
+<div class="box" id="out"></div>
+<script>
+const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
+// ── 曆法(節氣分月・五虎遁・五鼠遁)──
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const deltaT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:y>=1986?63.86+.3345*(y-2000)-.060374*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t,M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+function termJdn(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
+  for(let i=0;i<6;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-0.5)jd-=365.2422; if(jd<jdn(y,1,1)-0.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
+const gzi=(s,b)=>((6*s-5*b)%60+60)%60, gz=i=>ST[i%10]+BR[i%12];
+function fourPillars(Y,M,D,h){
+  const J=jdn(Y,M,D)+(h-12)/24-8/24;
+  let civ=jdn(Y,M,D); if(h>=23)civ+=1;
+  const day=((civ-11)%60+60)%60;
+  const lc=termJdn(Y,315);
+  const sui=(J>=lc)?Y:Y-1;
+  const year=((sui-1984)%60+60)%60;
+  const lon=sunLon(J,Y);
+  const mi=Math.floor(((lon-315)%360+360)%360/30);
+  const mB=(mi+2)%12, mS=((year%10)%5*2+2+mi)%10;
+  const hB=Math.floor((h+1)/2)%12, hS=((day%10)%5*2+hB)%10;
+  return{year,month:gzi(mS,mB),day,hour:gzi(hS,hB),sui,hB,mi};
+}
+// ── 天機道:干支取數 ──
+// 天干佈洛書之數(後天納甲:乾納甲壬、坤納乙癸、艮丙、兌丁、坎戊、離己、震庚、巽辛)
+const TG_NUM={'甲':6,'乙':2,'丙':8,'丁':7,'戊':1,'己':9,'庚':3,'辛':4,'壬':6,'癸':2};
+// 地支佈河圖之數(各取本五行生成之數一對)
+const DZ_NUM={'亥':[1,6],'子':[1,6],'巳':[2,7],'午':[2,7],'寅':[3,8],'卯':[3,8],
+'申':[4,9],'酉':[4,9],'辰':[5,10],'戌':[5,10],'丑':[5,10],'未':[5,10]};
+const LUOSHU={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const TRIG={'乾':[1,1,1],'兌':[1,1,0],'離':[1,0,1],'震':[1,0,0],
+'巽':[0,1,1],'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]}; // 由上而下(上中下爻)
+// 註:此處以「由下而上」存放較便運算
+const TRI_LH={'乾':[1,1,1],'兌':[1,1,0],'離':[1,0,1],'震':[1,0,0],
+'巽':[0,1,1],'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]};
+// 由下而上 [初,二,三]
+const TRI_UP={'乾':[1,1,1],'兌':[1,1,0],'離':[1,0,1],'震':[1,0,0],
+'巽':[0,1,1],'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]};
+function triBits(name){ // 回傳由下而上三爻
+  const m={'乾':[1,1,1],'兌':[0,1,1],'離':[1,0,1],'震':[1,0,0],
+  '巽':[0,1,1].slice(),'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]};
+  const t={'乾':[1,1,1],'兌':[1,1,0],'離':[1,0,1],'震':[1,0,0],
+  '巽':[0,1,1],'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]};
+  // 標準(由下而上):乾111 兌110 離101 震100 巽011 坎010 艮001 坤000
+  return t[name];
+}
+const BIT2TRI={'111':'乾','110':'兌','101':'離','100':'震','011':'巽','010':'坎','001':'艮','000':'坤'};
+const PAIR2N={'乾乾':'乾','乾兌':'履','乾離':'同人','乾震':'无妄','乾巽':'姤','乾坎':'訟','乾艮':'遯','乾坤':'否',
+'兌乾':'夬','兌兌':'兌','兌離':'革','兌震':'隨','兌巽':'大過','兌坎':'困','兌艮':'咸','兌坤':'萃',
+'離乾':'大有','離兌':'睽','離離':'離','離震':'噬嗑','離巽':'鼎','離坎':'未濟','離艮':'旅','離坤':'晉',
+'震乾':'大壯','震兌':'歸妹','震離':'豐','震震':'震','震巽':'恆','震坎':'解','震艮':'小過','震坤':'豫',
+'巽乾':'小畜','巽兌':'中孚','巽離':'家人','巽震':'益','巽巽':'巽','巽坎':'渙','巽艮':'漸','巽坤':'觀',
+'坎乾':'需','坎兌':'節','坎離':'既濟','坎震':'屯','坎巽':'井','坎坎':'坎','坎艮':'蹇','坎坤':'比',
+'艮乾':'大畜','艮兌':'損','艮離':'賁','艮震':'頤','艮巽':'蠱','艮坎':'蒙','艮艮':'艮','艮坤':'剝',
+'坤乾':'泰','坤兌':'臨','坤離':'明夷','坤震':'復','坤巽':'升','坤坎':'師','坤艮':'謙','坤坤':'坤'};
+const FULLN={'乾':'乾為天','坤':'坤為地','屯':'水雷屯','蒙':'山水蒙','需':'水天需','訟':'天水訟','師':'地水師','比':'水地比','小畜':'風天小畜','履':'天澤履','泰':'地天泰','否':'天地否','同人':'天火同人','大有':'火天大有','謙':'地山謙','豫':'雷地豫','隨':'澤雷隨','蠱':'山風蠱','臨':'地澤臨','觀':'風地觀','噬嗑':'火雷噬嗑','賁':'山火賁','剝':'山地剝','復':'地雷復','无妄':'天雷无妄','大畜':'山天大畜','頤':'山雷頤','大過':'澤風大過','坎':'坎為水','離':'離為火','咸':'澤山咸','恆':'雷風恆','遯':'天山遯','大壯':'雷天大壯','晉':'火地晉','明夷':'地火明夷','家人':'風火家人','睽':'火澤睽','蹇':'水山蹇','解':'雷水解','損':'山澤損','益':'風雷益','夬':'澤天夬','姤':'天風姤','萃':'澤地萃','升':'地風升','困':'澤水困','井':'水風井','革':'澤火革','鼎':'火風鼎','震':'震為雷','艮':'艮為山','漸':'風山漸','歸妹':'雷澤歸妹','豐':'雷火豐','旅':'火山旅','巽':'巽為風','兌':'兌為澤','渙':'風水渙','節':'水澤節','中孚':'風澤中孚','小過':'雷山小過','既濟':'水火既濟','未濟':'火水未濟'};
+const YAO_NM=['初','二','三','四','五','上'];
+const yaoName=(i,yang)=>{const g=yang?'九':'六';return i===0?'初'+g:i===5?'上'+g:g+YAO_NM[i]};
+// 卦辭(共用金錢卦資料)
+let ZY={},HEX_N={},HEX_N2={},SG={};
+fetch('%E9%87%91%E9%8C%A2%E5%8D%A6.html').then(r=>r.text()).then(t=>{
+  try{const m=t.match(/const ZY=\{[\s\S]*?\n\};/);if(m)ZY=eval('('+m[0].slice(9,-1)+')');}catch(e){}
+  try{const m2=t.match(/const ZD=\{[\s\S]*?\n\};/);if(m2)window.ZD=eval('('+m2[0].slice(9,-1)+')');}catch(e){}
+  render();
+}).catch(()=>render());
+fetch('%E7%BE%85%E7%9B%A4%E4%BA%92%E5%8B%95%E5%8E%9F%E5%9E%8B.html').then(r=>r.text()).then(t=>{
+  try{const a=t.match(/const HEX_N=\{[\s\S]*?\};/);if(a)HEX_N=eval('('+a[0].slice(12,-1)+')');}catch(e){}
+  try{const b=t.match(/const HEX_N2=\{[\s\S]*?\};/);if(b)HEX_N2=eval('('+b[0].slice(13,-1)+')');}catch(e){}
+}).catch(()=>{});
+// ── 推命核心 ──
+function tuiMing(Y,M,D,h,male){
+  const p=fourPillars(Y,M,D,h);
+  const pil=[gz(p.year),gz(p.month),gz(p.day),gz(p.hour)];
+  // 取數
+  let nums=[],detail=[];
+  for(const s of pil){
+    const a=TG_NUM[s[0]], b=DZ_NUM[s[1]];
+    nums.push(a);nums=nums.concat(b);
+    detail.push({gz:s,g:a,z:b});
+  }
+  const tian=nums.filter(n=>n%2===1).reduce((a,b)=>a+b,0);
+  const di=nums.filter(n=>n%2===0).reduce((a,b)=>a+b,0);
+  // 餘數(天基25、地基30)
+  const redT=n=>{let x=n;if(x>25)x-=25;if(x>=10)x=x%10;return x};
+  const redD=n=>{if(n===30)return 3;let x=n;if(x>30)x-=30;if(x>=10)x=x%10;return x};
+  let rt=redT(tian), rd=redD(di);
+  // 五數寄宮(元運)
+  const yb=p.year%12, yangCmd=[0,2,4,6,8,10].includes(yb); // 子寅辰午申戌=陽命
+  const roc=p.sui-1911;
+  const yuan=roc<=12?'上元':roc<=72?'中元':'下元';
+  const ji=(r)=>{
+    if(r!==5)return null;
+    if(yuan==='上元')return male?'艮':'坤';
+    if(yuan==='下元')return male?'離':'兌';
+    // 中元:陽男陰女寄艮、陰男陽女寄坤
+    const yangP=(male&&yangCmd)||(!male&&!yangCmd);
+    return yangP?'艮':'坤';
+  };
+  const tGua=ji(rt)||LUOSHU[rt]||'—', dGua=ji(rd)||LUOSHU[rd]||'—';
+  // 八卦相盪:陽男陰女→天上地下;陰男陽女→天下地上
+  const tianShang=(male&&yangCmd)||(!male&&!yangCmd);
+  const up=tianShang?tGua:dGua, lo=tianShang?dGua:tGua;
+  const xianName=PAIR2N[up+lo];
+  const bits=triBits(lo).concat(triBits(up)); // 由下而上六爻
+  // 元堂:陽時取陽爻(自子時數起)、陰時取陰爻(自午時數起)
+  const hB=p.hB, yangShi=hB<=5;
+  const targets=[];
+  for(let i=0;i<6;i++)if(bits[i]===(yangShi?1:0))targets.push(i);
+  let yuanTang=null,seq=yangShi?hB:hB-6;
+  if(targets.length)yuanTang=targets[seq%targets.length];
+  // 後天卦:元堂爻變 + 內外卦互換
+  let bits2=bits.slice();
+  let zunNote='';
+  const ZUN=['坎','屯','蹇'];
+  let doChange=true;
+  if(ZUN.includes(xianName)&&(yuanTang===4||yuanTang===5)){
+    // 至尊卦:九五為陽君、上六為陰主;陽令則易、陰令則不易
+    const mi=p.mi; // 0=寅月…;冬至在子月(mi=10),夏至在午月(mi=4)
+    const lunarM=(mi+2)%12; // 月支index
+    const yangLing=(lunarM>=10||lunarM<=3); // 十一月~四月(子丑寅卯辰巳前半)→ 冬至後夏至前
+    doChange=yangLing;
+    zunNote='本卦為【至尊卦】('+FULLN[xianName]+'),元堂居'+(yuanTang===4?'九五(陽君)':'上六(陰主)')
+      +';倪師云至尊至極不可輕變——'+(yangLing?'生於<b>陽令</b>(冬至後至夏至前),則變。':'生於<b>陰令</b>(夏至後至冬至前),<b>則不變</b>。');
+  }
+  if(yuanTang!==null&&doChange)bits2[yuanTang]=1-bits2[yuanTang];
+  const lo2=BIT2TRI[bits2.slice(0,3).join('')], up2=BIT2TRI[bits2.slice(3,6).join('')];
+  // 移外卦入內、內卦出外
+  const houUp=lo2, houLo=up2;
+  const houBits=triBits(houLo).concat(triBits(houUp));
+  const houName=PAIR2N[houUp+houLo];
+  return{p,pil,detail,nums,tian,di,rt,rd,tGua,dGua,yuan,yangCmd,male,tianShang,
+    xianName,bits,yuanTang,yangShi,houName,houBits,zunNote,up,lo,houUp,houLo};
+}
+function drawGua(bits,yuan,title,sub){
+  let h='<div class="gcard">';
+  for(let i=5;i>=0;i--){
+    const y=bits[i]===1;
+    h+='<div class="yao'+(y?'':' yin')+(i===yuan?' yuan':'')+'">'+(y?'<i></i>':'<i></i><i></i><i></i>')+'</div>';
+  }
+  h+='<div class="gname">'+title+'</div>'+(sub?'<div style="font-size:11.5px;opacity:.65">'+sub+'</div>':'')+'</div>';
+  return h;
+}
+document.getElementById('go').onclick=render;
+function render(){
+  const[Y,M,D]=document.getElementById('bd').value.split('-').map(Number);
+  const[h,mn]=document.getElementById('bt').value.split(':').map(Number);
+  const male=document.getElementById('sex').value==='1';
+  let r;try{r=tuiMing(Y,M,D,h+mn/60,male)}catch(e){document.getElementById('out').innerHTML='錯誤:'+e.message;return}
+  const zb=ZY[r.xianName],zh=ZY[r.houName];
+  const key=Object.keys(PAIR2N).find(k=>PAIR2N[k]===r.xianName);
+  let o='<h2>一、四柱與取數</h2>';
+  o+='<table><tr><th>柱</th><th>干支</th><th>天干數</th><th>地支數</th></tr>'
+   +['年','月','日','時'].map((n,i)=>'<tr><td>'+n+'</td><td><b>'+r.detail[i].gz+'</b></td><td>'+r.detail[i].g+'</td><td>'+r.detail[i].z.join('、')+'</td></tr>').join('')
+   +'</table>'
+   +'<div class="row2"><span>單數相加 = <b>天數</b></span><b>'+r.tian+' → 餘 '+r.rt+' → <span style="color:var(--gold)">'+r.tGua+'卦</span></b></div>'
+   +'<div class="row2"><span>雙數相加 = <b>地數</b></span><b>'+r.di+' → 餘 '+r.rd+' → <span style="color:var(--gold)">'+r.dGua+'卦</span></b></div>'
+   +'<div class="note">天干佈洛書之數、地支佈河圖之數;天數基數二十五、地數基數三十,超過則除之,餘十不用只取零位。'
+   +(r.rt===5||r.rd===5?'<br><b>五數寄宮:</b>'+r.yuan+'('+(r.p.sui-1911)+'年次),'+(r.male?'男':'女')+'命 → 依表寄宮。':'')+'</div>';
+  o+='<h2>二、八卦相盪成先天卦</h2>'
+   +'<div class="row2"><span>命屬</span><b>'+(r.yangCmd?'陽命':'陰命')+'('+BR[r.p.year%12]+'年生)・'+(r.male?'男':'女')+'</b></div>'
+   +'<div class="row2"><span>相盪法</span><b>'+(r.tianShang?'陽男陰女:天數在上、地數在下':'陰男陽女:天數在下、地數在上')+'</b></div>'
+   +'<div class="gua">'+drawGua(r.bits,r.yuanTang,FULLN[r.xianName],'上'+r.up+'・下'+r.lo)
+   +'<div style="font-size:22px;color:var(--gold)">→</div>'
+   +drawGua(r.houBits,null,FULLN[r.houName],'上'+r.houUp+'・下'+r.houLo)+'</div>'
+   +'<div style="text-align:center;font-size:12.5px;opacity:.7">先天卦 → 後天卦(紅色為元堂)</div>';
+  o+='<h2>三、元堂(動爻)</h2>'
+   +'<div class="row2"><span>生時</span><b>'+BR[r.p.hB]+'時('+(r.yangShi?'陽時,取陽爻自子時數起':'陰時,取陰爻自午時數起')+')</b></div>'
+   +'<div class="row2"><span>元堂爻位</span><b style="color:var(--red)">'+(r.yuanTang!==null?yaoName(r.yuanTang,r.bits[r.yuanTang]===1):'—')+'</b></div>'
+   +(r.yuanTang!==null&&zb&&zb.y[r.yuanTang]?'<div class="hl yw">'+yaoName(r.yuanTang,r.bits[r.yuanTang]===1)+':'+zb.y[r.yuanTang]+'</div>':'')
+   +'<div class="note">元堂者,如同命宮,亦名動爻,乃由先天卦變為後天卦之關鍵。此爻之爻辭最能顯本命之樞機。</div>'
+   +(r.zunNote?'<div class="ni">☯ '+r.zunNote+'</div>':'');
+  o+='<h2>四、先天卦(本命格局)</h2>'
+   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:19px;color:var(--gold);font-weight:900">'+FULLN[r.xianName]+'</div>'
+   +(zb?'<div class="yw">'+r.xianName+':'+zb.g+'</div>':'')
+   +(window.ZD&&window.ZD[r.xianName]?'<div style="font-size:13.5px;line-height:1.8;margin-top:4px">'+window.ZD[r.xianName][4]+'</div>':'')
+   +'<div class="note">先天卦主本命之體——先天所稟、性情格局、一生大勢。</div>';
+  o+='<h2>五、後天卦(後天際遇)</h2>'
+   +'<div style="font-family:\'Noto Serif TC\',serif;font-size:19px;color:var(--gold);font-weight:900">'+FULLN[r.houName]+'</div>'
+   +(zh?'<div class="yw">'+r.houName+':'+zh.g+'</div>':'')
+   +(window.ZD&&window.ZD[r.houName]?'<div style="font-size:13.5px;line-height:1.8;margin-top:4px">'+window.ZD[r.houName][4]+'</div>':'')
+   +'<div class="note">後天卦者,元堂之爻陰陽互變、再移外卦入內內卦出外——此「天旋地轉、更革」之象,主後天際遇、行事之用與人生轉折。</div>';
+  // 天紀層
+  if(key&&(HEX_N[key]||HEX_N2[key])){
+    o+='<h2 style="border-color:var(--pur);color:var(--pur)">六、天紀(倪海廈)卦解・先天卦</h2>'
+     +(HEX_N[key]?'<div class="ni">'+HEX_N[key]+'</div>':'')
+     +(HEX_N2[key]?'<div class="ni">'+HEX_N2[key]+'</div>':'');
+  }
+  o+='<div class="note" style="margin-top:8px">依《天紀・天機道》「易經推命」法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。書中例題:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算完全相符。<br>大運與流年卦之推法(易經推命起大運法)尚待補入;論命仍宜合參斗數、八字與陽宅。</div>';
+  document.getElementById('out').innerHTML=o;
+  window.fscP&&window.fscP('yijing','tuiming',r.xianName+'之'+r.houName);
+}
+</script></body></html>
