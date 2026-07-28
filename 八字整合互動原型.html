@@ -208,12 +208,12 @@ const N2G3={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
 const ds3=n=>n<10?n:ds3(Math.floor(n/10)+n%10);
 function mg3(y,male){let g=male?ds3((11-ds3(y))===0?9:11-ds3(y)):ds3(ds3(y)+4);if(g===5)g=male?2:8;return N2G3[g]}
 // ═══ 抱朴心法・合婚深論 ═══
-const XIANCHI={8:9,0:9,4:9,2:3,6:3,10:3,5:6,9:6,1:6,11:0,3:0,7:0};   // 三合局→咸池(桃花)
-const HONGYAN={'甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申'};
-const GULUAN=['甲寅','乙巳','丙午','丁巳','戊午','戊申','辛亥','壬子'];                       // 孤鸞
-const KUIGANG=['庚辰','庚戌','壬辰','戊戌'];                                                  // 魁罡
-const YINCHA=['丙子','丁丑','戊寅','辛卯','壬辰','癸巳','丙午','丁未','戊申','辛酉','壬戌','癸亥']; // 陰差陽錯
-const MONZ=['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
+const HH_XIANCHI={8:9,0:9,4:9,2:3,6:3,10:3,5:6,9:6,1:6,11:0,3:0,7:0};   // 三合局→咸池(桃花)
+const HH_HONGYAN={'甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申'};
+const HH_GULUAN=['甲寅','乙巳','丙午','丁巳','戊午','戊申','辛亥','壬子'];                       // 孤鸞
+const HH_KUIGANG=['庚辰','庚戌','壬辰','戊戌'];                                                  // 魁罡
+const HH_YINCHA=['丙子','丁丑','戊寅','辛卯','壬辰','癸巳','丙午','丁未','戊申','辛酉','壬戌','癸亥']; // 陰差陽錯
+const HH_MONZ=['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
 const HH_PIL=['年柱','月柱','日柱','時柱'];
 const HH_DOM=['祖蔭與初識印象','原生家庭與長輩緣','夫妻宮(核心)','子女與晚年'];
 
@@ -317,8 +317,8 @@ function heHunDeep(pA,pB,male1,male2,stA,stB,gA,gB){
   // 四、調候
   o+=S('四、調候合參——寒暖燥濕能否相濟','#3E5C76');
   const hA=hanNuan(pA.mi),hB=hanNuan(pB.mi);
-  o+=K(A.name+'生月',MONZ[pA.mi]+'月・'+hA+'　調候用神 '+(TIAOHOU[A.dm]||[])[pA.mi]);
-  o+=K(B.name+'生月',MONZ[pB.mi]+'月・'+hB+'　調候用神 '+(TIAOHOU[B.dm]||[])[pB.mi]);
+  o+=K(A.name+'生月',HH_MONZ[pA.mi]+'月・'+hA+'　調候用神 '+(TIAOHOU[A.dm]||[])[pA.mi]);
+  o+=K(B.name+'生月',HH_MONZ[pB.mi]+'月・'+hB+'　調候用神 '+(TIAOHOU[B.dm]||[])[pB.mi]);
   o+=P(hA!==hB&&hA!=='平'&&hB!=='平'
     ?'<b style="color:var(--green)">一寒一暖,調候相濟</b>——一方生於寒冬、一方生於炎夏,兩人的體質、性情、作息天生互補:急者遇緩則安,冷者遇熱則活。此為《窮通寶鑑》所重之「氣候相調」,主一生相處愈久愈舒服,是合婚中容易被忽略卻極實用的一項。'
     :(hA===hB&&hA!=='平'
@@ -348,18 +348,18 @@ function heHunDeep(pA,pB,male1,male2,stA,stB,gA,gB){
   o+=S('六、神煞檢視——桃花、孤鸞與刑剋','#A63A2E');
   const gzA=gz(pA.day),gzB=gz(pB.day);
   const shows=[];
-  const thA=XIANCHI[pA.year%12],thB=XIANCHI[pB.year%12];
-  const hasTH=p=>[p.year,p.month,p.day,p.hour].some(i=>i%12===XIANCHI[p.year%12]);
+  const thA=HH_XIANCHI[pA.year%12],thB=HH_XIANCHI[pB.year%12];
+  const hasTH=p=>[p.year,p.month,p.day,p.hour].some(i=>i%12===HH_XIANCHI[p.year%12]);
   if(hasTH(pA))shows.push([A.name+'命帶桃花(咸池 '+BR[thA]+')','人緣佳、異性緣旺,言談舉止自帶吸引力。吉處在人脈與貴人,忌處在<b>易招無謂糾纏</b>。宜於婚後主動減少單獨應酬,自清則無事。']);
   if(hasTH(pB))shows.push([B.name+'命帶桃花(咸池 '+BR[thB]+')','同上。兩人若皆帶桃花,外緣皆旺,更須建立明確界線與坦白習慣,否則猜疑一起便難收。']);
-  if(BR[pA.day%12]===HONGYAN[A.dm])shows.push([A.name+'日帶紅豔煞','主風情外顯、感情濃烈,易有戲劇性的情感經歷。此煞不主不貞,主「情深易惑」,宜以理智節之。']);
-  if(BR[pB.day%12]===HONGYAN[B.dm])shows.push([B.name+'日帶紅豔煞','同上。']);
-  if(GULUAN.includes(gzA))shows.push([A.name+'坐孤鸞日('+gzA+')','孤鸞主「獨」——並非孤獨終老,而是主<b>婚姻中易有實質的獨處時間</b>:如聚少離多、一方長期外派、或情感上各自為政。破解之法在晚婚(三十後)、或配偶年齡差距較大,古法亦取「先同居後婚」以應其象。']);
-  if(GULUAN.includes(gzB))shows.push([B.name+'坐孤鸞日('+gzB+')','同上。']);
-  if(KUIGANG.includes(gzA))shows.push([A.name+'坐魁罡('+gzA+')','魁罡主性剛果決、能擔大事,但<b>不受拘束、不肯低頭</b>。男命主威權,女命主自立而剛強。魁罡最忌配偶同樣強勢,宜一剛一柔。']);
-  if(KUIGANG.includes(gzB))shows.push([B.name+'坐魁罡('+gzB+')','同上。']);
-  if(YINCHA.includes(gzA))shows.push([A.name+'坐陰差陽錯('+gzA+')','古法謂婚事多波折、或與配偶家族緣薄。實務上多應在<b>婚禮過程不順、或與姻親互動疏遠</b>,不主婚姻本身失敗。行禮從簡、不強求排場即可大減其應。']);
-  if(YINCHA.includes(gzB))shows.push([B.name+'坐陰差陽錯('+gzB+')','同上。']);
+  if(BR[pA.day%12]===HH_HONGYAN[A.dm])shows.push([A.name+'日帶紅豔煞','主風情外顯、感情濃烈,易有戲劇性的情感經歷。此煞不主不貞,主「情深易惑」,宜以理智節之。']);
+  if(BR[pB.day%12]===HH_HONGYAN[B.dm])shows.push([B.name+'日帶紅豔煞','同上。']);
+  if(HH_GULUAN.includes(gzA))shows.push([A.name+'坐孤鸞日('+gzA+')','孤鸞主「獨」——並非孤獨終老,而是主<b>婚姻中易有實質的獨處時間</b>:如聚少離多、一方長期外派、或情感上各自為政。破解之法在晚婚(三十後)、或配偶年齡差距較大,古法亦取「先同居後婚」以應其象。']);
+  if(HH_GULUAN.includes(gzB))shows.push([B.name+'坐孤鸞日('+gzB+')','同上。']);
+  if(HH_KUIGANG.includes(gzA))shows.push([A.name+'坐魁罡('+gzA+')','魁罡主性剛果決、能擔大事,但<b>不受拘束、不肯低頭</b>。男命主威權,女命主自立而剛強。魁罡最忌配偶同樣強勢,宜一剛一柔。']);
+  if(HH_KUIGANG.includes(gzB))shows.push([B.name+'坐魁罡('+gzB+')','同上。']);
+  if(HH_YINCHA.includes(gzA))shows.push([A.name+'坐陰差陽錯('+gzA+')','古法謂婚事多波折、或與配偶家族緣薄。實務上多應在<b>婚禮過程不順、或與姻親互動疏遠</b>,不主婚姻本身失敗。行禮從簡、不強求排場即可大減其應。']);
+  if(HH_YINCHA.includes(gzB))shows.push([B.name+'坐陰差陽錯('+gzB+')','同上。']);
   o+=shows.length?shows.map(s=>'<div style="margin:6px 0;padding:7px 10px;background:rgba(166,58,46,.06);border-left:3px solid rgba(166,58,46,.5);border-radius:0 8px 8px 0"><b>'+s[0]+'</b><div style="font-size:13px;line-height:1.85;margin-top:2px">'+s[1]+'</div></div>').join('')
     :P('雙方日柱均不犯孤鸞、魁罡、陰差陽錯,亦不見明顯桃花咸池——感情結構單純,少有外緣干擾與波折之象,此為合婚中難得的清淨格局。');
 
