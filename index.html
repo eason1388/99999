@@ -106,6 +106,8 @@ footer.note{color:rgba(237,231,218,.58);opacity:1}
 /* 外殼底色改深,任何殘留間距都不會露出白邊 */
 html,body{background:var(--dark)}
 #stage{background:var(--dark)}
+/* 外殼自管版面:擋掉 lock.js 給模組頁用的底部留白 */
+body{padding-bottom:0!important;min-height:0!important}
 nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgba(0,0,0,.35)}
 .bnav.on{background:rgba(201,169,106,.13)}
 #sheet{max-height:80vh}
