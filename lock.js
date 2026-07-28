@@ -50,11 +50,13 @@ function clear(){ try{ localStorage.removeItem(KEY) }catch(e){} }
 /* ── 全站捲動順滑修正(所有載入 lock.js 的模組自動套用)── */
 function scrollFix(){
   if(document.getElementById('bpsy-scroll'))return;
+  // 外殼(index.html)自己管版面,只有模組頁才需要補底部留白與高度
+  var isShell=!!document.getElementById('stage');
   var st=document.createElement('style'); st.id='bpsy-scroll';
   st.textContent=
   'html{-webkit-text-size-adjust:100%}'+
-  'body{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;overflow-x:hidden;'+
-       'padding-bottom:calc(56px + env(safe-area-inset-bottom))}'+
+  'body{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;overflow-x:hidden}'+
+  (isShell?'':'body{padding-bottom:calc(40px + env(safe-area-inset-bottom))}')+
   '*{-webkit-tap-highlight-color:transparent}'+
   /* 畫布只吃橫向手勢,縱向一律讓頁面捲 */
   'canvas{touch-action:pan-y!important}'+
@@ -62,8 +64,8 @@ function scrollFix(){
   'table,pre,.scrollx{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}'+
   /* 手機上輸入元件不觸發整頁縮放跳動(縮放後回不去正是「卡住」的主因)*/
   '@media(max-width:719px){input,select,textarea{font-size:16px}}'+
-  /* 避免 iOS 動態視窗高度在捲動途中重排造成「卡住」 */
-  '@supports(height:100svh){html{height:auto;min-height:100svh}}';
+  /* 避免 iOS 動態視窗高度在捲動途中重排造成「卡住」(外殼自有 svh 設定,不動)*/
+  (isShell?'':'@supports(height:100svh){html{height:auto;min-height:100svh}}');
   (document.head||document.documentElement).appendChild(st);
 }
 
