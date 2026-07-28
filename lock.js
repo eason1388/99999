@@ -9,6 +9,8 @@
 (function(g){
 'use strict';
 var KEY='bpsy_lic_v1', LINE_ID='fengshui1388', PRICE='NT$699 永久解碼';
+// 線上刷卡購買頁(Google Apps Script 部署後把網址貼進來,留空則只顯示 LINE)
+var BUY_URL='';
 var ABC='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';           // 去掉 0O1I,避免抄錯
 
 function h32(s){var x=2166136261>>>0;for(var i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0}return x>>>0}
@@ -120,9 +122,15 @@ function modal(){
      '・羅盤〈家人配位・易理深解〉六十四卦<br>'+
      '・易經推命(四柱命卦)全頁<br>'+
      '・金錢卦深層卦解</div>'+
-   '<div style="font-size:13px;opacity:.85">加 LINE 取得授權碼</div>'+
+   (BUY_URL
+     ? '<button class="bpsy-btn" id="bpsy-buy" style="width:100%;padding:14px">💳 線上刷卡購買・立即取得授權碼</button>'+
+       '<div style="font-size:11.5px;opacity:.6;margin-top:6px">信用卡・ATM・超商・TWQR<br>付款完成畫面直接出碼,並寄一份到你的 Email</div>'+
+       '<div style="display:flex;align-items:center;gap:8px;margin:16px 0 6px;opacity:.4;font-size:11px">'+
+         '<span style="flex:1;height:1px;background:currentColor"></span>或<span style="flex:1;height:1px;background:currentColor"></span></div>'+
+       '<div style="font-size:12.5px;opacity:.8">加 LINE 由專人處理</div>'
+     : '<div style="font-size:13px;opacity:.85">加 LINE 取得授權碼</div>')+
    '<div class="lid">'+LINE_ID+'</div>'+
-   '<button class="bpsy-btn" id="bpsy-line">開啟 LINE 加好友</button>'+
+   '<button class="bpsy-btn" id="bpsy-line"'+(BUY_URL?' style="background:transparent;border:1.5px solid rgba(201,169,106,.5);color:#e8dcc8;box-shadow:none;animation:none;font-weight:400;padding:10px 22px;font-size:13.5px"':'')+'>開啟 LINE 加好友</button>'+
    '<div style="margin-top:16px;font-size:13px;opacity:.85">已有授權碼?</div>'+
    '<input id="bpsy-in" placeholder="BPSY-XXXXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">'+
    '<div id="bpsy-msg"></div>'+
@@ -133,6 +141,11 @@ function modal(){
   m.querySelector('#bpsy-x').onclick=close;
   m.querySelector('#bpsy-line').onclick=function(){
     try{ window.open('https://line.me/R/ti/p/~'+LINE_ID,'_blank'); }catch(e){}
+  };
+  var buy=m.querySelector('#bpsy-buy');
+  if(buy)buy.onclick=function(){
+    // iframe 內要開到最上層視窗,否則會被夾在小框裡
+    try{ (window.top||window).open(BUY_URL,'_blank'); }catch(e){ window.open(BUY_URL,'_blank'); }
   };
   m.querySelector('#bpsy-go').onclick=function(){
     var v=m.querySelector('#bpsy-in').value, msg=m.querySelector('#bpsy-msg');
