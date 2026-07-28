@@ -100,7 +100,7 @@ const SN={1:'一白貪狼(水)・利名聲智慧',2:'二黑病符(土)・主疾�
 const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬',BR='子丑寅卯辰巳午未申酉戌亥',ST='甲乙丙丁戊己庚辛壬癸';
 const ds=n=>{n=+n;if(!isFinite(n)||n<0)return 0;return n<10?n:ds(Math.floor(n/10)+n%10)};
 function mingGua(by,male){let sd=ds(by);let g=male?ds((11-sd)===0?9:11-sd):ds(sd+4);if(g===5)g=male?2:8;return NUM2PAL[g];}
-// 天紀層(共用羅盤模組資料)
+// 心法層(共用羅盤模組資料)
 let HEX_YG={},HEX_N={};
 fetch('%E7%BE%85%E7%9B%A4%E4%BA%92%E5%8B%95%E5%8E%9F%E5%9E%8B.html').then(r=>r.text()).then(t=>{
   try{const a=t.match(/const HEX_YG=\{[\s\S]*?\};/);if(a)HEX_YG=eval('('+a[0].slice(13,-1)+')');}catch(e){}
@@ -220,7 +220,7 @@ function run(){
     // 家人配位
     +'<h2>七、家人配位建議(易卦派)</h2>'
     +'<table><tr><th>成員</th><th>吉位(宜睡/坐)</th><th>凶位(避)</th></tr>'+famRows+'</table>'
-    +(HEX_N['坤乾']?'<div style="font-size:12px;color:var(--pur)">☯ 天紀一派:夫妻宜居西北(地天泰);廚房忌西北、西南;東方留房與長子,東南與長女。</div>':'')
+    +(HEX_N['坤乾']?'<div style="font-size:12px;color:var(--pur)">☯ 抱朴心法・易卦陽宅:夫妻宜居西北(地天泰);廚房忌西北、西南;東方留房與長子,東南與長女。</div>':'')
     // 化解
     +'<h2>八、化解與注意總表</h2>'
     +'<div class="row2"><span>流年五黃('+(g5?DIRZH[g5]:'中宮')+')</span><b>勿動土;置金屬重物、六帝錢化洩</b></div>'

@@ -35,9 +35,10 @@ th{background:#f2ead6}
  <select id="sex"><option value="1">男</option><option value="0">女</option></select>
  <button class="big" id="go">推命</button>
 </div>
-<div class="note">《天紀・天機道》易經推命法:排四柱→取干支數→天數地數→依洛書起卦→八卦相盪成先天卦→取元堂→變後天卦。此法市面罕見,倪師稱其與斗數、鐵版神數並列最精準之三術。</div>
+<div class="note">易卦四柱推命法:排四柱→取干支數→天數地數→依洛書起卦→八卦相盪成先天卦→取元堂→變後天卦。此法與紫微斗數、鐵版神數並列古傳三大精準推命術,今人罕見完整實作。</div>
 </div>
 <div class="box" id="out"></div>
+<script src="lock.js"></script>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
 // ── 曆法(節氣分月・五虎遁・五鼠遁)──
@@ -68,7 +69,7 @@ function fourPillars(Y,M,D,h){
   const hB=Math.floor((h+1)/2)%12, hS=((day%10)%5*2+hB)%10;
   return{year,month:gzi(mS,mB),day,hour:gzi(hS,hB),sui,hB,mi};
 }
-// ── 天機道:干支取數 ──
+// ── 干支取數(天干佈洛書、地支佈河圖)──
 // 天干佈洛書之數(後天納甲:乾納甲壬、坤納乙癸、艮丙、兌丁、坎戊、離己、震庚、巽辛)
 const TG_NUM={'甲':6,'乙':2,'丙':8,'丁':7,'戊':1,'己':9,'庚':3,'辛':4,'壬':6,'癸':2};
 // 地支佈河圖之數(各取本五行生成之數一對)
@@ -182,7 +183,7 @@ function tuiMing(Y,M,D,h,male){
     const yangLing=(lunarM>=10||lunarM<=3); // 十一月~四月(子丑寅卯辰巳前半)→ 冬至後夏至前
     doChange=yangLing;
     zunNote='本卦為【至尊卦】('+FULLN[xianName]+'),元堂居'+(yuanTang===4?'九五(陽君)':'上六(陰主)')
-      +';倪師云至尊至極不可輕變——'+(yangLing?'生於<b>陽令</b>(冬至後至夏至前),則變。':'生於<b>陰令</b>(夏至後至冬至前),<b>則不變</b>。');
+      +';至尊至極不可輕變——'+(yangLing?'生於<b>陽令</b>(冬至後至夏至前),則變。':'生於<b>陰令</b>(夏至後至冬至前),<b>則不變</b>。');
   }
   if(yuanTang!==null&&doChange)bits2[yuanTang]=1-bits2[yuanTang];
   const lo2=BIT2TRI[bits2.slice(0,3).join('')], up2=BIT2TRI[bits2.slice(3,6).join('')];
@@ -263,7 +264,7 @@ const MING={
 const HOUTXT={
 '體':'先天卦是「天生的你」——與生俱來的性情、根器與人生基調,一生不改。',
 '用':'後天卦是「後來的你」——由先天卦經元堂一變而來,代表後天的際遇、環境與做事方式,是你實際走出來的路。'};
-// ═══ 起大運・流年小限・流月・流日・互卦(天機道)═══
+// ═══ 起大運・流年小限・流月・流日・互卦 ═══
 const bitsName=b=>PAIR2N[BIT2TRI[b.slice(3).join('')]+BIT2TRI[b.slice(0,3).join('')]];
 const flipYao=(b,i)=>{const c=b.slice();c[i]=1-c[i];return c};
 const yingYao=i=>(i+3)%6;                       // 應爻:初應四、二應五、三應上
@@ -370,9 +371,10 @@ function render(){
    +'<div class="ni" style="font-size:13px"><b>先天 × 後天合看:</b>你天生是「'+FULLN[r.xianName]+'」的性情,但實際走的是「'+FULLN[r.houName]+'」的路。'
    +(r.xianName===r.houName?'兩卦相同,表示表裡如一、本性與際遇一致,人生方向明確少矛盾。'
      :'兩者若性質相近,則一生順著本性走、事半功倍;若性質相反,則常有「想的跟做的不一樣」之感——此時當以後天卦為實際行事準則,以先天卦為修養根本。')+'</div>';
-  // 天紀層
+  const _pY=o.length;   // ── 以下(心法深解・大運・小限・流月・互卦)為付費解碼區 ──
+  // 心法層
   if(key&&(HEX_N[key]||HEX_N2[key])){
-    o+='<h2 style="border-color:var(--pur);color:var(--pur)">六、天紀(倪海廈)卦解・先天卦</h2>'
+    o+='<h2 style="border-color:var(--pur);color:var(--pur)">六、抱朴心法・先天卦深解</h2>'
      +(HEX_N[key]?'<div class="ni">'+HEX_N[key]+'</div>':'')
      +(HEX_N2[key]?'<div class="ni">'+HEX_N2[key]+'</div>':'');
   }
@@ -425,12 +427,14 @@ function render(){
   // ═══ 互卦 ═══
   const hg1=huGua(r.bits),hg2=huGua(r.houBits);
   o+='<h2>九、互卦(鐵版神數推六親之要)</h2>'
-   +'<div class="note" style="margin-top:0">互卦是<b>藏在卦裡面的卦</b>——代表事情的內情、隱藏的變化與六親(父母兄弟子女)的狀況,是表面看不到的那一層。倪師云:互卦在鐵版數中很重要,尤其推算六親關係時其數不可忽略。<br><span style="opacity:.7">取法:去掉最下與最上兩爻,二三四爻為內互、三四五爻為外互,上外下內相疊即合互。</span></div>'
+   +'<div class="note" style="margin-top:0">互卦是<b>藏在卦裡面的卦</b>——代表事情的內情、隱藏的變化與六親(父母兄弟子女)的狀況,是表面看不到的那一層。本門論:互卦在鐵版數一系中極為關鍵,尤其推算六親關係,其數斷不可略。<br><span style="opacity:.7">取法:去掉最下與最上兩爻,二三四爻為內互、三四五爻為外互,上外下內相疊即合互。</span></div>'
    +'<div class="row2"><span>先天卦 '+FULLN[r.xianName]+'</span><b>內互'+hg1.nei+'・外互'+hg1.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg1.he]+'</span></b></div>'
    +'<div class="row2"><span>後天卦 '+FULLN[r.houName]+'</span><b>內互'+hg2.nei+'・外互'+hg2.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg2.he]+'</span></b></div>'
    +(ZY[hg1.he]?'<div class="yw" style="font-size:13.5px">合互'+hg1.he+':'+ZY[hg1.he].g+'</div>':'');
-  o+='<div class="note" style="margin-top:8px">依《天紀・天機道》「易經推命」法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。書中例題:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算完全相符。<br>大運、流年小限、流月、流日、互卦之推法均依書中例題(風水渙大運 1-9/10-15/16-21/22-30/31-39/40-45 共四十五年、小限渙蒙剝艮旅遯咸革夬、流月屯比坎井大過恆、合互山雷頤)逐項驗算相符。論命仍宜合參斗數、八字與陽宅。</div>';
+  o+='<div class="note" style="margin-top:8px">本頁依古傳易卦推命法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。驗例:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算相符。<br>大運、流年小限、流月、流日、互卦之推法,均以古傳驗例(風水渙大運 1-9/10-15/16-21/22-30/31-39/40-45 共四十五年、小限渙蒙剝艮旅遯咸革夬、流月屯比坎井大過恆、合互山雷頤)逐項核對相符。論命仍宜合參斗數、八字與陽宅。<br><span style="opacity:.7">此為抱朴隨緣堂整理之演算實作;各派傳承或有出入,請以自身師承為準。</span></div>';
+  if(window.BPSY)o=o.slice(0,_pY)+BPSY.gate(o.slice(_pY),'抱朴心法深解・大運流年流月・互卦');
   document.getElementById('out').innerHTML=o;
+  window.BPSY&&BPSY.bind(document.getElementById('out'));
   window.fscP&&window.fscP('yijing','tuiming',r.xianName+'之'+r.houName);
 }
 </script></body></html>

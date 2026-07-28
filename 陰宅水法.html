@@ -28,7 +28,7 @@ th{background:#f2ead6}
 <div style="display:flex;gap:8px;margin-bottom:8px">
  <button class="chip on" id="tSanhe">三合十二長生水法</button>
  <button class="chip" id="tLongmen">龍門八局(乾坤國寶)</button>
- <button class="chip" id="tHuang">八路黃泉(天紀)</button>
+ <button class="chip" id="tHuang">八路黃泉</button>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
  <span style="font-size:13.5px">坐山:</span><select id="sit"></select>
@@ -39,6 +39,7 @@ th{background:#f2ead6}
 </div>
 <div class="box" id="out"></div>
 <div class="note" style="max-width:620px">三合依《地理五訣》雙山起長生;龍門八局先天/後天/賓/客位以先後天八卦互求。天劫、地刑之歸屬與庫池位各師承有異(標△處待師承校正),重大立向請專業複核;巒頭形勢、水之屈曲有情仍為首要。</div>
+<script src="lock.js"></script>
 <script>
 const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
 // 十二雙山(地支為首)
@@ -93,7 +94,7 @@ function HTpos(gua){return gua} // 卦之後天位即其本卦方位
 const sitSel=document.getElementById('sit');
 for(const m of M24){const o=document.createElement('option');o.value=m;o.textContent=m+'山'+M24[(M24.indexOf(m)+12)%24]+'向';sitSel.appendChild(o)}
 sitSel.value='子';
-// ── 八路黃泉(羅經透解歌訣;倪師《天紀・地脈道》所引)──
+// ── 八路黃泉(歌訣出《羅經透解》,清・王道亨)──
 // 庚丁坤向是黃泉,坤向庚丁切莫言;巽向忌行乙丙上,乙丙須防巽水先;
 // 甲癸向中憂見艮,艮逢甲癸禍連連;辛壬水路怕當乾,乾向辛壬禍亦然。
 const HQ={'庚':['坤'],'丁':['坤'],'坤':['庚','丁'],
@@ -159,26 +160,30 @@ function render(){
       const badC=comes.filter(i=>COME_TXT[STAGE[((i-sh)%12+12)%12]][0]==='凶').length;
       const badG=goes.filter(i=>GO_TXT[STAGE[((i-sh)%12+12)%12]][0]==='凶').length;
       h+='<div style="margin-top:6px">'+(badC+badG===0?'<span class="tag good">來去水皆合局,格局清純 ✓</span>':'<span class="tag warn">有'+(badC+badG)+'處犯水法,宜改門路水路或另擇向</span>')+'</div>';
-      // 倪師房分斷法(生旺方水宜來、墓庫方宜去;反之則應房分)
+      // 房分斷法(生旺方水宜來、墓庫方宜去;反之則應房分)
       const fang=[];
       for(const i of goes){const st=STAGE[((i-sh)%12+12)%12];
         if(st==='長生'||st==='養')fang.push(['長房','生養之位水當來反去('+SSN[i]+' '+st+')——主長房敗']);
         if(st==='帝旺')fang.push(['仲房','帝旺之位水去('+SSN[i]+')——主仲房(次子)敗']);}
       for(const i of comes){const st=STAGE[((i-sh)%12+12)%12];
         if(st==='死'||st==='墓')fang.push(['季房','死墓之位當去反來('+SSN[i]+' '+st+')——主季房(么房)敗']);}
-      if(fang.length)h+='<div style="margin-top:6px"><b style="color:#8e6bb5">【天紀・房分斷】</b>'
-        +fang.map(f=>'<div class="row2"><span style="color:var(--red)">應'+f[0]+'</span><b>'+f[1]+'</b></div>').join('')
-        +'<div class="note">倪師云:生旺二方水宜來、墓庫方宜去;若宜來反去、當去反來,則各應長仲季房之敗。</div></div>';
+      if(fang.length){
+        const _fh=fang.map(f=>'<div class="row2"><span style="color:var(--red)">應'+f[0]+'</span><b>'+f[1]+'</b></div>').join('')
+          +'<div class="note">法要:生旺二方水宜來、墓庫方宜去;若宜來反去、當去反來,則各應長仲季房之敗。</div>';
+        h+='<div style="margin-top:6px"><b style="color:#8e6bb5">【抱朴心法・房分斷】</b>'
+          +(window.BPSY?BPSY.gate(_fh,'抱朴心法・房分斷'):_fh)+'</div>';
+      }
     }
   }else if(modeT==='huang'){
     document.getElementById('juInfo').textContent=sit+'山'+fac+'向';
     const ban=HQ[fac]||[];
-    h+='<h2>八路黃泉・'+sit+'山'+fac+'向</h2>'
-      +'<div style="background:rgba(142,107,181,.08);border-left:3px solid #8e6bb5;border-radius:0 10px 10px 0;padding:9px 12px;font-size:13.5px;line-height:1.9;margin-bottom:8px">'
-      +'<b style="color:#8e6bb5">歌訣(羅經透解;倪師《天紀・地脈道》所引)</b><br>'
+    h+='<h2>八路黃泉・'+sit+'山'+fac+'向</h2>';
+    const _pH=h.length;   // ── 以下為付費解碼區 ──
+    h+='<div style="background:rgba(142,107,181,.08);border-left:3px solid #8e6bb5;border-radius:0 10px 10px 0;padding:9px 12px;font-size:13.5px;line-height:1.9;margin-bottom:8px">'
+      +'<b style="color:#8e6bb5">歌訣(出《羅經透解》,清・王道亨)</b><br>'
       +'庚丁坤向是黃泉,坤向庚丁切莫言;<br>巽向忌行乙丙上,乙丙須防巽水先;<br>'
       +'甲癸向中憂見艮,艮逢甲癸禍連連;<br>辛壬水路怕當乾,乾向辛壬禍亦然。<br>'
-      +'<span style="opacity:.85;font-size:12.5px">倪師要點:此煞<b>只忌向上來水、開門放水</b>,專以坐山為主,不論左旋右旋;若水朝入穴前即為<b>黃泉入煞,主少亡孤寡</b>。測量時人須站在穴位上,<b>背向來龍、面向水口</b>。</span></div>';
+      +'<span style="opacity:.85;font-size:12.5px">實務要點:此煞<b>只忌向上來水、開門放水</b>,專以坐山為主,不論左旋右旋;若水朝入穴前即為<b>黃泉入煞,主少亡孤寡</b>。測量時人須站在穴位上,<b>背向來龍、面向水口</b>。</span></div>';
     if(!ban.length){
       h+='<div class="row2"><span>本向('+fac+')</span><b style="color:var(--green)">不在八路黃泉八向之列,無此忌 ✓</b></div>'
         +'<div class="note">八路黃泉只論庚丁坤、巽乙丙、甲癸艮、辛壬乾此十二向;其餘各向不犯本煞,仍須合三合水法與龍門八局參看。</div>';
@@ -197,7 +202,8 @@ function render(){
       h+=hit.length?('<h2>檢核結果</h2>'+hit.map(x=>'<div class="row2"><span style="color:var(--red)">'+x[0]+' '+x[1]+'</span><b>'+x[2]+'</b></div>').join(''))
         :'<div style="margin-top:6px"><span class="tag good">目前所標來去水未犯黃泉 ✓</span></div>';
     }
-    h+='<div class="note" style="margin-top:8px"><b>【明堂四忌・天紀】</b>破碎明堂(亂石堆積、東缺西凸、高低不定)、下陷明堂(如陷坑居明堂前,主家敗子孫散)、多路明堂(小路延伸不斷,主家宅不寧)、污濁之水(明堂水污則主凶事;家宅內有死水主人丁斷絕;有甘泉則主功名學問)。</div>';
+    h+='<div class="note" style="margin-top:8px"><b>【明堂四忌】</b>破碎明堂(亂石堆積、東缺西凸、高低不定)、下陷明堂(如陷坑居明堂前,主家敗子孫散)、多路明堂(小路延伸不斷,主家宅不寧)、污濁之水(明堂水污則主凶事;家宅內有死水主人丁斷絕;有甘泉則主功名學問)。</div>';
+    if(window.BPSY)h=h.slice(0,_pH)+BPSY.gate(h.slice(_pH),'八路黃泉・明堂四忌');
   }else{
     const sitPal=palaceOf(sit),lm=longmen(sitPal);
     document.getElementById('juInfo').textContent=sitPal+'卦局';
@@ -236,6 +242,7 @@ function render(){
     }
   }
   document.getElementById('out').innerHTML=h;
+  window.BPSY&&BPSY.bind(document.getElementById('out'));
 }
 render();
 window.fscP&&window.fscP('water','open','init');
