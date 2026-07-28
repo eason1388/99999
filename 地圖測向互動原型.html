@@ -41,6 +41,7 @@ button{font-family:inherit}
 <div id="bar"><div id="big">請在地圖上點兩點測向,或切換「畫房輪廓」圈出建物。</div><div id="tags"></div>
 <div class="note">地圖方位=真北。「磁針讀數」欄位為換算後之磁北讀數(真北−磁偏角)。畫房:逐點點擊,雙擊收尾;形心=立極點(可拖曳微調),自動疊 24 山扇形;再點一點設「向」。</div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="lock.js"></script>
 <script>
 const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
 const map=L.map('map').setView([25.0330,121.5654],17);

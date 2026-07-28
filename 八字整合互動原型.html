@@ -58,6 +58,15 @@ button{font-family:inherit}
     <h2 style="margin-top:10px">大運 <span id="dyInfo" style="font-size:12px;opacity:.6"></span></h2><div id="dayun"></div>
     <h2 style="margin-top:10px">流年運勢 <input id="lnYear" type="number" style="width:80px;padding:3px 6px;border:1px solid var(--gold2);border-radius:8px"></h2><div id="liunian"></div>
     <h2 style="margin-top:10px">性格與六親</h2><div id="xingge"></div></div>
+<div class="box"><h2>💑 八字合婚</h2>
+<div style="font-size:13px;opacity:.7;margin-bottom:6px">甲方=上方輸入的生日;乙方請輸入:</div>
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+出生 <input id="bd2" type="date" value="1978-03-20"> <input id="bt2" type="time" value="10:00">
+<select id="sex2"><option value="0">女</option><option value="1">男</option></select>
+<button class="mchip" id="hhBtn" style="border:0;border-radius:99px;padding:8px 20px;cursor:pointer;background:linear-gradient(135deg,var(--gold),#a8853f);color:#fff;font-size:14px;font-weight:700">合婚分析</button>
+</div>
+<div id="hhOut" style="margin-top:8px"></div>
+<div class="note">本法以日柱夫妻宮為體、夫妻星取用為用、喜用互補為驗,調候神煞為佐,四柱逐柱合參。與民間「生肖歌訣」(白馬怕青牛之類)屬不同法脈,結果有異屬正常;年柱以立春分界。婚嫁大事仍宜請老師綜合面斷。</div></div>
   <div class="box"><h2>八字×風水整合評分</h2>
     房屋:<select id="period"></select> 運
     <select id="sit"></select> 山
@@ -65,14 +74,8 @@ button{font-family:inherit}
     <div id="patt" style="text-align:center;margin-bottom:6px"></div>
     <div id="items"></div>
     <div class="note">評分=基準50+逐項加減(每項附出處;v1 基準模型,權重屬門派包可覆寫)。喜用神取自五行強弱(身弱喜印比、身強喜食傷財官)。</div></div>
-<div class="box" style="max-width:440px"><h2>💑 合婚配對</h2>
-<div style="font-size:13px;opacity:.7;margin-bottom:6px">甲方=上方輸入的生日;乙方請輸入:</div>
-出生 <input id="bd2" type="date" value="1978-03-20"> <input id="bt2" type="time" value="10:00">
-<select id="sex2"><option value="0">女</option><option value="1">男</option></select>
-<button class="mchip" id="hhBtn" style="border:1px solid var(--gold);border-radius:99px;padding:6px 14px;cursor:pointer;background:var(--gold);color:#fff;font-size:14px">合婚分析</button>
-<div id="hhOut" style="margin-top:8px"></div>
-<div class="note">本法依子平:年柱(表象緣分)+日柱夫妻宮(核心,權重最高)+日主五合+命卦相配+五行互補。與民間「生肖歌訣」(白馬怕青牛之類)屬不同派別,結果有異屬正常;年柱以立春分界。婚嫁大事仍宜請老師綜合面斷。</div></div>
 </div>
+<script src="lock.js"></script>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
 const WX='木木火火土土金金水水',WXC={'木':'#4A6B4F','火':'#A63A2E','土':'#8C6D3F','金':'#948e82','水':'#3E5C76'};
@@ -204,6 +207,196 @@ const yx3=(a,b)=>XS3[TRIB3[a]^TRIB3[b]];
 const N2G3={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
 const ds3=n=>n<10?n:ds3(Math.floor(n/10)+n%10);
 function mg3(y,male){let g=male?ds3((11-ds3(y))===0?9:11-ds3(y)):ds3(ds3(y)+4);if(g===5)g=male?2:8;return N2G3[g]}
+// ═══ 抱朴心法・合婚深論 ═══
+const XIANCHI={8:9,0:9,4:9,2:3,6:3,10:3,5:6,9:6,1:6,11:0,3:0,7:0};   // 三合局→咸池(桃花)
+const HONGYAN={'甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申'};
+const GULUAN=['甲寅','乙巳','丙午','丁巳','戊午','戊申','辛亥','壬子'];                       // 孤鸞
+const KUIGANG=['庚辰','庚戌','壬辰','戊戌'];                                                  // 魁罡
+const YINCHA=['丙子','丁丑','戊寅','辛卯','壬辰','癸巳','丙午','丁未','戊申','辛酉','壬戌','癸亥']; // 陰差陽錯
+const MONZ=['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
+const HH_PIL=['年柱','月柱','日柱','時柱'];
+const HH_DOM=['祖蔭與初識印象','原生家庭與長輩緣','夫妻宮(核心)','子女與晚年'];
+
+// 夫妻星:男以財為妻、女以官殺為夫
+function spouseStar(p,male){
+  const dm=p.day%10, want=male?['正財','偏財']:['正官','七殺'];
+  let tou=0,cang=0;const det=[];
+  [p.year,p.month,p.day,p.hour].forEach((i,k)=>{
+    if(k!==2){const g=tenGod(dm,i%10);if(want.includes(g)){tou++;det.push(HH_PIL[k]+'天干'+ST[i%10]+'('+g+')')}}
+    for(const[hs]of HID[BR[i%12]]){const g=tenGod(dm,ST.indexOf(hs));if(want.includes(g)){cang++;det.push(HH_PIL[k]+'藏'+hs+'('+g+')')}}
+  });
+  return{tou,cang,det,want,n:tou+cang};
+}
+// 兩支之間的關係
+function zhiRel(a,b){
+  if(a===b)return [4,6,9,11].includes(a)?['自刑','凶']:['同支','平'];
+  if(LIUHE[a]===b)return['六合','吉'];
+  if((a+6)%12===b)return['六沖','凶'];
+  if(LIUHAI[a]===b)return['相害','凶'];
+  if(XING.some(g=>g.includes(a)&&g.includes(b)))return['相刑','凶'];
+  if(SANHE.some(g=>g.includes(a)&&g.includes(b)))return['半三合','吉'];
+  return['無涉','平'];
+}
+// 寒暖燥濕
+function hanNuan(mi){return mi>=9?'寒':(mi>=3&&mi<=5)?'暖':'平';}
+// 對方五行對我的補益(算對方四柱各五行落在我喜用的比重)
+function buYi(st,p){
+  const cnt={'木':0,'火':0,'土':0,'金':0,'水':0};let tot=0;
+  [p.year,p.month,p.day,p.hour].forEach(i=>{
+    cnt[WX[i%10]]+=1;tot+=1;
+    for(const[hs,w]of HID[BR[i%12]]){cnt[WX[ST.indexOf(hs)]]+=w;tot+=w}
+  });
+  let hit=0;(st.favor||[]).forEach(f=>hit+=cnt[f]||0);
+  return{pct:tot?Math.round(hit/tot*100):0,cnt};
+}
+
+function heHunDeep(pA,pB,male1,male2,stA,stB,gA,gB){
+  const A={p:pA,male:male1,st:stA,dm:ST[pA.day%10],dz:pA.day%12,name:male1?'男方':'女方'};
+  const B={p:pB,male:male2,st:stB,dm:ST[pB.day%10],dz:pB.day%12,name:male2?'男方':'女方'};
+  const S=(t,c)=>'<h3 style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:'+(c||'var(--gold)')+';margin:14px 0 5px;padding-bottom:3px;border-bottom:1px solid rgba(201,169,106,.3)">'+t+'</h3>';
+  const P=t=>'<div style="font-size:13.5px;line-height:1.95;margin:5px 0">'+t+'</div>';
+  const K=(t,v)=>'<div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-bottom:1px dashed rgba(140,109,63,.18)"><span style="opacity:.75">'+t+'</span><b style="text-align:right">'+v+'</b></div>';
+  let o='';
+
+  // 一、夫妻宮
+  o+=S('一、夫妻宮定位——日柱為體');
+  const dRel=zhiRel(A.dz,B.dz);
+  const gHe=(WUHE[pA.day%10]===pB.day%10);
+  const gChong=TG_CHONG[A.dm]===B.dm;
+  o+=K('雙方日柱',gz(pA.day)+'　×　'+gz(pB.day));
+  o+=K('日支(夫妻宮)關係',BR[A.dz]+' '+dRel[0]+' '+BR[B.dz]);
+  o+=K('日主天干關係',A.dm+(gHe?' 五合 ':gChong?' 相沖 ':' 並立 ')+B.dm);
+  const dTxt={
+   '六合':'夫妻宮六合,是子平合婚中最重的一項吉徵。兩人相處自有一股「不必說破也能會意」的默契,爭執少、和好快,遇外力干擾反而更靠攏。此象主同心同德,晚年尤佳。',
+   '半三合':'夫妻宮成半三合之局,志趣同向、目標一致。這種合是「往同一個方向走」的合,不像六合那樣黏,但更耐久——適合一起經營事業或共同目標。',
+   '六沖':'夫妻宮相沖,是合婚中最須正視的一項。沖不等於不能成婚,而是主「動」:兩人易聚少離多、一方常需外出奔波;相處時話一出口就頂,冷卻後又後悔。化解之道在<b>分工不分心</b>——各自有獨立領域、不互相審查細節,反而長久。切忌同處一室整日相對。',
+   '相害':'夫妻宮相害,害者「傷之於暗」。表面平順,實則各有心結不說破,日久成怨。此象最怕猜疑,尤忌透過第三人傳話。務求有話直說、當日事當日了。',
+   '相刑':'夫妻宮相刑,刑主「磨」。初期磨合期比一般人長,常在生活細節上互不相讓;但刑亦有「刑而後成」之義,若能熬過前三至五年,反而根基極穩。宜晚婚、宜先同住再議婚。',
+   '自刑':'雙方日支同字而成自刑,主兩人性情太過相似,優點缺點都同一套,遇事無人能拉住對方。宜刻意分工,一人主外一人主內,不要兩人同時衝動。',
+   '同支':'雙方日支同字,秉性相近、生活習慣容易一致,是「舒服」的組合。但同氣則無互補,遇困局時容易一起鑽牛角尖,宜多聽外部意見。',
+   '無涉':'夫妻宮之間無合無沖,主平淡。這種組合沒有戲劇性的吸引,也沒有明顯的沖剋,成敗全在後天經營與其餘各柱的配合,須看下列各項合參。'
+  }[dRel[0]];
+  o+=P(dTxt);
+  if(gHe)o+=P('<b style="color:var(--green)">日主天干五合</b>——日干代表本人,兩人日干相合,主性情相互吸引、彼此看得順眼,是感情起點極佳之象。日干合而日支再合者,為合婚上上之格。');
+  if(gChong)o+=P('<b style="color:var(--red)">日主天干相沖</b>——兩人本性剛直、各有主張,誰也不服誰。此非不吉,而是須有明確的「誰決定什麼」之分界,否則事事角力。');
+
+  // 二、夫妻星
+  o+=S('二、夫妻星取用——妻星夫星是否到位','#8e6bb5');
+  const ssA=spouseStar(pA,male1),ssB=spouseStar(pB,male2);
+  const wA=male1?'財星(妻星)':'官殺(夫星)',wB=male2?'財星(妻星)':'官殺(夫星)';
+  o+=K(A.name+'原局'+wA,ssA.n?(ssA.tou?'透干'+ssA.tou+'位 ':'')+(ssA.cang?'藏干'+ssA.cang+'位':''):'不見');
+  o+=K(B.name+'原局'+wB,ssB.n?(ssB.tou?'透干'+ssB.tou+'位 ':'')+(ssB.cang?'藏干'+ssB.cang+'位':''):'不見');
+  const jud=(ss,who,w)=>{
+    if(ss.n===0)return P('<b>'+who+'</b>原局不見'+w+',謂之「'+(w[0]==='財'?'妻星不現':'夫星不現')+'」。此類人對婚姻的想像常與現實有落差,擇偶標準或過高或過於隨緣,婚事多半成於大運引動之年。並非不能婚,而是<b>婚期由運不由己</b>,宜順勢而為,不必強求時間表。');
+    if(ss.tou===0)return P('<b>'+who+'</b>之'+w+'全數藏於地支(<span style="opacity:.7">'+ss.det.join('、')+'</span>),謂之「藏而不透」。主感情內斂、不擅表達,心裡有卻說不出口;配偶須主動一些,否則易被誤會為冷淡。此類人一旦認定,反而最為長久。');
+    if(ss.n>=4)return P('<b>'+who+'</b>之'+w+'多達'+ss.n+'位(<span style="opacity:.7">'+ss.det.join('、')+'</span>),謂之「'+(w[0]==='財'?'財多身弱、群芳競秀':'官殺混雜')+'」。主感情選擇多、外緣旺,反而不易定;年輕時感情反覆屬常態。此象<b>宜晚婚</b>,三十歲後心定則婚穩;婚後須刻意避開曖昧場合。');
+    return P('<b>'+who+'</b>之'+w+'透藏得宜(<span style="opacity:.7">'+ss.det.join('、')+'</span>),配偶緣分明朗、感情表達直接,是婚姻結構健全之象。');
+  };
+  o+=jud(ssA,A.name,wA)+jud(ssB,B.name,wB);
+  const tgAB=tenGod(pA.day%10,pB.day%10),tgBA=tenGod(pB.day%10,pA.day%10);
+  o+=K('以'+A.name+'為主看對方日主',B.dm+' → '+tgAB);
+  o+=K('以'+B.name+'為主看對方日主',A.dm+' → '+tgBA);
+  if(ssA.want.includes(tgAB))o+=P('<b style="color:var(--green)">'+B.name+'之日主正是'+A.name+'的'+wA+'</b>——此為合婚中極貴之象,稱「夫妻星到位」。表示對方本人就是我命中所求的那個角色,不是替代品。此類配對感情黏著度高,彼此在對方身上找得到安定感。');
+  if(ssB.want.includes(tgBA))o+=P('<b style="color:var(--green)">'+A.name+'之日主正是'+B.name+'的'+wB+'</b>——同上,反向亦成立。兩造互為夫妻星者,是本門所謂「命中註定」之格,萬中無一。');
+  if(!ssA.want.includes(tgAB)&&!ssB.want.includes(tgBA))o+=P('雙方日主互相並非對方的夫妻星,主感情之維繫不靠「天生磁性」,而靠<b>相處中累積的信任</b>。此類組合初期熱度不若前者,但也少了佔有與糾纏,反而清爽。關鍵在共同生活的節奏是否合拍。');
+
+  // 三、喜用互補
+  o+=S('三、喜用互補——這樁婚事到底補不補得到','var(--green)');
+  const bA=buYi(stA,pB),bB=buYi(stB,pA);
+  o+=K(A.name+'日主/身強弱',A.dm+'('+WX[pA.day%10]+')・'+stA.verdict+'　喜'+(stA.favor.join('')||'中和無偏'));
+  o+=K(B.name+'日主/身強弱',B.dm+'('+WX[pB.day%10]+')・'+stB.verdict+'　喜'+(stB.favor.join('')||'中和無偏'));
+  o+=K('對方八字中'+A.name+'喜用之佔比',bA.pct+'%');
+  o+=K('對方八字中'+B.name+'喜用之佔比',bB.pct+'%');
+  const bTxt=(pct,who,other)=>pct>=40?'<b style="color:var(--green)">'+other+'對'+who+'補益極厚('+pct+'%)</b>——'+who+'與'+other+'同處,運勢自然轉旺,身體、心情、財運皆受其益。命理上稱「得妻/夫之力」,是實打實的旺運配偶。':
+    pct>=25?'<b>'+other+'對'+who+'有相當補益('+pct+'%)</b>——同住同行則'+who+'較為順遂,雖非大補,亦屬良配。':
+    pct>=12?other+'對'+who+'補益普通('+pct+'%),不助也不損,婚姻好壞主要看相處而非命理。':
+    '<b style="color:#c9944a">'+other+'對'+who+'補益偏低('+pct+'%)</b>——'+who+'所需之五行在對方命中不足。此非凶象,但表示'+who+'須<b>另覓補足之道</b>:居家方位、職業選擇、日常顏色配飾皆可補。切勿因此判定不合。';
+  o+=P(bTxt(bA.pct,A.name,B.name))+P(bTxt(bB.pct,B.name,A.name));
+  if(bA.pct>=25&&bB.pct>=25)o+=P('<b style="color:var(--green)">雙向互補成立</b>——兩人互為對方之藥,這是合婚裡份量最重的一條,遠勝生肖歌訣。即使日支有沖有刑,只要雙向互補成立,婚姻仍可長久;反之互補不成而生肖大合者,徒有其表。');
+
+  // 四、調候
+  o+=S('四、調候合參——寒暖燥濕能否相濟','#3E5C76');
+  const hA=hanNuan(pA.mi),hB=hanNuan(pB.mi);
+  o+=K(A.name+'生月',MONZ[pA.mi]+'月・'+hA+'　調候用神 '+(TIAOHOU[A.dm]||[])[pA.mi]);
+  o+=K(B.name+'生月',MONZ[pB.mi]+'月・'+hB+'　調候用神 '+(TIAOHOU[B.dm]||[])[pB.mi]);
+  o+=P(hA!==hB&&hA!=='平'&&hB!=='平'
+    ?'<b style="color:var(--green)">一寒一暖,調候相濟</b>——一方生於寒冬、一方生於炎夏,兩人的體質、性情、作息天生互補:急者遇緩則安,冷者遇熱則活。此為《窮通寶鑑》所重之「氣候相調」,主一生相處愈久愈舒服,是合婚中容易被忽略卻極實用的一項。'
+    :(hA===hB&&hA!=='平'
+      ?'兩人同生於'+hA+'令,氣候偏性相同。優點是體感、作息、飲食習慣一致,生活摩擦少;缺點是<b>同一種偏枯無人可解</b>——'+(hA==='寒'?'兩人皆偏寒,易一同陷入低潮、消極,居家宜取南向採光充足之屋,忌陰暗潮濕。':'兩人皆偏暖,易一同急躁上火、衝動決策,居家宜近水、宜北向靜室,忌西曬。')
+      :'雙方生月氣候不偏,調候一項無特別加減,論斷重心回到日柱與喜用互補。'));
+
+  // 五、四柱全局
+  o+=S('五、四柱逐柱比對——各領域的實際互動');
+  const cols=[[pA.year,pB.year],[pA.month,pB.month],[pA.day,pB.day],[pA.hour,pB.hour]];
+  o+='<table style="width:100%;border-collapse:collapse;font-size:12.5px">'
+    +'<tr style="color:var(--gold)"><th style="text-align:left;padding:4px 2px">柱</th><th style="text-align:left">干支</th><th style="text-align:left">關係</th><th style="text-align:left">所主</th></tr>';
+  cols.forEach((c,k)=>{
+    const r=zhiRel(c[0]%12,c[1]%12);
+    const col=r[1]==='吉'?'var(--green)':r[1]==='凶'?'var(--red)':'inherit';
+    o+='<tr><td style="padding:4px 2px">'+HH_PIL[k]+'</td><td>'+gz(c[0])+'／'+gz(c[1])+'</td>'
+      +'<td style="color:'+col+';font-weight:700">'+r[0]+'</td><td style="opacity:.75">'+HH_DOM[k]+'</td></tr>';
+  });
+  o+='</table>';
+  const yR=zhiRel(pA.year%12,pB.year%12),mR=zhiRel(pA.month%12,pB.month%12),hR=zhiRel(pA.hour%12,pB.hour%12);
+  if(mR[1]==='凶')o+=P('<b style="color:var(--red)">月柱'+mR[0]+'</b>——月柱主原生家庭與父母。此象主<b>婆媳翁婿之間易生嫌隙</b>,或兩家家風、經濟觀念差距大。此為合婚實務中最常引爆的一項,務必提前預備:婚後宜分居另立,節慶往來各自處理自家長輩,不代對方發言。');
+  else if(mR[1]==='吉')o+=P('月柱'+mR[0]+',主兩家長輩投緣、家風相近,婚事進行順利,亦少有兩家為難之事。');
+  if(hR[1]==='凶')o+=P('<b>時柱'+hR[0]+'</b>——時柱主子女與晚年。此象主子女教養理念分歧,或子女出生後夫妻重心失衡。宜早立教養共識,並保留兩人獨處時間,勿讓親職完全取代夫妻關係。');
+  else if(hR[1]==='吉')o+=P('時柱'+hR[0]+',主子女緣佳、晚年同心,老來相伴之象。');
+  if(yR[1]==='凶')o+=P('年柱'+yR[0]+'(即坊間所謂「生肖不合」)。<b>本門視年柱為表象緣分,權重遠低於日柱</b>——年柱主初識印象與外人觀感,不主婚姻實質。若日柱與喜用互補俱佳,年柱之沖僅主「旁人不看好」,實際相處無礙,不必為此卻步。');
+
+  // 六、神煞
+  o+=S('六、神煞檢視——桃花、孤鸞與刑剋','#A63A2E');
+  const gzA=gz(pA.day),gzB=gz(pB.day);
+  const shows=[];
+  const thA=XIANCHI[pA.year%12],thB=XIANCHI[pB.year%12];
+  const hasTH=p=>[p.year,p.month,p.day,p.hour].some(i=>i%12===XIANCHI[p.year%12]);
+  if(hasTH(pA))shows.push([A.name+'命帶桃花(咸池 '+BR[thA]+')','人緣佳、異性緣旺,言談舉止自帶吸引力。吉處在人脈與貴人,忌處在<b>易招無謂糾纏</b>。宜於婚後主動減少單獨應酬,自清則無事。']);
+  if(hasTH(pB))shows.push([B.name+'命帶桃花(咸池 '+BR[thB]+')','同上。兩人若皆帶桃花,外緣皆旺,更須建立明確界線與坦白習慣,否則猜疑一起便難收。']);
+  if(BR[pA.day%12]===HONGYAN[A.dm])shows.push([A.name+'日帶紅豔煞','主風情外顯、感情濃烈,易有戲劇性的情感經歷。此煞不主不貞,主「情深易惑」,宜以理智節之。']);
+  if(BR[pB.day%12]===HONGYAN[B.dm])shows.push([B.name+'日帶紅豔煞','同上。']);
+  if(GULUAN.includes(gzA))shows.push([A.name+'坐孤鸞日('+gzA+')','孤鸞主「獨」——並非孤獨終老,而是主<b>婚姻中易有實質的獨處時間</b>:如聚少離多、一方長期外派、或情感上各自為政。破解之法在晚婚(三十後)、或配偶年齡差距較大,古法亦取「先同居後婚」以應其象。']);
+  if(GULUAN.includes(gzB))shows.push([B.name+'坐孤鸞日('+gzB+')','同上。']);
+  if(KUIGANG.includes(gzA))shows.push([A.name+'坐魁罡('+gzA+')','魁罡主性剛果決、能擔大事,但<b>不受拘束、不肯低頭</b>。男命主威權,女命主自立而剛強。魁罡最忌配偶同樣強勢,宜一剛一柔。']);
+  if(KUIGANG.includes(gzB))shows.push([B.name+'坐魁罡('+gzB+')','同上。']);
+  if(YINCHA.includes(gzA))shows.push([A.name+'坐陰差陽錯('+gzA+')','古法謂婚事多波折、或與配偶家族緣薄。實務上多應在<b>婚禮過程不順、或與姻親互動疏遠</b>,不主婚姻本身失敗。行禮從簡、不強求排場即可大減其應。']);
+  if(YINCHA.includes(gzB))shows.push([B.name+'坐陰差陽錯('+gzB+')','同上。']);
+  o+=shows.length?shows.map(s=>'<div style="margin:6px 0;padding:7px 10px;background:rgba(166,58,46,.06);border-left:3px solid rgba(166,58,46,.5);border-radius:0 8px 8px 0"><b>'+s[0]+'</b><div style="font-size:13px;line-height:1.85;margin-top:2px">'+s[1]+'</div></div>').join('')
+    :P('雙方日柱均不犯孤鸞、魁罡、陰差陽錯,亦不見明顯桃花咸池——感情結構單純,少有外緣干擾與波折之象,此為合婚中難得的清淨格局。');
+
+  // 七、居家佈局
+  o+=S('七、命卦與居家配置','#8C6D3F');
+  const east='坎離震巽',sameG=(east.includes(gA)===east.includes(gB)),yy=yx3(gA,gB);
+  o+=K('雙方命卦',gA+'命('+(east.includes(gA)?'東四':'西四')+')　×　'+gB+'命('+(east.includes(gB)?'東四':'西四')+')');
+  o+=K('兩卦相見',yy);
+  o+=P(sameG
+    ?'兩人同屬'+(east.includes(gA)?'東四':'西四')+'命,吉凶方位一致,<b>選屋與臥房佈置最好安排</b>——同一個坐向、同一個床位就能同時滿足兩人,是居家風水上最省事的組合。'
+    :'兩人一東四一西四,吉方相反。<b>此為常見情形,不必因此判為不合。</b>實務化解:①主臥取<b>經濟主力一方</b>之延年方或生氣方;②床頭朝向取雙方皆不犯絕命五鬼之中性方;③各自書桌/辦公位再分別取自己吉方,分開補足即可。');
+  o+=P('兩卦相見為<b>'+yy+'</b>——'+({'延年':'延年主情義綿長、感情持久,是八宅遊星中最利夫妻之星,主白頭偕老。','生氣':'生氣主活力興旺,兩人在一起精神好、想法多,適合共同創業或開展新局。','天醫':'天醫主安穩相扶,遇病遇難有人照應,是細水長流之象,平淡卻極可靠。','伏位':'伏位主平順守成,兩人相處安定但變化不多,宜主動創造共同新體驗,以免日久生倦。','絕命':'絕命主意見難合、易生大爭執。化解之道在臥房——務必取一方之吉位安床,並避免兩人同時在氣頭上做決定。','五鬼':'五鬼主口舌是非、易受外人挑撥。此象最忌第三者傳話,凡事兩人當面說清;居家忌東北或西南方(視命卦)堆放雜物。','六煞':'六煞主是非纏繞、感情起伏,易因小事反覆。宜規律作息、減少臨時變動,居家保持整潔明亮。','禍害':'禍害主口角與小病痛,不主大凶。多為生活瑣事積累,定期共同外出走動即可化解。'}[yy]||''));
+
+  // 八、總論
+  o+=S('八、總論與經營要領');
+  const strong=[],weak=[];
+  if(dRel[1]==='吉')strong.push('夫妻宮'+dRel[0]);if(dRel[1]==='凶')weak.push('夫妻宮'+dRel[0]);
+  if(gHe)strong.push('日主五合');if(gChong)weak.push('日主相沖');
+  if(bA.pct>=25)strong.push(B.name+'補'+A.name);if(bB.pct>=25)strong.push(A.name+'補'+B.name);
+  if(bA.pct<12)weak.push(B.name+'補益不足');if(bB.pct<12)weak.push(A.name+'補益不足');
+  if(hA!==hB&&hA!=='平'&&hB!=='平')strong.push('調候相濟');
+  if(sameG)strong.push('命卦同組');if('延年生氣天醫'.includes(yy))strong.push('命卦互見'+yy);
+  if('絕命五鬼'.includes(yy))weak.push('命卦互見'+yy);
+  if(mR[1]==='凶')weak.push('月柱'+mR[0]+'(姻親)');
+  o+=K('本盤優勢',strong.length?strong.join('、'):'無特別突出處');
+  o+=K('本盤課題',weak.length?weak.join('、'):'無明顯缺陷');
+  o+=P('<b>經營要領:</b>'+(weak.length===0
+    ?'此盤結構完整、無明顯破綻,屬可放心的組合。唯結構好者常疏於經營,反而在平順中生倦——建議每年固定安排兩人單獨的長途出遊,維持新鮮感即可長保。'
+    :(weak.some(w=>w.includes('沖'))?'首要在「距離」:沖者宜動不宜靜,兩人各有獨立的事業與交友圈反而相安;最忌整日相處、事事過問。':'')
+     +(weak.some(w=>w.includes('刑')||w.includes('害'))?'其次在「明說」:刑害之象皆起於暗處,凡有不滿當日講清,切忌積累與冷戰。':'')
+     +(weak.some(w=>w.includes('補益不足'))?'補益不足者,不可依賴配偶旺運,須自行以居家方位、職業與作息補足所缺五行。':'')
+     +(weak.some(w=>w.includes('姻親'))?'姻親一項須提前佈局:婚後另立門戶、各自處理自家長輩,是最有效的化解。':'')
+     +(weak.some(w=>w.includes('絕命')||w.includes('五鬼'))?'居家務必調整:主臥安於一方吉位,勿將就。臥房一改,爭執可減大半。':'')));
+  o+='<div style="font-size:11.5px;opacity:.6;margin-top:10px;line-height:1.8">以上為抱朴隨緣堂合婚論法:以日柱夫妻宮為體、夫妻星取用為用、喜用互補為驗、調候神煞為佐,四柱逐柱合參。與坊間「生肖歌訣」屬不同法脈,結論有異屬正常。合婚是參考,不是判決;兩人相待之心終究勝過命理。重大決定仍宜面斷。</div>';
+  return o;
+}
+
 function heHun(){
   const[Y1,M1,D1]=document.getElementById('bd').value.split('-').map(Number);
   const[h1,n1]=document.getElementById('bt').value.split(':').map(Number);
@@ -223,16 +416,21 @@ function heHun(){
   if(_hit(_A,male1,_B,male2)||_hit(_B,male2,_A,male1)){
     const gA=mg3(pA.sui,male1),gB=mg3(pB.sui,male2);
     const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
-    document.getElementById('hhOut').innerHTML=
-      '<div style="text-align:center"><span class="score" style="font-size:38px">99</span><span style="opacity:.6">/100</span> <b style="color:var(--green)">天作之合</b></div>'
-     +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">'
+    const stA0=strength({year:pA.year,month:pA.month,day:pA.day,hour:pA.hour});
+    const stB0=strength({year:pB.year,month:pB.month,day:pB.day,hour:pB.hour});
+    const free0=
+      '<div style="text-align:center"><span class="score" style="font-size:44px">99</span><span style="opacity:.6">/100</span> <b style="color:var(--green)">天作之合</b></div>'
+     +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:8px">'
      +'甲:'+gz(pA.year)+'年(屬'+SX[pA.year%12]+')・'+gz(pA.day)+'日・'+gA+'命<br>'
      +'乙:'+gz(pB.year)+'年(屬'+SX[pB.year%12]+')・'+gz(pB.day)+'日・'+gB+'命</div>'
-     +'<div class="item"><span>年支相合,緣分天定<br><small style="opacity:.6">生肖三合六合,情投意合</small></span><b style="color:var(--green)">+15</b></div>'
-     +'<div class="item"><span>日主陰陽相配<br><small style="opacity:.6">夫妻宮相生,琴瑟和鳴</small></span><b style="color:var(--green)">+14</b></div>'
-     +'<div class="item"><span>命卦互為延年<br><small style="opacity:.6">情義綿長,白頭偕老之象</small></span><b style="color:var(--green)">+12</b></div>'
-     +'<div class="item"><span>五行互補得宜<br><small style="opacity:.6">彼此補足,同心同德</small></span><b style="color:var(--green)">+12</b></div>'
-     +'<div class="item"><span>神煞無沖無破<br><small style="opacity:.6">百年好合,子孫昌盛</small></span><b style="color:var(--green)">+6</b></div>';
+     +'<div style="font-size:13.5px;line-height:1.95;padding:10px 12px;background:rgba(74,107,79,.08);border-left:3px solid var(--green);border-radius:0 10px 10px 0">'
+     +'年支相合、夫妻宮相生,命卦互為延年,五行彼此補足而神煞無沖無破。<br>'
+     +'此為合婚中極罕見之上上格,情投意合、同心同德,主白頭偕老、子孫昌盛。<br>'
+     +'<b>結構已臻完備,重點不在化解,而在如何長保。</b></div>';
+    const deep0='<div style="margin-top:10px">'+heHunDeep(pA,pB,male1,male2,stA0,stB0,gA,gB)+'</div>';
+    const el0=document.getElementById('hhOut');
+    el0.innerHTML=free0+(window.BPSY?BPSY.gate(deep0,'抱朴心法・合婚深論(八章全解)'):deep0);
+    window.BPSY&&BPSY.bind(el0);
     return;
   }
   const ya=pA.year,yb=pB.year;
@@ -279,12 +477,29 @@ function heHun(){
   sc+=comp;
   sc=Math.max(20,Math.min(98,sc));
   const lv=sc>=85?['天作之合','var(--green)']:sc>=72?['上等婚配','var(--green)']:sc>=58?['中上之配','var(--gold)']:sc>=45?['普通,重經營','#c9944a']:['多有考驗','var(--red)'];
-  document.getElementById('hhOut').innerHTML=
-    '<div style="text-align:center"><span class="score" style="font-size:38px">'+sc+'</span><span style="opacity:.6">/100</span> <b style="color:'+lv[1]+'">'+lv[0]+'</b></div>'
-   +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:6px">'
+  // ── 免費層:分數 + 三句總評 ──
+  const dR0=zhiRel(pA.day%12,pB.day%12);
+  const bA0=buYi(stA,pB),bB0=buYi(stB,pA);
+  const s1=({'六合':'夫妻宮六合,默契天成、爭執少而和好快。','半三合':'夫妻宮半三合,志趣同向、目標一致。','六沖':'夫妻宮相沖,主聚少離多、言語易頂,關鍵在分工不分心。','相害':'夫妻宮相害,表面平順而心結不說破,最忌猜疑。','相刑':'夫妻宮相刑,磨合期較長,熬過則根基極穩。','自刑':'雙方日支自刑,性情太像,遇事無人拉得住對方。','同支':'雙方日支同字,習慣相近但缺互補。','無涉':'夫妻宮無合無沖,成敗全在後天經營。'})[dR0[0]];
+  const s2=(bA0.pct>=25&&bB0.pct>=25)?'五行雙向互補成立,兩人互為對方之藥,這是合婚裡份量最重的一條。'
+          :(bA0.pct>=25||bB0.pct>=25)?'五行單向互補,一方明顯受益於另一方,另一方則須自行補足所缺。'
+          :'五行互補有限,婚姻好壞主要看相處而非命理,宜以居家方位與作息補其不足。';
+  const s3=sc>=72?'整體結構良好,屬可安心的組合。':sc>=58?'整體中上,有可為之處也有須留意之處。':'整體須用心經營,命理上的課題明確,但都有對應的化解之道。';
+  const free=
+    '<div style="text-align:center"><span class="score" style="font-size:44px">'+sc+'</span><span style="opacity:.6">/100</span> <b style="color:'+lv[1]+'">'+lv[0]+'</b></div>'
+   +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:8px">'
    +'甲:'+gz(pA.year)+'年(屬'+SX[pA.year%12]+')・'+gz(pA.day)+'日・'+gA+'命<br>'
    +'乙:'+gz(pB.year)+'年(屬'+SX[pB.year%12]+')・'+gz(pB.day)+'日・'+gB+'命</div>'
-   +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('');
+   +'<div style="font-size:13.5px;line-height:1.95;padding:10px 12px;background:rgba(140,109,63,.07);border-left:3px solid var(--gold);border-radius:0 10px 10px 0">'
+   +s1+'<br>'+s2+'<br><b>'+s3+'</b></div>';
+  // ── 付費層:八章深論 + 逐項計分 ──
+  const deep='<div style="margin-top:10px">'+heHunDeep(pA,pB,male1,male2,stA,stB,gA,gB)
+   +'<h3 style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:var(--gold);margin:14px 0 5px;padding-bottom:3px;border-bottom:1px solid rgba(201,169,106,.3)">附:逐項計分明細</h3>'
+   +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('')
+   +'</div>';
+  const el=document.getElementById('hhOut');
+  el.innerHTML=free+(window.BPSY?BPSY.gate(deep,'抱朴心法・合婚深論(八章全解)'):deep);
+  window.BPSY&&BPSY.bind(el);
 }
 document.getElementById('hhBtn').onclick=heHun;
 // ═══ 專業強化模組 ═══
