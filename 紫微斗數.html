@@ -60,6 +60,7 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 <div class="box"><div id="chart"></div></div>
 <div class="box" id="detail"></div>
 <script src="lock.js"></script>
+<script src="report.js"></script>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
 const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
@@ -708,6 +709,22 @@ function render(){
   h2+='<div class="note">論法要旨:一看格局成敗、二看四化流向、三看三方四正會照、四看大限流年引動。單宮獨論易失偏頗,必須「宮宮相參、星星互看」;吉中須察其凶、凶中須尋其解,方為完整論法。<br>安星依通行《紫微斗數全書》口訣;農曆以天文朔望與中氣置閏推算(非查表)。星曜廟旺陷與四化各派微異,重大論斷請以師承為準。</div>';
   dtl.innerHTML=h2;
   window.BPSY&&BPSY.bind(dtl);
+  // 報告書輸出
+  if(window.BPRPT){
+    const _old=document.getElementById('rptBox'); if(_old)_old.remove();
+    const _box=document.createElement('div'); _box.id='rptBox';
+    dtl.appendChild(_box);
+    BPRPT.button(_box,function(){
+      return {
+        title:'紫微斗數命書',
+        meta:[['出生',document.getElementById('bd').value+' '+document.getElementById('bt').value],
+              ['性別',document.getElementById('sex').selectedOptions[0].textContent],
+              ['年干支',z.yGZ],['五行局',JU_NAME[z.ju]],
+              ['命宮',BR[z.ming]+'宮'],['身宮',BR[z.shen]+'宮']],
+        html:'<div id="chartPrint">'+document.getElementById('chart').innerHTML+'</div>'+h2
+      };
+    });
+  }
   window.fscP&&window.fscP('ziwei','chart',z.yGZ+'/'+JU_NAME[z.ju]);
 }
 render();

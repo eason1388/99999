@@ -76,6 +76,7 @@ button{font-family:inherit}
     <div class="note">評分=基準50+逐項加減(每項附出處;v1 基準模型,權重屬門派包可覆寫)。喜用神取自五行強弱(身弱喜印比、身強喜食傷財官)。</div></div>
 </div>
 <script src="lock.js"></script>
+<script src="report.js"></script>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
 const WX='木木火火土土金金水水',WXC={'木':'#4A6B4F','火':'#A63A2E','土':'#8C6D3F','金':'#948e82','水':'#3E5C76'};
@@ -434,6 +435,7 @@ function heHun(){
     const el0=document.getElementById('hhOut');
     el0.innerHTML=free0+(window.BPSY?BPSY.gate(deep0,'抱朴心法・合婚深論(八章全解)',_tz0):deep0);
     window.BPSY&&BPSY.bind(el0);
+    hhReport(el0,pA,pB,male1,male2,gA,gB,99,'天作之合',free0,deep0);
     return;
   }
   const ya=pA.year,yb=pB.year;
@@ -519,6 +521,24 @@ function heHun(){
   const el=document.getElementById('hhOut');
   el.innerHTML=free+(window.BPSY?BPSY.gate(deep,'抱朴心法・合婚深論(八章全解)',_tz):deep);
   window.BPSY&&BPSY.bind(el);
+  hhReport(el,pA,pB,male1,male2,gA,gB,sc,lv[0],free,deep);
+}
+// ── 合婚報告書 ──
+function hhReport(el,pA,pB,male1,male2,gA,gB,sc,lvName,free,deep){
+  if(!window.BPRPT)return;
+  const SXX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+  const box=document.createElement('div');el.appendChild(box);
+  BPRPT.button(box,function(){
+    return{
+      title:'八字合婚報告書',
+      meta:[['甲方',gz(pA.year)+'年 '+gz(pA.month)+'月 '+gz(pA.day)+'日 '+gz(pA.hour)+'時'],
+            ['乙方',gz(pB.year)+'年 '+gz(pB.month)+'月 '+gz(pB.day)+'日 '+gz(pB.hour)+'時'],
+            ['甲方命卦',gA+'命(屬'+SXX[pA.year%12]+')'],
+            ['乙方命卦',gB+'命(屬'+SXX[pB.year%12]+')'],
+            ['合婚評分',sc+' / 100'],['總評',lvName]],
+      html:free+(window.BPSY&&BPSY.ok()?deep:'')
+    };
+  });
 }
 document.getElementById('hhBtn').onclick=heHun;
 // ═══ 專業強化模組 ═══
