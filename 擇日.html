@@ -130,11 +130,12 @@ const localDay=jd=>Math.floor(jd+8/24+0.5);
 // ── 農曆 ──
 const LUCACHE={};
 function toLunar(J){
-  const [Y]=fromJDN(J);
-  const key=Y;
+  const [Y0]=fromJDN(J);
+  // 以「J 之前最近的冬至」為錨,月表必然涵蓋 J
+  let wsY=Y0, ws=localDay(termJD(Y0,270));
+  if(ws>J){wsY=Y0-1;ws=localDay(termJD(wsY,270));}
+  const key=wsY;
   if(!LUCACHE[key]){
-    let wsY=Y,ws=localDay(termJD(Y,270));
-    if(ws>J){wsY=Y-1;ws=localDay(termJD(Y-1,270));}
     let k=Math.floor((ws-2451550.09766)/29.530588861)+2;
     while(localDay(newMoonJD(k))>ws)k--;
     const m11k=k;
@@ -153,30 +154,18 @@ function toLunar(J){
     LUCACHE[key]={months,wsY};
   }
   const {months}=LUCACHE[key];
-  let cur=months.find(m=>J>=m.s&&J<m.e);
-  if(!cur){ // 跨到相鄰年的表
-    const alt=Y+(J<months[0].s?-1:1);
-    delete LUCACHE[key];
-    if(!toLunar._r){toLunar._r=1;const r=toLunar(J);toLunar._r=0;return r}
-    return{month:1,day:1,isLeap:false};
-  }
+  const cur=months.find(m=>J>=m.s&&J<m.e)||months[months.length-1];
   return{month:cur.name,day:J-cur.s+1,isLeap:cur.isLeap};
 }
-// ── 日干支(以 1984/2/2 甲子日校準:JDN 2445733 為甲子)──
+// ── 日干支(與八字/紫微模組同一套式,已交叉驗證)──
 const gzOfDay=J=>((J-11)%60+60)%60;
 // ── 節氣月建與年支(立春分界)──
+// 節氣月:直接取當日正午太陽黃經。立春(315°)起寅月,每 30° 一月。
 function monthBranch(J){
   const [Y]=fromJDN(J);
-  // 找出 J 所在的節氣月:以 315°(立春)起,每 30° 一月
-  for(const yy of [Y-1,Y,Y+1]){
-    for(let i=0;i<12;i++){
-      const lon=(315+i*30)%360;
-      const s=localDay(termJD(yy,lon));
-      const e=localDay(termJD((lon+30)%360<lon?yy+1:yy,(lon+30)%360));
-      if(J>=s&&J<e)return{mb:(2+i)%12, mi:i, sy:yy};
-    }
-  }
-  return{mb:2,mi:0,sy:Y};
+  const lon=sunLon(J-8/24,Y);              // 該曆日之當地正午
+  const mi=Math.floor((((lon-315)%360)+360)%360/30);   // 0=寅月 … 11=丑月
+  return{mb:(2+mi)%12, mi};
 }
 function yearBranchOf(J){
   const [Y]=fromJDN(J);
