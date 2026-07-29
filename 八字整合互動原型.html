@@ -505,8 +505,11 @@ function heHun(){
   const _tgAB=tenGod(pA.day%10,pB.day%10),_tgBA=tenGod(pB.day%10,pA.day%10);
   const _daoWei=_sp1.want.includes(_tgAB)||_sp2.want.includes(_tgBA);
   const _mR=zhiRel(pA.month%12,pB.month%12);
+  const _dzTxt=(dR0[0]==='無涉'||dR0[0]==='同支'||dR0[0]==='自刑')
+    ? BR[pA.day%12]+'・'+BR[pB.day%12]+' <b>'+dR0[0]+'</b>'
+    : '<b>'+BR[pA.day%12]+dR0[0]+BR[pB.day%12]+'</b>';
   let _tz='雙方日柱 <span class="k">'+gz(pA.day)+'</span> × <span class="k">'+gz(pB.day)+'</span>'
-    +'　夫妻宮 <b>'+BR[pA.day%12]+dR0[0]+BR[pB.day%12]+'</b><br>';
+    +'　夫妻宮 '+_dzTxt+'<br>';
   _tz+=_daoWei
     ? '<b>夫妻星到位</b>——一方之日主正是對方命中所求之夫妻星,此為合婚中極罕之象。<br>'
     : '五行互補 '+(bA0.pct>=25&&bB0.pct>=25?'<b>雙向成立</b>':bA0.pct>=25||bB0.pct>=25?'<b>單向成立</b>':'<b>偏弱</b>')
