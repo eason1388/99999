@@ -49,6 +49,15 @@ function save(code){
 }
 function clear(){ try{ localStorage.removeItem(KEY) }catch(e){} }
 
+/* ── 共用視覺:外殼自有整套設計,只給模組頁套 ── */
+function theme(){
+  if(document.getElementById('bpsy-theme'))return;
+  if(document.getElementById('stage'))return;          // index.html 外殼不套
+  var l=document.createElement('link'); l.id='bpsy-theme';
+  l.rel='stylesheet'; l.href='theme.css';
+  (document.head||document.documentElement).appendChild(l);
+}
+
 /* ── 全站捲動順滑修正(所有載入 lock.js 的模組自動套用)── */
 function scrollFix(){
   if(document.getElementById('bpsy-scroll'))return;
@@ -217,6 +226,6 @@ function bind(root){
 g.BPSY={ok:ok,gate:gate,gatePage:gatePage,bind:bind,open:open_,close:close,
          valid:valid,gen:gen,save:save,clear:clear,LINE:LINE_ID,PRICE:PRICE,KEY:KEY};
 
-scrollFix();
-document.addEventListener('DOMContentLoaded',function(){ scrollFix(); bind(); });
+theme(); scrollFix();
+document.addEventListener('DOMContentLoaded',function(){ theme(); scrollFix(); bind(); });
 })(window);
