@@ -293,7 +293,12 @@ function finish(){
   let _dp='';
   if(key&&HEX_N[key])_dp+='<div class="sec"><b style="color:var(--pur)">【抱朴心法・卦位要旨】</b><div style="font-size:13.5px;line-height:1.8">'+HEX_N[key]+'</div></div>';
   if(key&&HEX_N2[key])_dp+='<div class="sec"><b style="color:var(--pur)">【易理深解】</b><div style="font-size:13.5px;line-height:1.8">'+HEX_N2[key]+'</div></div>';
-  if(_dp)h+=(window.BPSY?BPSY.gate(_dp,'抱朴心法・卦解深層'):_dp);
+  if(_dp){
+    const _tzC='本卦 <span class="k">'+FULLN[ben.n]+'</span>'
+      +(nMov>0?'　變 <span class="k">'+FULLN[bian.n]+'</span>　動爻 <b>'+nMov+'</b>':'　<b>六爻皆靜</b>')+'<br>'
+      +'<span style="opacity:.8">此卦所問之事的內情、應期、六親所涉,以及本堂對此卦於占問上的法要,詳見下文。</span>';
+    h+=(window.BPSY?BPSY.gate(_dp,'抱朴心法・卦解深層',_tzC):_dp);
+  }
   h+='<div class="note">變占法依朱熹《易學啟蒙》;卦爻辭為通行本原文。欲詳斷流年應期、用神喜忌,請洽抱朴隨緣堂。</div>';
   const r=document.getElementById('result');r.style.display='block';r.innerHTML=h;
   window.BPSY&&BPSY.bind(r);

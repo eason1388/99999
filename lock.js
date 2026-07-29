@@ -76,13 +76,20 @@ function css(){
   if(document.getElementById('bpsy-css')) return;
   var st=document.createElement('style'); st.id='bpsy-css';
   st.textContent=
-  '.bpsy-wrap{position:relative;border:1.5px solid rgba(201,169,106,.55);border-radius:16px;overflow:hidden;margin:14px 0;background:#1c1712;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.18);transition:border-color .18s,box-shadow .18s,transform .18s}'+
+  '.bpsy-wrap{border:1.5px solid rgba(201,169,106,.55);border-radius:16px;overflow:hidden;margin:14px 0;background:#1c1712;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.18);transition:border-color .18s,box-shadow .18s,transform .18s}'+
   '.bpsy-wrap:hover{border-color:rgba(201,169,106,.95);box-shadow:0 10px 32px rgba(201,169,106,.22);transform:translateY(-2px)}'+
   '.bpsy-wrap:active{transform:scale(.995)}'+
-  '.bpsy-tag{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:6px;padding:8px 14px;background:linear-gradient(90deg,#c9a96a,#a8853f);color:#1a1410;font-size:12.5px;font-weight:700;letter-spacing:.06em}'+
+  '.bpsy-tag{display:flex;align-items:center;gap:6px;padding:8px 14px;background:linear-gradient(90deg,#c9a96a,#a8853f);color:#1a1410;font-size:12.5px;font-weight:700;letter-spacing:.06em}'+
   '.bpsy-tag .r{margin-left:auto;font-weight:800;letter-spacing:0}'+
-  '.bpsy-blur{filter:blur(4.5px);opacity:.3;pointer-events:none;user-select:none;padding:52px 16px 16px;font-size:13.5px;line-height:1.95;height:200px;overflow:hidden;color:#e8dcc8}'+
-  '.bpsy-mask{position:absolute;inset:36px 0 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:14px;background:linear-gradient(180deg,rgba(28,23,18,.55) 0%,rgba(28,23,18,.94) 55%)}'+
+  /* 個人化提要:這一段是看得見的,內容由本人命盤實算 */
+  '.bpsy-teaser{padding:15px 16px 13px;font-size:13.5px;line-height:2;color:rgba(237,231,218,.92);'+
+    'background:linear-gradient(180deg,rgba(201,169,106,.13),rgba(201,169,106,.02))}'+
+  '.bpsy-teaser b{color:#f0d9a0;font-size:15px}'+
+  '.bpsy-teaser .k{display:inline-block;background:rgba(201,169,106,.2);border:1px solid rgba(201,169,106,.45);'+
+    'border-radius:6px;padding:1px 8px;color:#f0d9a0;font-weight:700;margin:0 2px}'+
+  '.bpsy-cut{position:relative}'+
+  '.bpsy-blur{filter:blur(4.5px);opacity:.3;pointer-events:none;user-select:none;padding:14px 16px;font-size:13.5px;line-height:1.95;height:150px;overflow:hidden;color:#e8dcc8}'+
+  '.bpsy-mask{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:14px;background:linear-gradient(180deg,rgba(28,23,18,.5) 0%,rgba(28,23,18,.95) 55%)}'+
   '.bpsy-mask .bi{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(201,169,106,.16);border:1.5px solid rgba(201,169,106,.5)}'+
   '.bpsy-mask .bt{font-family:"Noto Serif TC",serif;color:#e6c886;font-size:16px;letter-spacing:.08em;font-weight:700}'+
   '.bpsy-mask .bs{font-size:12.5px;color:rgba(237,231,218,.72);line-height:1.75}'+
@@ -164,7 +171,10 @@ function close(){ var m=document.getElementById('bpsy-modal'); m&&m.classList.re
 
 /* ── 產生鎖住區塊的 HTML ──
    已解碼 → 原樣回傳;未解碼 → 模糊預覽 + 遮罩 */
-function gate(html, title){
+/* gate(完整內容, 標題, 個人化提要)
+   teaser 必須是「由本人命盤實算出來的具體結論」,不是廣告詞。
+   給了 teaser 就先讓他看見結論、斷在論斷與化解之前。 */
+function gate(html, title, teaser){
   if(ok()) return html;
   css();
   // 不放真實內文,只放假文字底,避免未付費者由原始碼取得內容
@@ -173,12 +183,13 @@ function gate(html, title){
             '非坊間泛論可比,解碼後可永久查閱、離線使用。';
   return '<div class="bpsy-wrap" data-bpsy-open>'+
     '<div class="bpsy-tag"><span>🔒 深解內容・尚未解碼</span><span class="r">'+PRICE+'</span></div>'+
-    '<div class="bpsy-blur">'+plain+'</div>'+
+    (teaser?'<div class="bpsy-teaser">'+teaser+'</div>':'')+
+    '<div class="bpsy-cut"><div class="bpsy-blur">'+plain+'</div>'+
     '<div class="bpsy-mask"><div class="bi">🔒</div>'+
     '<div class="bt">'+(title||'深解內容')+'</div>'+
-    '<div class="bs">此段為抱朴隨緣堂心法深解<br>一次解碼・永久開啟・不需連網</div>'+
+    '<div class="bs">'+(teaser?'完整論斷與化解次第<br>解碼後永久開啟':'此段為抱朴隨緣堂心法深解<br>一次解碼・永久開啟・不需連網')+'</div>'+
     '<button class="bpsy-btn" data-bpsy-open>🔑 點此解碼</button>'+
-    '<div class="bpsy-hint">已有授權碼?也是點這裡輸入</div></div></div>';
+    '<div class="bpsy-hint">已有授權碼?也是點這裡輸入</div></div></div></div>';
 }
 
 /* ── 整頁鎖(易經推命這類整頁付費用)── */

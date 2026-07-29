@@ -428,8 +428,11 @@ function heHun(){
      +'此為合婚中極罕見之上上格,情投意合、同心同德,主白頭偕老、子孫昌盛。<br>'
      +'<b>結構已臻完備,重點不在化解,而在如何長保。</b></div>';
     const deep0='<div style="margin-top:10px">'+heHunDeep(pA,pB,male1,male2,stA0,stB0,gA,gB)+'</div>';
+    const _tz0='雙方日柱 <span class="k">'+gz(pA.day)+'</span> × <span class="k">'+gz(pB.day)+'</span><br>'
+      +'<b>年支相合、夫妻宮相生、命卦互為延年</b>——三項俱全,合婚中極罕之上上格。<br>'
+      +'<span style="opacity:.8">夫妻星取用、喜用互補、調候相濟、四柱逐柱、神煞刑剋、居家配置與長保之道,共八章,詳見下文。</span>';
     const el0=document.getElementById('hhOut');
-    el0.innerHTML=free0+(window.BPSY?BPSY.gate(deep0,'抱朴心法・合婚深論(八章全解)'):deep0);
+    el0.innerHTML=free0+(window.BPSY?BPSY.gate(deep0,'抱朴心法・合婚深論(八章全解)',_tz0):deep0);
     window.BPSY&&BPSY.bind(el0);
     return;
   }
@@ -497,8 +500,21 @@ function heHun(){
    +'<h3 style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:var(--gold);margin:14px 0 5px;padding-bottom:3px;border-bottom:1px solid rgba(201,169,106,.3)">附:逐項計分明細</h3>'
    +items.map(([t,d,note])=>'<div class="item"><span>'+t+'<br><small style="opacity:.6">'+note+'</small></span><b style="color:'+(d>0?'var(--green)':d<0?'var(--red)':'inherit')+'">'+(d>0?'+':'')+d+'</b></div>').join('')
    +'</div>';
+  // ── 個人化提要:由雙方八字實算 ──
+  const _sp1=spouseStar(pA,male1),_sp2=spouseStar(pB,male2);
+  const _tgAB=tenGod(pA.day%10,pB.day%10),_tgBA=tenGod(pB.day%10,pA.day%10);
+  const _daoWei=_sp1.want.includes(_tgAB)||_sp2.want.includes(_tgBA);
+  const _mR=zhiRel(pA.month%12,pB.month%12);
+  let _tz='雙方日柱 <span class="k">'+gz(pA.day)+'</span> × <span class="k">'+gz(pB.day)+'</span>'
+    +'　夫妻宮 <b>'+BR[pA.day%12]+dR0[0]+BR[pB.day%12]+'</b><br>';
+  _tz+=_daoWei
+    ? '<b>夫妻星到位</b>——一方之日主正是對方命中所求之夫妻星,此為合婚中極罕之象。<br>'
+    : '五行互補 '+(bA0.pct>=25&&bB0.pct>=25?'<b>雙向成立</b>':bA0.pct>=25||bB0.pct>=25?'<b>單向成立</b>':'<b>偏弱</b>')
+      +'('+bA0.pct+'% / '+bB0.pct+'%)<br>';
+  if(_mR[1]==='凶')_tz+='另:月柱'+_mR[0]+',主<b>姻親往來</b>須提前佈局。<br>';
+  _tz+='<span style="opacity:.8">夫妻星取用、喜用互補、調候相濟、四柱逐柱、神煞刑剋、居家配置與經營要領,共八章,詳見下文。</span>';
   const el=document.getElementById('hhOut');
-  el.innerHTML=free+(window.BPSY?BPSY.gate(deep,'抱朴心法・合婚深論(八章全解)'):deep);
+  el.innerHTML=free+(window.BPSY?BPSY.gate(deep,'抱朴心法・合婚深論(八章全解)',_tz):deep);
   window.BPSY&&BPSY.bind(el);
 }
 document.getElementById('hhBtn').onclick=heHun;

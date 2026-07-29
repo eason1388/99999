@@ -432,7 +432,21 @@ function render(){
    +'<div class="row2"><span>後天卦 '+FULLN[r.houName]+'</span><b>內互'+hg2.nei+'・外互'+hg2.wai+' → 合互 <span style="color:var(--gold)">'+FULLN[hg2.he]+'</span></b></div>'
    +(ZY[hg1.he]?'<div class="yw" style="font-size:13.5px">合互'+hg1.he+':'+ZY[hg1.he].g+'</div>':'');
   o+='<div class="note" style="margin-top:8px">本頁依古傳易卦推命法推算(天干佈洛書、地支佈河圖、單雙數分取天地、洛書起卦、八卦相盪、元堂變後天)。驗例:己酉/戊辰/戊寅/甲寅 → 天數三十一得乾、地數三十六得乾,本程式驗算相符。<br>大運、流年小限、流月、流日、互卦之推法,均以古傳驗例(風水渙大運 1-9/10-15/16-21/22-30/31-39/40-45 共四十五年、小限渙蒙剝艮旅遯咸革夬、流月屯比坎井大過恆、合互山雷頤)逐項核對相符。論命仍宜合參斗數、八字與陽宅。<br><span style="opacity:.7">此為抱朴隨緣堂整理之演算實作;各派傳承或有出入,請以自身師承為準。</span></div>';
-  if(window.BPSY)o=o.slice(0,_pY)+BPSY.gate(o.slice(_pY),'抱朴心法深解・大運流年流月・互卦');
+  if(window.BPSY){
+    // 個人化提要:由本人命卦實算
+    const _nowAge=new Date().getFullYear()-Y+1;
+    const _d1=daYun(r.bits,r.yuanTang,1);
+    const _d2=daYun(r.houBits,(r.yuanTang+3)%6,_d1.end+1);
+    const _all=_d1.runs.concat(_d2.runs);
+    const _cur=_all.find(x=>_nowAge>=x.from&&_nowAge<=x.to);
+    let _tz='先天 <span class="k">'+FULLN[r.xianName]+'</span> 之 後天 <span class="k">'+FULLN[r.houName]+'</span><br>';
+    _tz+=_cur
+      ? '你今年虛歲 <b>'+_nowAge+'</b>,正走 <b>'+_cur.from+'—'+_cur.to+' 歲</b>這一段大運'
+        +'('+(_cur.yang?'陽爻・管九年':'陰爻・管六年')+')<br>'
+      : '你今年虛歲 <b>'+_nowAge+'</b>,已行過先後天兩卦共 '+(_d1.total+_d2.total)+' 年之運<br>';
+    _tz+='<span style="opacity:.8">此運主什麼、今年的年卦是哪一卦、逐月吉凶,以及互卦所藏的六親內情,詳見下文。</span>';
+    o=o.slice(0,_pY)+BPSY.gate(o.slice(_pY),'抱朴心法深解・大運流年流月・互卦',_tz);
+  }
   document.getElementById('out').innerHTML=o;
   window.BPSY&&BPSY.bind(document.getElementById('out'));
   window.fscP&&window.fscP('yijing','tuiming',r.xianName+'之'+r.houName);

@@ -1421,7 +1421,12 @@ document.getElementById('fmGo').onclick=function(){
   const who=mem==='父'?'父親':(mem==='母'?'母親':mem);
   var _deep=(HEX_N[j.u+j.g]?'<div style="padding:4px 0"><b style="color:#8e6bb5">【抱朴心法・易卦陽宅】</b>'+HEX_N[j.u+j.g]+'</div>':'')
     +(HEX_N2[j.u+j.g]?'<div style="padding:4px 0"><b style="color:#8e6bb5">【易理深解】</b>'+HEX_N2[j.u+j.g]+'<span style="opacity:.55;font-size:11.5px">(本堂依易卦陽宅法要與臨案心得整理)</span></div>':'');
-  if(_deep&&window.BPSY)_deep=BPSY.gate(_deep,'家人配位・易理深解');
+  if(_deep&&window.BPSY){
+    var _tzL=mem+'居'+DIRZH[g]+'方 → <span class="k">'+j.name+'</span> <b style="color:'+j.col+'">['+j.lv+']</b><br>'
+      +'<span style="opacity:.85">'+j.txt+'。</span><br>'
+      +'<span style="opacity:.8">此卦於陽宅之全解、六親所應、應期與化解次第,詳見下文。</span>';
+    _deep=BPSY.gate(_deep,'家人配位・易理深解',_tzL);
+  }
   document.getElementById('fmOut').innerHTML=
     '<b style="color:var(--gold);font-size:16px">'+mem+'居'+DIRZH[g]+'方 → '+j.name+'</b> <b style="color:'+j.col+'">['+j.lv+']</b>'+src
     +'<div style="padding:4px 0">'+j.txt+'。</div>'

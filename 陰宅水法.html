@@ -170,8 +170,11 @@ function render(){
       if(fang.length){
         const _fh=fang.map(f=>'<div class="row2"><span style="color:var(--red)">應'+f[0]+'</span><b>'+f[1]+'</b></div>').join('')
           +'<div class="note">法要:生旺二方水宜來、墓庫方宜去;若宜來反去、當去反來,則各應長仲季房之敗。</div>';
+        const _tzF='本盤水法應 <b>'+[...new Set(fang.map(f=>f[0]))].join('、')+'</b> 之敗<br>'
+          +'<span style="opacity:.8">生旺二方水宜來、墓庫方宜去;宜來反去、當去反來,則各應長仲季房。'
+          +'何房、應在何事、如何改水口挽回,詳見下文。</span>';
         h+='<div style="margin-top:6px"><b style="color:#8e6bb5">【抱朴心法・房分斷】</b>'
-          +(window.BPSY?BPSY.gate(_fh,'抱朴心法・房分斷'):_fh)+'</div>';
+          +(window.BPSY?BPSY.gate(_fh,'抱朴心法・房分斷',_tzF):_fh)+'</div>';
       }
     }
   }else if(modeT==='huang'){
@@ -203,7 +206,23 @@ function render(){
         :'<div style="margin-top:6px"><span class="tag good">目前所標來去水未犯黃泉 ✓</span></div>';
     }
     h+='<div class="note" style="margin-top:8px"><b>【明堂四忌】</b>破碎明堂(亂石堆積、東缺西凸、高低不定)、下陷明堂(如陷坑居明堂前,主家敗子孫散)、多路明堂(小路延伸不斷,主家宅不寧)、污濁之水(明堂水污則主凶事;家宅內有死水主人丁斷絕;有甘泉則主功名學問)。</div>';
-    if(window.BPSY)h=h.slice(0,_pH)+BPSY.gate(h.slice(_pH),'八路黃泉・明堂四忌');
+    if(window.BPSY){
+      // 個人化提要:依本向實算
+      let _tz='立 <span class="k">'+sit+'山'+fac+'向</span>　';
+      if(!ban.length){
+        _tz+='<b>不在八路黃泉八向之列</b>,不犯本煞 ✓<br>'
+          +'<span style="opacity:.8">餘下明堂四忌之辨、與三合龍門合參之法,詳見下文。</span>';
+      }else{
+        const _hit=[];
+        for(const i of comes)if(ban.includes(SS[i][0])||ban.includes(SS[i][1]))_hit.push('來水'+SSN[i]);
+        for(const i of goes)if(ban.includes(SS[i][0])||ban.includes(SS[i][1]))_hit.push('去水'+SSN[i]);
+        _tz+='忌 <b>'+ban.join('、')+'</b> 方來去水與開門<br>'
+          +(_hit.length
+            ? '<b style="color:#e88">本盤已犯:'+_hit.join('、')+'</b><br><span style="opacity:.8">此煞主少亡孤寡。如何判定入煞深淺、如何改水口門路化解,詳見下文。</span>'
+            : '<span style="opacity:.85">目前所標來去水<b>未犯</b> ✓</span><br><span style="opacity:.8">歌訣全文、測量站位法要與明堂四忌之辨,詳見下文。</span>');
+      }
+      h=h.slice(0,_pH)+BPSY.gate(h.slice(_pH),'八路黃泉・明堂四忌',_tz);
+    }
   }else{
     const sitPal=palaceOf(sit),lm=longmen(sitPal);
     document.getElementById('juInfo').textContent=sitPal+'卦局';
