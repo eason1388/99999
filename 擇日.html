@@ -215,7 +215,6 @@ function dayInfo(J){
   const start=((2*(mb-2))%12+12)%12;
   const hd=((dB-start)%12+12)%12;
   o.huangdao=HD12[hd]; o.isHuang=HD_GOOD.has(hd);
-  if(o.isHuang)o.ji.push(o.huangdao+'(黃道)'); else o.xiong.push(o.huangdao+'(黑道)');
 
   // 吉神
   const td=TIANDE[mi];
@@ -326,7 +325,8 @@ function judge(o,ev,persons){
   score+=good.length*7 + (o.isHuang?8:-6) + (jcGood?8:0);
   score-=bad.length*11 + (jcBad?9:0) + chong.length*40;
   if(o.hardBad)score-=25;
-  const usable = chong.length===0 && !o.hardBad && !jcBad && bad.length===0;
+  // 可用之日必須:黃道、不沖當事人、無硬凶、建除不忌、無事類凶煞
+  const usable = o.isHuang && chong.length===0 && !o.hardBad && !jcBad && bad.length===0;
   return{bad,good,jcBad,jcGood,chong,score,usable};
 }
 
@@ -380,9 +380,9 @@ function render(days,persons){
       '<span class="rank '+(rank<3?'r1':'r2')+'">'+(rank<3?'上吉':'可用')+'</span></div>'+
       '<div class="tags">'+
         '<span class="tg n">'+d.jianchu+'日</span>'+
-        '<span class="tg j">'+d.huangdao+'</span>'+
+        '<span class="tg j">'+d.huangdao+'(黃道)</span>'+
         d.v.good.map(g=>'<span class="tg j">'+g+'</span>').join('')+
-        d.xiong.filter(x=>!d.v.bad.includes(x)).map(x=>'<span class="tg x">'+x+'</span>').join('')+
+        d.xiong.map(x=>'<span class="tg x">'+x+'</span>').join('')+
       '</div>'+
       '<div class="hr">吉時　<b>'+gh.map(h=>BR[h.h]+'時 '+h.time).join('</b>　<b>')+'</b>'+
       '<div style="font-size:11.5px;opacity:.6;margin-top:2px">'+gh.map(h=>BR[h.h]+'='+h.name).join('・')+
@@ -415,9 +415,9 @@ function render(days,persons){
     bad.map(d=>{
       const rs=[];
       if(d.v.chong.length)rs.push('<b style="color:var(--red)">沖 '+d.v.chong.join('、')+'</b>');
+      if(!d.isHuang)rs.push(d.huangdao+'(黑道)');
       if(d.v.jcBad)rs.push(d.jianchu+'日不宜');
       d.v.bad.forEach(x=>rs.push(x));
-      if(!d.isHuang&&!rs.length)rs.push(d.huangdao+'(黑道)');
       return '<tr><td style="padding:4px;border-top:1px solid rgba(140,109,63,.15)">'+d.M+'/'+d.D+'</td>'+
         '<td style="border-top:1px solid rgba(140,109,63,.15)">'+d.gz+'</td>'+
         '<td style="border-top:1px solid rgba(140,109,63,.15)">'+d.jianchu+'</td>'+
