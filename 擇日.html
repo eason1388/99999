@@ -1,0 +1,462 @@
+<!DOCTYPE html><html lang="zh-TW"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>擇日・嫁娶開市入宅安床</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FAF7F2;--ink:#2B2620;--gold:#8C6D3F;--gold2:#C9A96A;--card:#F2ECE1;
+--green:#4A6B4F;--red:#A63A2E;--pur:#8e6bb5;--blue:#3E5C76}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--paper);color:var(--ink);
+font-family:'Noto Sans TC',-apple-system,'PingFang TC',sans-serif;font-size:15px;line-height:1.7}
+h1{font-family:'Noto Serif TC',serif;font-size:21px;letter-spacing:.1em;margin:0 0 2px;color:var(--gold)}
+.sub{font-size:12.5px;opacity:.65;margin-bottom:14px}
+h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:1.5px solid var(--gold2);
+padding-bottom:3px;margin:16px 0 8px;letter-spacing:.06em}
+.box{background:#fff;border:1px solid rgba(140,109,63,.2);border-radius:14px;padding:14px;margin-bottom:12px;
+box-shadow:0 2px 12px rgba(43,38,32,.05)}
+label{font-size:13px;opacity:.8;display:block;margin-bottom:3px}
+input,select{padding:9px 10px;border:1px solid rgba(140,109,63,.35);border-radius:9px;background:#fff;
+font-family:inherit;font-size:16px;color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid var(--gold2);background:#fff;color:var(--gold);border-radius:99px;
+padding:8px 18px;font-size:14.5px;cursor:pointer;font-family:inherit;font-weight:700}
+.chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.go{width:100%;border:0;border-radius:99px;padding:13px;background:linear-gradient(135deg,var(--gold2),#a8853f);
+color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:4px}
+.day{border:1px solid rgba(140,109,63,.22);border-radius:12px;padding:11px 13px;margin-bottom:9px;background:#fff}
+.day.top{border:2px solid var(--green);background:rgba(74,107,79,.05)}
+.day.good{border-color:rgba(74,107,79,.5)}
+.dhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.dhead .dt{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:900}
+.dhead .lu{font-size:12.5px;opacity:.65}
+.dhead .gz{font-size:13.5px;color:var(--gold);font-weight:700}
+.rank{margin-left:auto;font-size:13px;font-weight:800;padding:2px 11px;border-radius:99px}
+.r1{background:rgba(74,107,79,.15);color:var(--green)}
+.r2{background:rgba(201,169,106,.2);color:var(--gold)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.tg{font-size:11.5px;padding:1px 8px;border-radius:5px}
+.tg.j{background:rgba(74,107,79,.13);color:var(--green)}
+.tg.x{background:rgba(166,58,46,.11);color:var(--red)}
+.tg.n{background:rgba(140,109,63,.1);color:var(--gold)}
+.hr{font-size:13px;margin-top:7px;padding-top:6px;border-top:1px dashed rgba(140,109,63,.25)}
+.hr b{color:var(--green)}
+.note{background:var(--card);border-left:3px solid var(--gold2);border-radius:0 9px 9px 0;
+padding:9px 12px;font-size:12.5px;line-height:1.85;margin:10px 0}
+.bad{background:rgba(166,58,46,.06);border-left:3px solid var(--red);border-radius:0 9px 9px 0;
+padding:9px 12px;font-size:12.5px;line-height:1.8;margin:10px 0}
+#out{margin-top:4px}
+.cnt{font-size:13px;opacity:.7;margin:6px 0 10px}
+details{margin-top:8px}
+summary{cursor:pointer;font-size:13px;color:var(--gold);font-weight:700}
+</style></head><body>
+
+<h1>擇日</h1>
+<div class="sub">嫁娶・開市・入宅・安床　依建除黃道、神煞吉凶與當事人生肖合參</div>
+
+<div class="box">
+  <div class="chips" id="evChips">
+    <button class="chip on" data-ev="wed">💒 嫁娶</button>
+    <button class="chip" data-ev="biz">🏪 開市</button>
+    <button class="chip" data-ev="mov">🏠 入宅</button>
+    <button class="chip" data-ev="bed">🛏 安床</button>
+  </div>
+
+  <div class="row">
+    <div><label>起始年月</label>
+      <input id="ym" type="month"></div>
+    <div><label>查詢範圍</label>
+      <select id="span"><option value="1">1 個月</option><option value="2" selected>2 個月</option><option value="3">3 個月</option></select></div>
+  </div>
+
+  <div class="row" id="pplRow">
+    <div><label id="l1">男方出生年(西元)</label>
+      <input id="y1" type="number" value="1990" style="width:110px"></div>
+    <div><label id="l2">女方出生年(西元)</label>
+      <input id="y2" type="number" value="1992" style="width:110px"></div>
+  </div>
+  <div style="font-size:12px;opacity:.6;margin-top:-4px">生年以立春分界。不需精確到日,程式會依立春自動判定生肖。</div>
+
+  <button class="go" id="goBtn">排出可用吉日</button>
+</div>
+
+<div id="out"></div>
+
+<div class="note">
+本頁依<b>建除十二神、黃道黑道十二神、月令神煞</b>與<b>當事人生肖沖剋</b>綜合排定,農曆與節氣以天文朔望、中氣置閏推算(非查表)。<br>
+擇日各家取用不一,本頁取通行之《協紀辨方書》體系為主。<b>二十八宿與陰陽不將日未納入計算</b>,重大之事(尤其嫁娶)請另以通書核對,並合參雙方八字喜用與祖先牌位方位。
+</div>
+
+<script src="lock.js"></script>
+<script src="report.js"></script>
+<script>
+const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
+const SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const fromJDN=j=>{let a=j+32044,b=Math.floor((4*a+3)/146097),c=a-Math.floor(146097*b/4),
+  d=Math.floor((4*c+3)/1461),e=c-Math.floor(1461*d/4),m=Math.floor((5*e+2)/153);
+  return[100*b+d-4800+Math.floor(m/10),m+3-12*Math.floor(m/10),e-Math.floor((153*m+2)/5)+1]};
+const deltaT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:y>=1986?63.86+.3345*(y-2000)-.060374*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+deltaT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t,M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return (((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+function termJD(y,target){let jd=jdn(y,3,21)+((target%360)+360)%360/360*365.2422;
+  for(let i=0;i<8;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-0.5)jd-=365.2422;
+  if(jd<jdn(y,1,1)-0.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=target-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
+function newMoonJD(k){
+  const T=k/1236.85,rad=Math.PI/180;
+  let jde=2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T+0.00000000073*Math.pow(T,4);
+  const E=1-0.002516*T-0.0000074*T*T;
+  const M=(2.5534+29.10535670*k-0.0000014*T*T-0.00000011*T*T*T)*rad;
+  const Mp=(201.5643+385.81693528*k+0.0107582*T*T+0.00001238*T*T*T-0.000000058*Math.pow(T,4))*rad;
+  const F=(160.7108+390.67050284*k-0.0016118*T*T-0.00000227*T*T*T+0.000000011*Math.pow(T,4))*rad;
+  const O=(124.7746-1.56375588*k+0.0020672*T*T+0.00000215*T*T*T)*rad;
+  jde+=-0.40720*Math.sin(Mp)+0.17241*E*Math.sin(M)+0.01608*Math.sin(2*Mp)+0.01039*Math.sin(2*F)
+   +0.00739*E*Math.sin(Mp-M)-0.00514*E*Math.sin(Mp+M)+0.00208*E*E*Math.sin(2*M)
+   -0.00111*Math.sin(Mp-2*F)-0.00057*Math.sin(Mp+2*F)+0.00056*E*Math.sin(2*Mp+M)
+   -0.00042*Math.sin(3*Mp)+0.00042*E*Math.sin(M+2*F)+0.00038*E*Math.sin(M-2*F)
+   -0.00024*Math.sin(2*Mp-M)-0.00017*Math.sin(O)-0.00007*Math.sin(Mp+2*M)
+   +0.00004*Math.sin(2*Mp-2*F)+0.00004*Math.sin(3*M)+0.00003*Math.sin(Mp+M-2*F)
+   +0.00003*Math.sin(2*Mp+2*F)-0.00003*Math.sin(Mp+M+2*F)+0.00003*Math.sin(Mp-M+2*F)
+   -0.00002*Math.sin(Mp-M-2*F)-0.00002*Math.sin(3*Mp+M)+0.00002*Math.sin(4*Mp);
+  return jde-deltaT(2000+k/12.3685)/86400}
+const localDay=jd=>Math.floor(jd+8/24+0.5);
+// ── 農曆 ──
+const LUCACHE={};
+function toLunar(J){
+  const [Y]=fromJDN(J);
+  const key=Y;
+  if(!LUCACHE[key]){
+    let wsY=Y,ws=localDay(termJD(Y,270));
+    if(ws>J){wsY=Y-1;ws=localDay(termJD(Y-1,270));}
+    let k=Math.floor((ws-2451550.09766)/29.530588861)+2;
+    while(localDay(newMoonJD(k))>ws)k--;
+    const m11k=k;
+    const ws2=localDay(termJD(wsY+1,270));
+    let k2=Math.floor((ws2-2451550.09766)/29.530588861)+2;
+    while(localDay(newMoonJD(k2))>ws2)k2--;
+    const n=k2-m11k, months=[];
+    for(let i=0;i<=n;i++)months.push({s:localDay(newMoonJD(m11k+i)),e:localDay(newMoonJD(m11k+i+1)),leap:false});
+    if(n===13){for(let i=1;i<n;i++){const m=months[i];let has=false;
+      for(let t=0;t<12;t++){const lon=(270+t*30)%360;
+        for(const yy of[wsY,wsY+1]){const tj=localDay(termJD(yy,lon));if(tj>=m.s&&tj<m.e){has=true;break}}
+        if(has)break}
+      if(!has){m.leap=true;break}}}
+    let nm=11;
+    for(const m of months){if(m.leap){m.name=nm===1?12:nm-1;m.isLeap=true}else{m.name=nm;m.isLeap=false;nm=nm%12+1}}
+    LUCACHE[key]={months,wsY};
+  }
+  const {months}=LUCACHE[key];
+  let cur=months.find(m=>J>=m.s&&J<m.e);
+  if(!cur){ // 跨到相鄰年的表
+    const alt=Y+(J<months[0].s?-1:1);
+    delete LUCACHE[key];
+    if(!toLunar._r){toLunar._r=1;const r=toLunar(J);toLunar._r=0;return r}
+    return{month:1,day:1,isLeap:false};
+  }
+  return{month:cur.name,day:J-cur.s+1,isLeap:cur.isLeap};
+}
+// ── 日干支(以 1984/2/2 甲子日校準:JDN 2445733 為甲子)──
+const gzOfDay=J=>((J-11)%60+60)%60;
+// ── 節氣月建與年支(立春分界)──
+function monthBranch(J){
+  const [Y]=fromJDN(J);
+  // 找出 J 所在的節氣月:以 315°(立春)起,每 30° 一月
+  for(const yy of [Y-1,Y,Y+1]){
+    for(let i=0;i<12;i++){
+      const lon=(315+i*30)%360;
+      const s=localDay(termJD(yy,lon));
+      const e=localDay(termJD((lon+30)%360<lon?yy+1:yy,(lon+30)%360));
+      if(J>=s&&J<e)return{mb:(2+i)%12, mi:i, sy:yy};
+    }
+  }
+  return{mb:2,mi:0,sy:Y};
+}
+function yearBranchOf(J){
+  const [Y]=fromJDN(J);
+  const lc=localDay(termJD(Y,315));
+  const sui=J>=lc?Y:Y-1;
+  return((sui-1984)%12+12)%12;   // 1984 甲子年 → 子
+}
+const zodiacOfYear=y=>((y-1984)%12+12)%12;
+
+// ═══ 神煞表 ═══
+const JIANCHU='建除滿平定執破危成收開閉';
+const HD12=['青龍','明堂','天刑','朱雀','金匱','天德','白虎','玉堂','天牢','元武','司命','勾陳'];
+const HD_GOOD=new Set([0,1,4,5,7,10]);   // 青龍明堂金匱天德玉堂司命 = 黃道
+// 天德(以節氣月序 mi:0=寅月)
+const TIANDE=['丁','申','壬','辛','亥','甲','癸','寅','丙','乙','巳','庚'];
+const TIANDEHE=['壬','巳','丁','丙','寅','己','戊','亥','辛','庚','申','乙'];
+const YUEDE={2:'丙',6:'丙',10:'丙',8:'壬',0:'壬',4:'壬',11:'甲',3:'甲',7:'甲',5:'庚',9:'庚',1:'庚'};
+const YUEDEHE={2:'辛',6:'辛',10:'辛',8:'丁',0:'丁',4:'丁',11:'己',3:'己',7:'己',5:'乙',9:'乙',1:'乙'};
+const SHOUSI=['戌','辰','亥','巳','子','午','丑','未','寅','申','卯','酉'];         // 受死
+const WANGWANG=['寅','巳','申','亥','卯','午','酉','子','辰','未','戌','丑'];      // 往亡
+const YUEYAN=['戌','酉','申','未','午','巳','辰','卯','寅','丑','子','亥'];        // 月厭
+// 三合局(以年支)→ 三煞/劫災月煞/驛馬
+const SANHE_GRP=[['申','子','辰'],['寅','午','戌'],['巳','酉','丑'],['亥','卯','未']];
+const SANSHA={0:['巳','午','未'],1:['亥','子','丑'],2:['寅','卯','辰'],3:['申','酉','戌']};
+const YIMA={0:'寅',1:'申',2:'亥',3:'巳'};
+function grpOf(bIdx){const b=BR[bIdx];for(let i=0;i<4;i++)if(SANHE_GRP[i].includes(b))return i;return 0}
+const LIUHE={0:1,1:0,2:11,11:2,3:10,10:3,4:9,9:4,5:8,8:5,6:7,7:6};
+const YANGGONG={1:13,2:11,3:9,4:7,5:5,6:3,7:1,8:27,9:25,10:23,11:21,12:19}; // 楊公忌(七月另有廿九)
+const SANNIANG=[3,7,13,18,22,27];
+// 四廢:季節 → 干支
+const SIFEI={0:['庚申','辛酉'],1:['壬子','癸亥'],2:['甲寅','乙卯'],3:['丙午','丁巳']}; // 0春 1夏 2秋 3冬
+
+// ═══ 逐日排盤 ═══
+function dayInfo(J){
+  const g=gzOfDay(J), dS=g%10, dB=g%12;
+  const lu=toLunar(J);
+  const {mb,mi}=monthBranch(J);
+  const yb=yearBranchOf(J);
+  const [Y,M,D]=fromJDN(J);
+  const o={J,Y,M,D,lu,gz:ST[dS]+BR[dB],dS,dB,mb,mi,yb,
+           ji:[],xiong:[],neutral:[]};
+
+  // 建除十二神
+  const jc=((dB-mb)%12+12)%12;
+  o.jianchu=JIANCHU[jc]; o.jcIdx=jc;
+  // 黃道黑道
+  const start=((2*(mb-2))%12+12)%12;
+  const hd=((dB-start)%12+12)%12;
+  o.huangdao=HD12[hd]; o.isHuang=HD_GOOD.has(hd);
+  if(o.isHuang)o.ji.push(o.huangdao+'(黃道)'); else o.xiong.push(o.huangdao+'(黑道)');
+
+  // 吉神
+  const td=TIANDE[mi];
+  if(ST[dS]===td||BR[dB]===td)o.ji.push('天德');
+  const tdh=TIANDEHE[mi];
+  if(ST[dS]===tdh||BR[dB]===tdh)o.ji.push('天德合');
+  if(ST[dS]===YUEDE[mb])o.ji.push('月德');
+  if(ST[dS]===YUEDEHE[mb])o.ji.push('月德合');
+  // 三合六合(與月建)
+  const gm=grpOf(mb);
+  if(SANHE_GRP[gm].includes(BR[dB])&&dB!==mb)o.ji.push('三合');
+  if(LIUHE[mb]===dB)o.ji.push('六合');
+  // 天喜(季節)
+  const season=Math.floor(((mi)%12)/3); // 0春(寅卯辰) 1夏 2秋 3冬
+  const TIANXI=['戌','丑','辰','未'][season];
+  if(BR[dB]===TIANXI)o.ji.push('天喜');
+  // 驛馬(以年支)
+  const gy=grpOf(yb);
+  if(BR[dB]===YIMA[gy])o.ji.push('驛馬');
+
+  // 凶煞
+  if(((mb+6)%12)===dB){o.xiong.push('月破');o.hardBad=true}
+  if(((yb+6)%12)===dB){o.xiong.push('歲破');o.hardBad=true}
+  if(SANSHA[gy].includes(BR[dB]))o.xiong.push('三煞');
+  const gk=grpOf(yb);
+  const LJ={0:'巳',1:'亥',2:'寅',3:'申'},ZS={0:'午',1:'子',2:'卯',3:'酉'},YS={0:'未',1:'丑',2:'辰',3:'戌'};
+  if(BR[dB]===LJ[gk])o.xiong.push('劫煞');
+  if(BR[dB]===ZS[gk])o.xiong.push('災煞');
+  if(BR[dB]===YS[gk])o.xiong.push('月煞');
+  if(BR[dB]===SHOUSI[mi]){o.xiong.push('受死');o.hardBad=true}
+  if(BR[dB]===WANGWANG[mi])o.xiong.push('往亡');
+  if(BR[dB]===YUEYAN[mi])o.xiong.push('月厭');
+  // 歸忌:孟丑 仲寅 季子
+  const kind=mi%3; // 0=孟(寅巳申亥) 1=仲 2=季
+  const GUI=['丑','寅','子'][kind];
+  if(BR[dB]===GUI)o.xiong.push('歸忌');
+  // 紅紗:孟酉 仲巳 季丑
+  const HS=['酉','巳','丑'][kind];
+  if(BR[dB]===HS)o.xiong.push('紅紗');
+  // 四廢
+  if(SIFEI[season].includes(o.gz)){o.xiong.push('四廢');o.hardBad=true}
+  // 四離四絕(二分二至、四立前一日)
+  for(const lon of [0,90,180,270,315,45,135,225]){
+    for(const yy of [Y-1,Y,Y+1]){
+      if(J===localDay(termJD(yy,lon))-1){
+        o.xiong.push([0,90,180,270].includes(lon)?'四離':'四絕');o.hardBad=true;break}
+    }
+  }
+  // 楊公忌 / 三娘煞(農曆)
+  if(YANGGONG[lu.month]===lu.day||(lu.month===7&&lu.day===29)){o.xiong.push('楊公忌');o.hardBad=true}
+  if(SANNIANG.includes(lu.day))o.xiong.push('三娘煞');
+
+  return o;
+}
+
+// ═══ 事類宜忌 ═══
+const EV={
+  wed:{name:'嫁娶',
+    goodJC:['除','危','定','成','開'], badJC:['建','破','平','收','閉','滿'],
+    badGods:['受死','往亡','歸忌','紅紗','月厭','四離','四絕','四廢','三娘煞','楊公忌','月破','歲破','三煞'],
+    goodGods:['天德','月德','天德合','月德合','天喜','三合','六合'],
+    tip:'嫁娶最重日課,忌沖新娘本命年支;新娘生月之對沖月份亦傳統避開。'},
+  biz:{name:'開市',
+    goodJC:['建','滿','成','開'], badJC:['破','平','收','閉'],
+    badGods:['月破','歲破','三煞','四廢','往亡','四離','四絕','劫煞','楊公忌'],
+    goodGods:['天德','月德','天德合','月德合','驛馬','三合','六合'],
+    tip:'開市取生氣流通之日,驛馬、三合最宜;忌閉、收、破。'},
+  mov:{name:'入宅',
+    goodJC:['成','開','定','危'], badJC:['建','破','平','收','閉'],
+    badGods:['月破','歲破','三煞','四廢','歸忌','往亡','月厭','四離','四絕','楊公忌'],
+    goodGods:['天德','月德','天德合','月德合','驛馬','三合','六合'],
+    tip:'入宅忌歸忌、往亡;新宅坐向若犯本年三煞、太歲,宜另擇年。'},
+  bed:{name:'安床',
+    goodJC:['危','成','開','定'], badJC:['破','平','收','閉'],
+    badGods:['月破','歲破','三煞','劫煞','災煞','月煞','四廢','四離','四絕','楊公忌'],
+    goodGods:['天德','月德','天德合','月德合','三合','六合'],
+    tip:'安床忌申日;床位方位另須合宅主命卦與飛星,非僅擇日可定。'}
+};
+
+// ═══ 吉時 ═══
+function goodHours(dB){
+  const start=((dB%6)*2+8)%12;
+  const out=[];
+  for(let h=0;h<12;h++){
+    const idx=((h-start)%12+12)%12;
+    const chong=((dB+6)%12)===h;
+    if(HD_GOOD.has(idx)&&!chong)
+      out.push({h,name:HD12[idx],
+        time:String((h*2+23)%24).padStart(2,'0')+':00–'+String((h*2+1)%24).padStart(2,'0')+':00'});
+  }
+  return out;
+}
+
+// ═══ 評分 ═══
+function judge(o,ev,persons){
+  const E=EV[ev];
+  const bad=o.xiong.filter(x=>E.badGods.some(b=>x.indexOf(b)===0));
+  const good=o.ji.filter(x=>E.goodGods.some(b=>x.indexOf(b)===0));
+  const jcBad=E.badJC.includes(o.jianchu);
+  const jcGood=E.goodJC.includes(o.jianchu);
+  // 沖生肖
+  const chong=[];
+  for(const p of persons){
+    if(((p.zb+6)%12)===o.dB)chong.push(p.label+'(屬'+SX[p.zb]+')');
+  }
+  if(ev==='bed'&&BR[o.dB]==='申')bad.push('安床忌申日');
+  let score=50;
+  score+=good.length*7 + (o.isHuang?8:-6) + (jcGood?8:0);
+  score-=bad.length*11 + (jcBad?9:0) + chong.length*40;
+  if(o.hardBad)score-=25;
+  const usable = chong.length===0 && !o.hardBad && !jcBad && bad.length===0;
+  return{bad,good,jcBad,jcGood,chong,score,usable};
+}
+
+// ═══ 主流程 ═══
+let EVNOW='wed';
+document.querySelectorAll('#evChips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#evChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on');EVNOW=c.dataset.ev;
+  const wed=EVNOW==='wed';
+  document.getElementById('l1').textContent=wed?'男方出生年(西元)':'主事者出生年(西元)';
+  document.getElementById('l2').parentElement.style.display=wed?'':'none';
+  document.getElementById('out').innerHTML='';
+});
+(function(){const d=new Date();
+  document.getElementById('ym').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+
+document.getElementById('goBtn').onclick=function(){
+  const [yy,mm]=document.getElementById('ym').value.split('-').map(Number);
+  if(!yy){alert('請選擇起始年月');return}
+  const span=+document.getElementById('span').value;
+  const wed=EVNOW==='wed';
+  const persons=[{label:wed?'男方':'主事者',zb:zodiacOfYear(+document.getElementById('y1').value)}];
+  if(wed)persons.push({label:'女方',zb:zodiacOfYear(+document.getElementById('y2').value)});
+
+  const start=jdn(yy,mm,1);
+  const endY=mm+span>12?yy+1:yy, endM=(mm+span-1)%12+1;
+  const end=jdn(endY,endM,1)+31;
+  const days=[];
+  for(let J=start;J<end;J++){
+    const [Y,M]=fromJDN(J);
+    if((Y-yy)*12+(M-mm)>=span)break;
+    const o=dayInfo(J);
+    o.v=judge(o,EVNOW,persons);
+    days.push(o);
+  }
+  render(days,persons);
+};
+
+function render(days,persons){
+  const E=EV[EVNOW];
+  const ok=days.filter(d=>d.v.usable).sort((a,b)=>b.v.score-a.v.score||a.J-b.J);
+  const okByDate=ok.slice().sort((a,b)=>a.J-b.J);
+  const W='日一二三四五六';
+  const card=(d,rank)=>{
+    const w=W[(d.J+1)%7];
+    const gh=goodHours(d.dB);
+    return '<div class="day '+(rank<3?'top':'good')+'">'+
+      '<div class="dhead"><span class="dt">'+d.M+'/'+d.D+'</span>'+
+      '<span class="lu">週'+w+'　農曆'+(d.lu.isLeap?'閏':'')+d.lu.month+'/'+d.lu.day+'</span>'+
+      '<span class="gz">'+d.gz+'日</span>'+
+      '<span class="rank '+(rank<3?'r1':'r2')+'">'+(rank<3?'上吉':'可用')+'</span></div>'+
+      '<div class="tags">'+
+        '<span class="tg n">'+d.jianchu+'日</span>'+
+        '<span class="tg j">'+d.huangdao+'</span>'+
+        d.v.good.map(g=>'<span class="tg j">'+g+'</span>').join('')+
+        d.xiong.filter(x=>!d.v.bad.includes(x)).map(x=>'<span class="tg x">'+x+'</span>').join('')+
+      '</div>'+
+      '<div class="hr">吉時　<b>'+gh.map(h=>BR[h.h]+'時 '+h.time).join('</b>　<b>')+'</b>'+
+      '<div style="font-size:11.5px;opacity:.6;margin-top:2px">'+gh.map(h=>BR[h.h]+'='+h.name).join('・')+
+      '　(已避開日沖'+BR[(d.dB+6)%12]+'時)</div></div>'+
+      '<div style="font-size:12px;opacity:.6;margin-top:4px">本日沖'+SX[(d.dB+6)%12]+'　'+
+        persons.map(p=>p.label+'屬'+SX[p.zb]).join('、')+' 皆不沖 ✓</div>'+
+    '</div>';
+  };
+
+  let h='<h2>'+E.name+'可用吉日　'+days[0].Y+'/'+days[0].M+' 起 '+
+        Math.round((days.length)/30)+' 個月</h2>';
+  h+='<div class="cnt">共掃描 '+days.length+' 日,可用 <b>'+ok.length+'</b> 日'+
+     (ok.length?'(依吉度排序,前三日標為上吉)':'')+'</div>';
+
+  if(!ok.length){
+    h+='<div class="bad"><b>這段期間沒有完全乾淨的日子。</b><br>'+
+       '常見原因:當事人生肖與本月日支頻繁相沖、或適逢三煞方年份。<br>'+
+       '建議①放寬到三個月 ②改由通書取「小吉可用」之日並以時辰補救 ③重大之事寧可延期。</div>';
+  }else{
+    h+=okByDate.map(d=>card(d,ok.indexOf(d))).join('');
+  }
+
+  // 付費層:排除清單與逐日明細
+  const bad=days.filter(d=>!d.v.usable);
+  let deep='<h2>不用之日與原因(逐日)</h2>'+
+    '<div class="cnt">以下 '+bad.length+' 日經檢核不宜'+E.name+',列出原因供核對。</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12.5px">'+
+    '<tr style="color:var(--gold)"><th style="text-align:left;padding:4px">日期</th><th style="text-align:left">干支</th>'+
+    '<th style="text-align:left">建除</th><th style="text-align:left">不用原因</th></tr>'+
+    bad.map(d=>{
+      const rs=[];
+      if(d.v.chong.length)rs.push('<b style="color:var(--red)">沖 '+d.v.chong.join('、')+'</b>');
+      if(d.v.jcBad)rs.push(d.jianchu+'日不宜');
+      d.v.bad.forEach(x=>rs.push(x));
+      if(!d.isHuang&&!rs.length)rs.push(d.huangdao+'(黑道)');
+      return '<tr><td style="padding:4px;border-top:1px solid rgba(140,109,63,.15)">'+d.M+'/'+d.D+'</td>'+
+        '<td style="border-top:1px solid rgba(140,109,63,.15)">'+d.gz+'</td>'+
+        '<td style="border-top:1px solid rgba(140,109,63,.15)">'+d.jianchu+'</td>'+
+        '<td style="border-top:1px solid rgba(140,109,63,.15)">'+(rs.join('、')||'吉度不足')+'</td></tr>';
+    }).join('')+'</table>'+
+    '<div class="note" style="margin-top:10px"><b>'+E.name+'要旨</b><br>'+E.tip+'</div>';
+
+  const teaser='查詢區間共 <span class="k">'+days.length+'</span> 日,可用 <b>'+ok.length+'</b> 日、'+
+    '<b>'+bad.length+'</b> 日不宜<br>'+
+    (bad.length?'<span style="opacity:.85">不用的原因各不相同:沖生肖、月破、受死、四廢、三煞…</span><br>':'')+
+    '<span style="opacity:.8">逐日不用原因明細、與'+E.name+'的取用要旨,詳見下文。</span>';
+
+  const out=document.getElementById('out');
+  out.innerHTML=h+(window.BPSY?BPSY.gate(deep,'擇日・逐日排除明細與要旨',teaser):deep);
+  window.BPSY&&BPSY.bind(out);
+
+  // 報告書
+  if(window.BPRPT){
+    const box=document.createElement('div');out.appendChild(box);
+    BPRPT.button(box,function(){
+      return{title:E.name+'擇日報告書',
+        meta:[['事類',E.name],
+              ['查詢區間',days[0].Y+'/'+days[0].M+'/'+days[0].D+' — '+days[days.length-1].Y+'/'+days[days.length-1].M+'/'+days[days.length-1].D],
+              ['當事人',persons.map(p=>p.label+' 屬'+SX[p.zb]).join('　')],
+              ['可用吉日',ok.length+' 日']],
+        html:h+(window.BPSY&&BPSY.ok()?deep:'')};
+    });
+  }
+}
+</script>
+</body></html>
