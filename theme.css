@@ -62,6 +62,11 @@ th{
   line-height:1.9;
 }
 
+/* ── iOS 修正:<button> 未指定 color 時,iOS 會套系統藍(桌機是黑,故不易發現)──
+   用 inherit 讓它跟著父層文字色。選擇器只有 0,0,1,
+   各模組自己用 class 指定的顏色仍然優先,不會被蓋掉。 */
+button{color:inherit}
+
 /* ── 按鈕:按壓回饋 ── */
 button:not(.bpsy-btn):not([data-bprpt]){
   letter-spacing:.05em;
