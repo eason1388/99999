@@ -306,6 +306,8 @@ function render(){
   // 立春定年
   const lc=lday(termJD(Y,315)), sui=J>=lc?Y:Y-1;
   const yB=((sui-1984)%12+12)%12, yS=((sui-1984)%10+10)%10;
+  // 月干:年干起月,(年干 mod 5)×2 + 2 + 月序
+  const mS=((yS%5)*2+2+mi)%10;
   // 節氣：目前所在 + 下一個
   const ji=Math.floor(lon/15), curJQ=JQ[ji];
   let nxJD=null,nxName='';
@@ -322,7 +324,7 @@ function render(){
   const W='日一二三四五六';
 
   document.getElementById('today').innerHTML=
-   '<div class="tp1"><div class="gz">'+ST[yS]+BR[yB]+'年　'+BR[mb]+'月　'+ST[dS]+BR[dB]+'日</div>'+
+   '<div class="tp1"><div class="gz">'+ST[yS]+BR[yB]+'年　'+ST[mS]+BR[mb]+'月　'+ST[dS]+BR[dB]+'日</div>'+
      '<div class="d2">'+Y+'/'+M+'/'+D+'　週'+W[now.getDay()]+
        '　農曆'+(lu.isLeap?'閏':'')+lu.month+'月'+lu.day+'日</div>'+
      '<div class="jq">'+curJQ+(dLeft!==''?'　距'+nxName+' '+dLeft+' 日':'')+'</div></div>'+
