@@ -119,6 +119,33 @@ footer.note{color:rgba(237,231,218,.58);opacity:1}
 nav.bottom .bi{font-size:16px;border:0;background:none;width:auto;height:auto}
 .secttl{font-size:13px}
 
+/* ── 今日盤 ── */
+#todayWrap{max-width:880px;margin:-14px auto 0;padding:0 16px;position:relative;z-index:2}
+.tpanel{background:linear-gradient(180deg,#1E1913,#191410);
+  border:1px solid rgba(201,169,106,.4);border-radius:18px;padding:0;overflow:hidden;
+  box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.tp1{padding:16px 18px 13px;text-align:center;
+  background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,169,106,.16),transparent)}
+.tp1 .gz{font-family:'Noto Serif TC',serif;font-weight:900;font-size:22px;letter-spacing:.14em;color:var(--gold2)}
+.tp1 .d2{font-size:12.5px;color:rgba(237,231,218,.72);margin-top:5px;letter-spacing:.04em}
+.tp1 .jq{display:inline-block;margin-top:8px;font-size:12px;color:var(--gold2);
+  border:1px solid rgba(201,169,106,.4);border-radius:99px;padding:3px 13px;letter-spacing:.06em}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
+  border-top:1px solid rgba(201,169,106,.2)}
+.tcell{padding:11px 8px;text-align:center;border-right:1px solid rgba(201,169,106,.13)}
+.tcell:last-child{border-right:0}
+.tcell .k{font-size:11px;color:rgba(237,231,218,.5);letter-spacing:.1em}
+.tcell .v{font-family:'Noto Serif TC',serif;font-weight:700;font-size:16px;color:#EDE7DA;margin-top:3px}
+.tcell .v.g{color:#8FCB9B}.tcell .v.r{color:#E39A90}
+.twarn{padding:10px 16px;font-size:12.5px;line-height:1.8;color:#E8DCC8;
+  background:rgba(166,58,46,.16);border-top:1px solid rgba(166,58,46,.35)}
+.twarn b{color:#F0B9B1}
+.tfoot{display:flex;gap:8px;padding:11px 14px;border-top:1px solid rgba(201,169,106,.2)}
+.tfoot button{flex:1;border:0;border-radius:99px;padding:11px;cursor:pointer;font-family:inherit;
+  font-size:14px;font-weight:800;letter-spacing:.04em}
+.tfoot .p{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410}
+.tfoot .s{background:transparent;border:1px solid rgba(201,169,106,.45);color:var(--gold2);font-weight:400}
+
 /* 外殼底色改深,任何殘留間距都不會露出白邊 */
 html,body{background:var(--dark)}
 #stage{background:var(--dark)}
@@ -146,6 +173,8 @@ nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgb
  <div class="stats"><span class="stat"><b>9</b> 大排盤引擎</span><span class="stat"><b>600+</b> 局演算法驗證</span><span class="stat"><b>免安裝</b> 加入主畫面即 App</span></div>
  <div class="ctaRow"><button class="cta" data-k="luopan">🧭 開始量測</button><button class="cta2" data-k="guide">使用說明</button></div>
  </div>
+ <!-- ── 今日盤 ── -->
+ <div id="todayWrap"><div id="today" class="tpanel"></div></div>
  <div class="secttl">陽宅勘察</div>
  <div class="grid"><div class="mcard" data-k="luopan"><div class="mic">羅</div><div><b>三合羅盤・即時判讀</b><p>山向、兼向、騎縫、分金自動判定,AR 實景八方浮標,點任一格即有詳解</p></div><span class="go">→</span></div><div class="mcard" data-k="xk"><div class="mic">星</div><div><b>玄空飛星・八宅</b><p>九運×二十四山,下卦替卦、格局城門、八宅遊星、擇向建議</p></div><span class="go">→</span></div><div class="mcard" data-k="venue"><div class="mic">舖</div><div><b>場所佈局模式</b><p>餐廳、辦公室、工廠、店面、住家五種模式,收銀台、爐灶、老闆位一鍵排定</p></div><span class="go">→</span></div><div class="mcard" data-k="plan"><div class="mic">圖</div><div><b>平面圖疊盤</b><p>上傳平面圖,九宮飛星八宅吉凶直接疊在圖上,點格標房間即時檢核</p></div><span class="go">→</span></div><div class="mcard" data-k="check"><div class="mic">檢</div><div><b>全宅健檢總報告</b><p>一鍵跑完評分、飛星、八宅、流年、開運佈局,列印即 A4 交付報告</p></div><span class="go">→</span></div></div>
  <div class="secttl">陰宅・巒頭</div>
@@ -188,6 +217,111 @@ nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgb
 </div>
 <script src="lock.js"></script>
 <script>
+/*═══ 今日盤:干支、農曆、節氣、流年紫白（全部即時推算，不查表）═══*/
+(function(){
+const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥',SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+const JQ=['春分','清明','穀雨','立夏','小滿','芒種','夏至','小暑','大暑','立秋','處暑','白露',
+          '秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒','立春','雨水','驚蟄'];
+const JIANCHU='建除滿平定執破危成收開閉';
+const HD12=['青龍','明堂','天刑','朱雀','金匱','天德','白虎','玉堂','天牢','元武','司命','勾陳'];
+const HDG=new Set([0,1,4,5,7,10]);
+const jdn=(y,m,d)=>{const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045};
+const dT=y=>y>=2005?62.92+.32217*(y-2000)+.005589*(y-2000)**2:70;
+function sunLon(jd,y){const t=(jd+dT(y)/86400-2451545)/36525;
+  const L=280.46646+36000.76983*t,M=(357.52911+35999.05029*t)*Math.PI/180;
+  const C=(1.914602-.004817*t)*Math.sin(M)+(.019993-.000101*t)*Math.sin(2*M)+.000289*Math.sin(3*M);
+  const O=(125.04-1934.136*t)*Math.PI/180;
+  return(((L+C-.00569-.00478*Math.sin(O))%360)+360)%360}
+function termJD(y,tg){let jd=jdn(y,3,21)+((tg%360)+360)%360/360*365.2422;
+  for(let i=0;i<8;i++){let d=tg-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  if(jd>=jdn(y+1,1,1)-.5)jd-=365.2422; if(jd<jdn(y,1,1)-.5)jd+=365.2422;
+  for(let i=0;i<3;i++){let d=tg-sunLon(jd,y);while(d>180)d-=360;while(d<-180)d+=360;jd+=d*365.2422/360}
+  return jd}
+function nmJD(k){const T=k/1236.85,r=Math.PI/180;
+  let j=2451550.09766+29.530588861*k+.00015437*T*T-1.5e-7*T*T*T+7.3e-10*Math.pow(T,4);
+  const E=1-.002516*T-7.4e-6*T*T,M=(2.5534+29.10535670*k-1.4e-6*T*T)*r,
+   Mp=(201.5643+385.81693528*k+.0107582*T*T+1.238e-5*T*T*T)*r,
+   F=(160.7108+390.67050284*k-.0016118*T*T-2.27e-6*T*T*T)*r,
+   O=(124.7746-1.56375588*k+.0020672*T*T)*r;
+  j+=-.4072*Math.sin(Mp)+.17241*E*Math.sin(M)+.01608*Math.sin(2*Mp)+.01039*Math.sin(2*F)
+   +.00739*E*Math.sin(Mp-M)-.00514*E*Math.sin(Mp+M)+.00208*E*E*Math.sin(2*M)
+   -.00111*Math.sin(Mp-2*F)-.00057*Math.sin(Mp+2*F)+.00056*E*Math.sin(2*Mp+M)
+   -.00042*Math.sin(3*Mp)+.00042*E*Math.sin(M+2*F)+.00038*E*Math.sin(M-2*F)
+   -.00024*E*Math.sin(2*Mp-M)-.00017*Math.sin(O)-.00007*Math.sin(Mp+2*M);
+  return j-dT(2000+k/12.3685)/86400}
+const lday=jd=>Math.floor(jd+8/24+.5);
+function lunar(J,Y0){
+  let wY=Y0,ws=lday(termJD(Y0,270)); if(ws>J){wY=Y0-1;ws=lday(termJD(wY,270));}
+  let k=Math.floor((ws-2451550.09766)/29.530588861)+2;
+  while(lday(nmJD(k))>ws)k--;
+  const m11=k, ws2=lday(termJD(wY+1,270));
+  let k2=Math.floor((ws2-2451550.09766)/29.530588861)+2;
+  while(lday(nmJD(k2))>ws2)k2--;
+  const n=k2-m11, ms=[];
+  for(let i=0;i<=n;i++)ms.push({s:lday(nmJD(m11+i)),e:lday(nmJD(m11+i+1)),leap:false});
+  if(n===13)for(let i=1;i<n;i++){const m=ms[i];let has=false;
+    for(let t=0;t<12;t++){const lo=(270+t*30)%360;
+      for(const yy of[wY,wY+1]){const tj=lday(termJD(yy,lo));if(tj>=m.s&&tj<m.e){has=true;break}}
+      if(has)break}
+    if(!has){m.leap=true;break}}
+  let nm=11; for(const m of ms){if(m.leap){m.name=nm===1?12:nm-1;m.isLeap=true}
+    else{m.name=nm;m.isLeap=false;nm=nm%12+1}}
+  const c=ms.find(m=>J>=m.s&&J<m.e)||ms[0];
+  return{month:c.name,day:J-c.s+1,isLeap:c.isLeap};
+}
+// 流年紫白：中宮星 =((11 - 年 mod 9) mod 9)||9，順飛
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const DIRP={'坎':'正北','艮':'東北','震':'正東','巽':'東南','離':'正南','坤':'西南','兌':'正西','乾':'西北'};
+function flyYear(c){const o={};let s=c;for(const p of FLY){o[p]=s;s=s%9+1}return o}
+const palOf=(chart,star)=>Object.keys(chart).find(p=>chart[p]===star&&p!=='中');
+
+function render(){
+  const now=new Date(), Y=now.getFullYear(), M=now.getMonth()+1, D=now.getDate();
+  const J=jdn(Y,M,D), g=((J-11)%60+60)%60, dS=g%10, dB=g%12;
+  const lu=lunar(J,Y);
+  const lon=sunLon(J-8/24,Y);
+  const mi=Math.floor((((lon-315)%360)+360)%360/30), mb=(2+mi)%12;
+  // 立春定年
+  const lc=lday(termJD(Y,315)), sui=J>=lc?Y:Y-1;
+  const yB=((sui-1984)%12+12)%12, yS=((sui-1984)%10+10)%10;
+  // 節氣：目前所在 + 下一個
+  const ji=Math.floor(lon/15), curJQ=JQ[ji];
+  let nxJD=null,nxName='';
+  for(let i=1;i<=2;i++){const tl=((ji+i)*15)%360;
+    for(const yy of[Y,Y+1]){const t=lday(termJD(yy,tl)); if(t>J){nxJD=t;nxName=JQ[(ji+i)%24];break}}
+    if(nxJD)break}
+  const dLeft=nxJD?nxJD-J:'';
+  // 建除、黃道
+  const jc=((dB-mb)%12+12)%12;
+  const st=((2*(mb-2))%12+12)%12, hd=((dB-st)%12+12)%12;
+  // 流年紫白
+  const ch=flyYear(((11-(sui%9))%9)||9);
+  const p5=palOf(ch,5), p2=palOf(ch,2), p8=palOf(ch,8), p4=palOf(ch,4);
+  const W='日一二三四五六';
+
+  document.getElementById('today').innerHTML=
+   '<div class="tp1"><div class="gz">'+ST[yS]+BR[yB]+'年　'+BR[mb]+'月　'+ST[dS]+BR[dB]+'日</div>'+
+     '<div class="d2">'+Y+'/'+M+'/'+D+'　週'+W[now.getDay()]+
+       '　農曆'+(lu.isLeap?'閏':'')+lu.month+'月'+lu.day+'日</div>'+
+     '<div class="jq">'+curJQ+(dLeft!==''?'　距'+nxName+' '+dLeft+' 日':'')+'</div></div>'+
+   '<div class="tgrid">'+
+     '<div class="tcell"><div class="k">今日沖</div><div class="v r">'+SX[(dB+6)%12]+'</div></div>'+
+     '<div class="tcell"><div class="k">建除</div><div class="v">'+JIANCHU[jc]+'日</div></div>'+
+     '<div class="tcell"><div class="k">'+(HDG.has(hd)?'黃道':'黑道')+'</div>'+
+       '<div class="v '+(HDG.has(hd)?'g':'r')+'">'+HD12[hd]+'</div></div>'+
+     '<div class="tcell"><div class="k">本年財位</div><div class="v g">'+DIRP[p8]+'</div></div>'+
+     '<div class="tcell"><div class="k">本年文昌</div><div class="v g">'+DIRP[p4]+'</div></div>'+
+   '</div>'+
+   '<div class="twarn">⚠ 本年 <b>五黃在'+DIRP[p5]+'</b>、<b>二黑在'+DIRP[p2]+'</b>　'+
+     '此二方忌動土、修造、開門放水;臥床、爐灶亦宜避開。</div>'+
+   '<div class="tfoot"><button class="p" data-k="luopan">現在測方位</button>'+
+     '<button class="s" data-k="zeri">看可用吉日</button></div>';
+  document.querySelectorAll('#today [data-k]').forEach(b=>b.onclick=()=>go(b.dataset.k));
+}
+try{render()}catch(e){var t=document.getElementById('todayWrap');if(t)t.style.display='none'}
+})();
+
 // ── 深解授權 ──
 (function(){
   var b=document.getElementById('licBtn'),s=document.getElementById('licSub');
