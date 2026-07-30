@@ -83,6 +83,11 @@ body:not([data-dark]) #search{
   border-color:rgba(201,169,106,.35)!important;
 }
 body:not([data-dark]) option{background:#241E18;color:#EDE7DA}
+/* 報告頁的案場資訊條(底色寫死成淺米色) */
+body:not([data-dark]) .meta{
+  background:rgba(201,169,106,.12)!important;
+  border:1px solid rgba(201,169,106,.22);
+}
 /* 表格:多數模組把表頭底色寫死成淺色,文字翻白後會變成淺底淺字 */
 body:not([data-dark]) th{
   background:rgba(201,169,106,.17)!important;
