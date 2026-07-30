@@ -12,6 +12,95 @@
   --bp-gold2:#C9A96A;
   --bp-serif:'Noto Serif TC','Songti TC','Source Han Serif TC',serif;
 }
+/* v4 */
+
+/*═══ 深金配色:與首頁統一 ═══
+  作用範圍 body:not([data-dark]) —— 羅盤、平面圖疊盤本來就是深色,
+  在那兩頁的 <body> 加 data-dark 即排除,避免二次翻色把它們弄壞。
+  變數定義在 body 上(不是 :root),因為 body:not([data-dark]) 的
+  權重(0,1,1)才蓋得過各模組自己的 body{...}(0,0,1)。*/
+body:not([data-dark]){
+  --paper:#0F0C0A; --bg:#0F0C0A;
+  --card:#1A1613;
+  --ink:#EDE7DA;
+  --gold:#C9A96A;  --gold2:#E0C285;
+  --red:#E58A79;  --green:#8FC49A;  --blue:#8AB0CE;  --pur:#B79BDC;
+  --dim:#9A9284;
+  background-color:#0F0C0A;
+  color:#EDE7DA;
+  background-image:
+    radial-gradient(circle at 18% 10%,rgba(201,169,106,.07),transparent 40%),
+    radial-gradient(circle at 84% 82%,rgba(201,169,106,.05),transparent 44%);
+  background-attachment:fixed;
+}
+/* 卡片與版塊 */
+body:not([data-dark]) .box,
+body:not([data-dark]) section,
+body:not([data-dark]) .cell,
+body:not([data-dark]) .case,
+body:not([data-dark]) .day,
+body:not([data-dark]) .dy,
+body:not([data-dark]) .lvl>b{
+  background:#1A1613!important;
+  border-color:rgba(201,169,106,.22)!important;
+}
+body:not([data-dark]) .box,
+body:not([data-dark]) section{box-shadow:0 2px 4px rgba(0,0,0,.25),0 8px 26px rgba(0,0,0,.35)!important}
+/* 小籤、標記 */
+body:not([data-dark]) .tag,
+body:not([data-dark]) .badge,
+body:not([data-dark]) .mchip,
+body:not([data-dark]) .mini,
+body:not([data-dark]) .aiTag{
+  background:rgba(255,255,255,.06)!important;
+  border-color:rgba(201,169,106,.3)!important;
+  color:#EDE7DA!important;
+}
+/* 未選取的籤 */
+body:not([data-dark]) .chip:not(.on){
+  background:rgba(255,255,255,.05)!important;
+  color:#E0C285!important;
+  border-color:rgba(201,169,106,.42)!important;
+}
+/* 金底按鈕:金色轉亮後,白字對比不足,改用深色字 */
+body:not([data-dark]) .chip.on,
+body:not([data-dark]) .mchip.on,
+body:not([data-dark]) .big,
+body:not([data-dark]) .no,
+body:not([data-dark]) .badge.gold,
+body:not([data-dark]) #pop button{
+  background:linear-gradient(135deg,#E0BD78,#B8923F)!important;
+  color:#1A1410!important;
+  border-color:transparent!important;
+}
+/* 輸入元件 */
+body:not([data-dark]) input,
+body:not([data-dark]) select,
+body:not([data-dark]) textarea,
+body:not([data-dark]) #search{
+  background:#241E18!important;
+  color:#EDE7DA!important;
+  border-color:rgba(201,169,106,.35)!important;
+}
+body:not([data-dark]) option{background:#241E18;color:#EDE7DA}
+/* 分隔線 */
+body:not([data-dark]) .item,
+body:not([data-dark]) .row2,
+body:not([data-dark]) .lesson,
+body:not([data-dark]) .fcard,
+body:not([data-dark]) table.items td{border-bottom-color:rgba(201,169,106,.2)!important}
+body:not([data-dark]) .disc{border-top-color:rgba(201,169,106,.22)!important}
+/* 進度條軌道 */
+body:not([data-dark]) .bar{background:rgba(255,255,255,.08)!important}
+/* 列印:一律回到白底黑字,深色只用於螢幕 */
+@media print{
+  body:not([data-dark]){background:#fff!important;color:#1a1a1a!important;background-image:none!important}
+  body:not([data-dark]) .box,body:not([data-dark]) section,body:not([data-dark]) .cell,
+  body:not([data-dark]) .case,body:not([data-dark]) .day,body:not([data-dark]) .dy{
+    background:#fff!important;border-color:#D9CDB6!important;box-shadow:none!important}
+  body:not([data-dark]) .tag,body:not([data-dark]) .badge,body:not([data-dark]) .mchip{
+    background:#F7F3EC!important;color:#1a1a1a!important;border-color:#D9CDB6!important}
+}
 
 /* ── 標題:字形、字距、金線 ── */
 h1{

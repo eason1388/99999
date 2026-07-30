@@ -13,7 +13,7 @@ input,select{padding:7px 9px;border:1.5px solid var(--gold2);border-radius:10px;
 h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bottom:2px solid var(--gold2);padding-bottom:4px;margin:10px 0 8px}
 /* 命盤 4x4 */
 #chart{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(132px,auto));gap:2px;margin-top:6px}
-.pal{background:#fff;border:1px solid #d8ccae;border-radius:6px;padding:2px 3px;font-size:10px;position:relative;display:flex;flex-direction:column}
+.pal{background:#1A1613;border:1px solid rgba(201,169,106,.28);border-radius:6px;padding:2px 3px;font-size:10px;position:relative;display:flex;flex-direction:column}
 .pal.ming{border:2px solid var(--gold);background:rgba(201,169,106,.1)}
 .pal.shen::after{content:'身';position:absolute;top:2px;right:2px;background:var(--blue);color:#fff;font-size:8px;padding:0 3px;border-radius:3px}
 .pal.daxian{background:rgba(74,107,79,.09)}
@@ -34,14 +34,14 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 .pal .gz{color:#6b6153;font-size:10px;font-weight:700}
 .pal .dx{color:var(--green);font-size:10px;font-weight:700}
 .pal .cs{color:#8a7fa8;font-size:8.5px}
-.center{grid-column:2/4;grid-row:2/4;background:#fffdf7;border:1px solid var(--gold2);border-radius:10px;padding:8px;font-size:12px;line-height:1.75}
+.center{grid-column:2/4;grid-row:2/4;background:#1A1613;border:1px solid var(--gold2);border-radius:10px;padding:8px;font-size:12px;line-height:1.75}
 .hua{display:inline-block;border-radius:3px;padding:0 3px;font-size:9.5px;font-weight:700;margin-left:1px;color:#fff}
 .hua.lu{background:var(--green)}.hua.quan{background:#c9944a}.hua.ke{background:var(--blue)}.hua.ji{background:var(--red)}
 .tag{display:inline-block;border-radius:99px;padding:1px 9px;font-size:11.5px;margin:1px 2px;background:#f2ead6;color:#6b5427}
 .note{font-size:11.5px;opacity:.65;margin-top:6px}
 .row2{display:flex;justify-content:space-between;gap:8px;padding:3px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13px}
 @media(max-width:560px){#chart{grid-template-rows:repeat(4,minmax(86px,auto))}.pal{font-size:9.5px}.pal .zhu{font-size:11px}}
-</style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=3"></head><body>
+</style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=4"></head><body>
 <h1>✴ 紫微斗數</h1>
 <div class="box">
 <div class="row">
@@ -544,7 +544,7 @@ function render(){
   h2+='<b style="color:#8e6bb5;font-size:14.5px">① 致命傷:子午流注定臟腑</b><br>'
    +'<span style="opacity:.85">本門論疾厄<b>不看疾厄宮之星</b>,而以中醫<b>子午流注</b>定臟腑——「肺寅大卯胃辰宮,脾巳心午小未中;膀申腎酉心包戌,亥三子膽丑肝通」。看<b>煞星與化忌聚於哪一個地支宮</b>,該地支所主之臟腑即是此生<b>致命傷</b>。坊間「七殺在疾厄主痔瘡」之類的說法無濟於事——論命要論的是致命傷,不是小毛病。</span><br>';
   if(NL.worst.length){
-    h2+=NL.worst.map(w=>'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+    h2+=NL.worst.map(w=>'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px">'
       +'<b style="color:var(--red);font-size:14.5px">'+BR[w.i]+'宮 → '+ZIWU[w.i][0]+'</b>'
       +' <span style="font-size:12px;opacity:.7">(見'+w.items.join('、')+')</span>'
       +'<div style="font-size:13px">'+ZIWU[w.i][1]+'</div></div>').join('');
@@ -557,7 +557,7 @@ function render(){
   const fuNet=good(fuP)-bad(fuP), qiNet=good(qiP)-bad(qiP);
   h2+='<br><b style="color:#8e6bb5;font-size:14.5px">② 論婚姻必合福德宮</b><br>'
    +'<span style="opacity:.85">論婚姻若<b>只看夫妻宮,必然失準</b>——本門要求<b>一定要合看福德宮</b>。福德宮者,<b>一輩子的福祿</b>也,亦主夫妻關係與一世財祿事業。<b>夫妻宮好而福德宮壞者,終究要散。</b></span><br>'
-   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px">'
    +'夫妻宮('+BR[NL.qi]+'):'+(qiP.zhu.join('、')||'空宮')+(qiP.sha.length?' <span style="color:var(--red)">見'+qiP.sha.join('、')+'</span>':'')+'<br>'
    +'福德宮('+BR[NL.fu]+'):'+(fuP.zhu.join('、')||'空宮')+(fuP.sha.length?' <span style="color:var(--red)">見'+fuP.sha.join('、')+'</span>':'')+'<br>'
    +'<b>合參:</b>'+(qiNet>=0&&fuNet>=0?'夫妻與福德皆得力,婚姻根基穩固,可白首偕老。':
@@ -567,7 +567,7 @@ function render(){
   // 3 三方:命宮兼看財官遷
   h2+='<br><b style="color:#8e6bb5;font-size:14.5px">③ 命宮必兼看財帛・官祿・遷移</b><br>'
    +'<span style="opacity:.85">「看命宮一定要同時兼看三個宮:財帛、官祿、遷移。」財帛主自營為老闆,官祿主公職受薪;何者旺即知其發展方向。遷移則定其「該不該離鄉」——有人須外出方發,有人出去繞一圈回來才好,有人非留本地不可。</span><br>'
-   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px">'
    +'財帛('+BR[NL.cai]+'):'+(z.P[NL.cai].zhu.join('、')||'空宮')+'　勢 '+NL.caiW+'<br>'
    +'官祿('+BR[NL.guan]+'):'+(z.P[NL.guan].zhu.join('、')||'空宮')+'　勢 '+NL.guanW+'<br>'
    +'遷移('+BR[NL.qian]+'):'+(z.P[NL.qian].zhu.join('、')||'空宮')+'　勢 '+NL.qianW+'<br>'
@@ -578,7 +578,7 @@ function render(){
   // 4 先天財 vs 後天財
   h2+='<br><b style="color:#8e6bb5;font-size:14.5px">④ 先天財與後天財</b><br>'
    +'<span style="opacity:.85">「命宮、財帛都是財星者,生下來就有家業,此先天之財;命宮空空,而財星在遷移或官祿者,是後天自己賺來的。」</span><br>'
-   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+   +'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px">'
    +(NL.xian>NL.hou?'<b>先天財勝</b>('+NL.xian+' : '+NL.hou+')——財星聚於命財之位,主有祖蔭家業可承,起步較他人輕鬆;然守成不易,仍須自立。':
      NL.hou>NL.xian?'<b>後天財勝</b>('+NL.xian+' : '+NL.hou+')——財星在遷移官祿,主白手起家、自力更生;家中未必有助,但憑本事與外緣可致富,愈動愈發。':
      '先後天財相當——祖蔭有限而自力可成,宜半守半創。')+'</div>';
@@ -586,7 +586,7 @@ function render(){
   const xP=z.P[NL.xiong];
   if(Object.values(xP.hua).includes('忌')||xP.sha.filter(s=>NI_SHA.includes(s)).length>=2){
     h2+='<br><b style="color:#8e6bb5;font-size:14.5px">⑤ 兄弟宮見忌煞——本門三解</b><br>'
-     +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px">'
+     +'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px">'
      +'兄弟宮('+BR[NL.xiong]+')見'+(Object.entries(xP.hua).filter(([,t])=>t==='忌').map(([n])=>n+'化忌').concat(xP.sha.filter(s=>NI_SHA.includes(s))).join('、'))+',依本門之法有三解:<br>'
      +'<b>一</b>、有兄弟而<b>不和</b>——非常不睦;<b>二</b>、有兄弟而<b>夭折</b>;<b>三</b>、與<b>兄弟合夥必破財</b>。<br>'
      +'<span style="font-size:12.5px;opacity:.8">三者取何,須以面相佐證:眉毛雜亂顛倒主兄弟不和,眉有斷缺主手足有損(左眉主兄弟、右眉主姊妹)。斗數批六親本就較弱,本門主張以面相輔之。</span></div>';
@@ -594,7 +594,7 @@ function render(){
   // 6 改運法
   h2+='<br><b style="color:#8e6bb5;font-size:14.5px">⑥ 三才改命:天一分、人一分、地一分</b><br>'
    +'<span style="opacity:.85">本門核心主張:<b>天命佔三分之一、人事佔三分之一、地理佔三分之一。</b>論命是看天,知其脈絡、預知將發生何事;知道之後,用<b>地理位置(陽宅)</b>為之化解——為什麼地理能化解?因為<b>換了位置就換了念,念一改,想法就改、做法就改,命就跟著改</b>。再加上人事(明理、懂得判斷事情),人與地合起來是三分之二,自然大於天命的三分之一。<br>此非畫符念咒、買魚缸做法之類——<b>無理之事明白人不接受;有理則走遍天下</b>。</span>'
-   +'<div style="margin:4px 0;padding:6px 9px;background:#fff;border-radius:8px;font-size:13px">'
+   +'<div style="margin:4px 0;padding:6px 9px;background:rgba(255,255,255,.06);border-radius:8px;font-size:13px">'
    +'<b>本盤化解方向:</b>'
    +(NL.worst.length?'健康上以<b>'+NL.worst.map(w=>ZIWU[w.i][0]).join('、')+'</b>為終身要害,宜及早以中醫調養、定期檢查;':'')
    +(fuNet<0?'福德受剋者,調整之要在<b>心念與慾望</b>,可配合陽宅福德方位佈置靜穩;':'')
@@ -641,7 +641,7 @@ function render(){
     if(meets.length)extra+='<div style="font-size:12.5px;opacity:.8;line-height:1.7;margin-top:2px">三方四正會照 <b>'+meets.join('、')+'</b><br>'+sfDeep(meets.concat(useStars))+'。</div>';
     const isMing=i===z.ming,isShen=i===z.shen;
     const inDx=dxNow&&+dxNow[0]===i;
-    return '<div style="border:1px solid #e6dcc3;border-radius:10px;padding:8px 10px;margin:6px 0;background:'+(isMing?'rgba(201,169,106,.12)':'#fff')+'">'
+    return '<div style="border:1px solid rgba(201,169,106,.22);border-radius:10px;padding:8px 10px;margin:6px 0;background:'+(isMing?'rgba(201,169,106,.16)':'rgba(255,255,255,.05)')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">'
       +'<b style="font-family:\'Noto Serif TC\',serif;font-size:16px;color:var(--gold)">'+g+'宮</b>'
       +'<span style="font-size:12px;opacity:.7">'+z.gongGan(i)+BR[i]
