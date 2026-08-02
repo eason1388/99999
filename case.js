@@ -78,9 +78,25 @@ function put(id,val,force){
   el.dispatchEvent(new Event('input',{bubbles:true}));
   return true;
 }
+/* 有些模組(飛星)用一排籤按鈕而非下拉,需改用點選 */
+function clickChip(boxId,text,force){
+  var box=document.getElementById(boxId); if(!box||text==null||text==='')return false;
+  if(!box.__bpw){ box.__bpw=1;
+    box.addEventListener('click',function(){if(!box.__bpFilling)box.__bpTouched=1},true); }
+  if(!force&&box.__bpTouched)return false;
+  var t=String(text).trim();
+  var b=Array.prototype.slice.call(box.querySelectorAll('button'))
+        .filter(function(x){return x.textContent.trim()===t})[0];
+  if(!b||b.classList.contains('on'))return false;
+  box.__bpFilling=1; b.click(); box.__bpFilling=0;
+  return true;
+}
 function autofill(c,force){
   if(!c)return 0;
   var n=0;
+  // 飛星八宅:#periods 是 1運…9運、#mts 是二十四山
+  n+=clickChip('periods',(c.per||'')+'運',force)?1:0;
+  n+=clickChip('mts',c.sit,force)?1:0;
   n+=put('sit',c.sit,force)?1:0;
   n+=put('per',c.per,force)?1:0;
   n+=put('period',c.per,force)?1:0;
