@@ -113,8 +113,11 @@ function css(){
   if(document.getElementById('bpcase-css'))return;
   var s=document.createElement('style'); s.id='bpcase-css';
   s.textContent=
+  /* 注意:不可用負邊界。部分模組的 body 是 flex 置中容器,
+     負邊界會把內容寬度撐歪,導致畫布算出負半徑而在動畫迴圈裡持續拋錯。*/
   '#bpcase{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px;'+
-    'padding:7px 12px;margin:-8px -8px 10px;font-size:13px;'+
+    'width:100%;max-width:100%;box-sizing:border-box;flex:none;align-self:stretch;'+
+    'padding:7px 12px;margin:0 0 10px;font-size:13px;'+
     'background:linear-gradient(90deg,rgba(201,169,106,.22),rgba(201,169,106,.10));'+
     'border-bottom:1px solid rgba(201,169,106,.4);backdrop-filter:blur(6px);'+
     '-webkit-backdrop-filter:blur(6px);color:#E8DCC8}'+
@@ -201,14 +204,20 @@ function pick(){
 g.BPCASE={list:list,get:get,setActive:setActive,clear:clear,update:update,
           on:on,apply:apply,pick:pick,refresh:fire,autofill:autofill,KEY:KEY};
 
-/* 模組頁自動帶入(案件簿本身不帶,免得蓋掉編輯中的表單)*/
+/* 模組頁自動帶入(案件簿本身不帶,免得蓋掉編輯中的表單)
+   等 load 之後才插入案件列,讓各模組先把畫布尺寸算完,避免插入時的版面位移。*/
 function boot(){
-  paint();
-  if(document.getElementById('cName'))return;      // 客戶案件簿
-  var c=get(); if(!c)return;
-  // 等模組把 select 的 option 建好再填
-  setTimeout(function(){autofill(c)},60);
-  setTimeout(function(){autofill(c)},400);
+  var go=function(){
+    paint();
+    // 插入後通知需要重新量尺寸的模組(羅盤畫布等)
+    try{window.dispatchEvent(new Event('resize'))}catch(e){}
+    if(document.getElementById('cName'))return;   // 客戶案件簿
+    var c=get(); if(!c)return;
+    setTimeout(function(){autofill(c)},80);       // 等 select 的 option 建好
+    setTimeout(function(){autofill(c)},500);
+  };
+  if(document.readyState==='complete')setTimeout(go,120);
+  else window.addEventListener('load',function(){setTimeout(go,120)});
 }
 on(function(c){ if(c&&!document.getElementById('cName'))setTimeout(function(){autofill(c,true)},30); });
 
