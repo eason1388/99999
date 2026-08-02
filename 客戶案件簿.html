@@ -39,6 +39,13 @@ input,select,textarea{padding:8px 10px;border:1.5px solid var(--gold2);border-ra
  <input id="cDate" type="date">
  <input id="cBy" type="number" placeholder="屋主生年" style="width:110px">
 </div>
+<div class="row" style="align-items:center">
+ <span style="font-size:12.5px;opacity:.75">屋主生辰(選填,供八字/擇日自動帶入)</span>
+ <input id="cBirth" type="date" style="width:150px">
+ <input id="cBtime" type="time" style="width:110px">
+ <select id="cSex"><option value="1">男</option><option value="0">女</option></select>
+ <input id="cSp" type="number" placeholder="配偶生年" style="width:110px">
+</div>
 <div class="row">
  <textarea id="cNote" placeholder="備註(格局、已做化解、待辦事項…)" rows="2" style="flex:1;min-width:200px"></textarea>
 </div>
@@ -125,6 +132,10 @@ document.getElementById('save').onclick=()=>{
     sit:cSit.value,per:+cPer.value,
     date:document.getElementById('cDate').value,
     by:+document.getElementById('cBy').value||0,
+    birth:document.getElementById('cBirth').value||'',
+    btime:document.getElementById('cBtime').value||'',
+    sex:+document.getElementById('cSex').value,
+    sp:+document.getElementById('cSp').value||0,
     note:document.getElementById('cNote').value.trim()};
   if(editId){cases=cases.map(c=>c.id===editId?o:c)}else{cases.push(o)}
   if(save(cases)){editId=null;document.getElementById('editing').textContent='';
@@ -137,7 +148,11 @@ window.editCase=id=>{const c=cases.find(x=>x.id===id);if(!c)return;
   document.getElementById('cAddr').value=c.addr||'';document.getElementById('cType').value=c.type;
   cSit.value=c.sit;cPer.value=c.per;document.getElementById('cDate').value=c.date||'';
   document.getElementById('cBy').value=c.by||'';document.getElementById('cNote').value=c.note||'';
+  document.getElementById('cBirth').value=c.birth||'';document.getElementById('cBtime').value=c.btime||'';
+  document.getElementById('cSex').value=(c.sex===0?0:1);document.getElementById('cSp').value=c.sp||'';
   scrollTo({top:0,behavior:'smooth'})};
+// 設為目前案件 → 各模組自動帶入
+window.useCase=id=>{ if(window.BPCASE){BPCASE.setActive(id);render();} };
 window.delCase=id=>{if(!confirm('確定刪除此案件?'))return;
   cases=cases.filter(x=>x.id!==id);save(cases);render()};
 document.getElementById('exp').onclick=()=>{
@@ -205,7 +220,12 @@ function render(){
      +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">'
      +'<b style="font-size:16px">'+c.name+'</b>'
      +'<span style="font-size:12.5px;opacity:.7">'+c.type+'・'+c.sit+'山'+s.ch.facing+'向・'+c.per+'運'+(c.date?'・勘於'+c.date:'')+'</span>'
-     +'<span style="margin-left:auto"><button class="mini" onclick="editCase('+c.id+')">編輯</button><button class="mini" onclick="delCase('+c.id+')">刪</button></span></div>'
+     +'<span style="margin-left:auto">'
+     +'<button class="mini" onclick="useCase('+c.id+')"'
+     +(window.BPCASE&&BPCASE.get()&&String(BPCASE.get().id)===String(c.id)
+        ?' style="background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;font-weight:700;border-color:transparent">使用中'
+        :'>設為目前案件')+'</button>'
+     +'<button class="mini" onclick="editCase('+c.id+')">編輯</button><button class="mini" onclick="delCase('+c.id+')">刪</button></span></div>'
      +(c.addr||c.phone?'<div style="font-size:12.5px;opacity:.75">'+(c.addr||'')+(c.phone?' ・'+c.phone:'')+'</div>':'')
      +'<div style="margin-top:4px">'+s.alerts.map(a=>'<span class="tag '+(a[0]>=3?'warn':a[0]===2?'mid':'')+'">'+(a[0]>=3?'⚠ ':'')+a[1]+'</span>').join('')
      +s.goods.map(g=>'<span class="tag good">'+g+'</span>').join('')+'</div>'

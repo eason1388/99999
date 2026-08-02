@@ -226,6 +226,16 @@ function bind(root){
 g.BPSY={ok:ok,gate:gate,gatePage:gatePage,bind:bind,open:open_,close:close,
          valid:valid,gen:gen,save:save,clear:clear,LINE:LINE_ID,PRICE:PRICE,KEY:KEY};
 
+/* ── 案件狀態層:模組頁自動載入(外殼不需要)── */
+function loadCase(){
+  if(document.getElementById('stage'))return;        // index.html 外殼
+  if(window.BPCASE||document.getElementById('bpcase-js'))return;
+  var s=document.createElement('script');
+  s.id='bpcase-js'; s.src='case.js'; s.defer=false;
+  (document.head||document.documentElement).appendChild(s);
+}
+
 theme(); scrollFix();
-document.addEventListener('DOMContentLoaded',function(){ theme(); scrollFix(); bind(); });
+document.addEventListener('DOMContentLoaded',function(){ theme(); scrollFix(); bind(); loadCase(); });
+if(document.readyState!=='loading')loadCase();
 })(window);
