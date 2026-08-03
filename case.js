@@ -138,6 +138,7 @@ function css(){
     'border-bottom:1px solid rgba(201,169,106,.4);backdrop-filter:blur(6px);'+
     '-webkit-backdrop-filter:blur(6px);color:#E8DCC8}'+
   '#bpcase .ic{color:#E0C285;font-family:"Noto Serif TC",serif;font-weight:900;flex:none}'+
+  '#bpcase button.hm{padding:3px 10px;color:#E0C285;border-color:rgba(201,169,106,.45)}'+
   /* min-width:0 讓長文字可以被截斷,否則會把右邊的按鈕擠出螢幕 */
   '#bpcase .nm{font-weight:700;color:#F0D9A0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}'+
   '#bpcase .dt{opacity:.78;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto}'+
@@ -172,31 +173,42 @@ function paint(){
     document.body.insertBefore(bar,document.body.firstChild);
   }
   var c=get(), n=list().length;
+  /* 在外殼裡有底部導覽可回首頁;獨立開啟時必須自己給一顆返回鍵,否則使用者出不去 */
+  var lead=inShell()?'<span class="ic">案</span>'
+                    :'<button class="hm" id="bpcase-home">‹ 首頁</button>';
   if(c){
-    bar.innerHTML='<span class="ic">案</span>'+
+    bar.innerHTML=lead+
       '<span class="nm">'+esc(c.name)+'</span>'+
       '<span class="dt">'+esc(c.sit||'')+'山・'+(c.per||'')+'運'+(c.by?'・屋主'+c.by:'')+'</span>'+
       '<span class="sp"></span>'+
       '<button id="bpcase-sw">切換</button><button id="bpcase-x">取消</button>';
     bar.querySelector('#bpcase-x').onclick=function(){clear()};
   }else{
-    bar.innerHTML='<span class="ic">案</span>'+
+    bar.innerHTML=lead+
       '<span class="dt">'+(n?'未指定案件':'尚無案件,請先到客戶案件簿建立')+'</span>'+
       '<button class="on" id="bpcase-sw">'+(n?'選擇':'去建立')+'</button>';
   }
   var sw=bar.querySelector('#bpcase-sw');
   if(sw)sw.onclick=function(){
-    if(!list().length){                       // 還沒有案件 → 直接帶去建立
-      try{ (window.top&&window.top!==window ? window.top : window).location.href=
-            location.href.replace(/[^\/]*$/,'')+encodeURIComponent('客戶案件簿.html'); }
-      catch(e){ location.href=encodeURIComponent('客戶案件簿.html'); }
-      return;
-    }
+    if(!list().length){ gotoCases(); return; }   // 還沒有案件 → 帶去建立
     pick();
   };
+  var hm=bar.querySelector('#bpcase-home');
+  if(hm)hm.onclick=function(){ location.href='index.html'; };
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
   return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+
+/* 是否被外殼(index.html)以 iframe 載入 */
+function inShell(){
+  try{ return window.parent&&window.parent!==window&&typeof window.parent.go==='function'; }
+  catch(e){ return false; }
+}
+/* 前往客戶案件簿:在外殼內就切換分頁,別把整個視窗換掉(否則底部導覽消失、回不來)*/
+function gotoCases(){
+  if(inShell()){ try{ window.parent.go('cases'); return; }catch(e){} }
+  location.href=encodeURIComponent('客戶案件簿.html');
+}
 
 function pick(){
   css();
