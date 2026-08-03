@@ -151,6 +151,10 @@ function modal(){
    '<input id="bpsy-in" placeholder="BPSY-XXXXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">'+
    '<div id="bpsy-msg"></div>'+
    '<div class="row"><button id="bpsy-x">關閉</button><button class="pri" id="bpsy-go">解碼</button></div>'+
+   /* 綠界審核與消保法都要求可清楚查閱商品內容、交付與退費規定 */
+   '<div style="margin-top:14px;font-size:11.5px;opacity:.6;line-height:1.8">'+
+     '<a href="購買說明.html" target="_top" style="color:#E0C285">服務說明・交付方式・退費規定</a>'+
+     '<br>客服信箱 jackkok1388@gmail.com</div>'+
    '</div>';
   document.body.appendChild(m);
   m.addEventListener('click',function(e){ if(e.target===m) close(); });
