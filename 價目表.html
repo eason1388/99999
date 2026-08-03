@@ -3,52 +3,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0}
-body{background:#0F0C0A;color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
-  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:0}
-.poster{width:1400px;background:linear-gradient(165deg,#14110D 0%,#231D14 100%);
-  border:2px solid rgba(201,169,106,.45);padding:38px 46px 34px;position:relative}
-.hd{display:flex;align-items:center;gap:16px;padding-bottom:16px;border-bottom:2px solid rgba(201,169,106,.4)}
-.seal{width:56px;height:56px;border-radius:50%;border:2px solid #C9A96A;display:flex;align-items:center;
-  justify-content:center;font-family:'Noto Serif TC',serif;font-weight:900;color:#C9A96A;font-size:27px;flex:none}
-.hd h1{font-family:'Noto Serif TC',serif;font-size:29px;letter-spacing:.1em;color:#E0C285;font-weight:900}
-.hd .s{font-size:13.5px;opacity:.62;margin-top:3px;letter-spacing:.08em}
-.hd .url{margin-left:auto;text-align:right;font-size:12.5px;opacity:.65;line-height:1.9}
-.hd .url b{color:#E0C285;display:block;font-size:13.5px}
+html,body{background:#0F0C0A}
+body{color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;overflow:hidden}
+/* 版面固定 1568×661,對應綠界上傳用的單張截圖比例 */
+.poster{width:1568px;height:661px;background:linear-gradient(150deg,#14110D 0%,#241E15 100%);
+  border:2px solid rgba(201,169,106,.45);padding:20px 26px 16px;display:flex;flex-direction:column}
 
-.tag{display:inline-block;background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;
-  font-weight:700;font-size:14px;padding:5px 16px;border-radius:99px;letter-spacing:.06em;margin:20px 0 4px}
+.hd{display:flex;align-items:center;gap:13px;padding-bottom:11px;border-bottom:2px solid rgba(201,169,106,.42);flex:none}
+.seal{width:46px;height:46px;border-radius:50%;border:2px solid #C9A96A;display:flex;align-items:center;
+  justify-content:center;font-family:'Noto Serif TC',serif;font-weight:900;color:#C9A96A;font-size:23px;flex:none}
+.hd h1{font-family:'Noto Serif TC',serif;font-size:25px;letter-spacing:.09em;color:#E0C285;font-weight:900;line-height:1.25}
+.hd .s{font-size:12.5px;opacity:.6;margin-top:2px;letter-spacing:.06em}
+.hd .url{margin-left:auto;text-align:right;font-size:12px;opacity:.68;line-height:1.7}
+.hd .url b{color:#E0C285;display:block;font-size:13px}
+.hd .cnt{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;font-weight:700;font-size:12.5px;
+  padding:4px 13px;border-radius:99px;margin-left:16px;white-space:nowrap}
 
-.body{display:flex;gap:34px;margin-top:14px}
-.left{flex:0 0 470px}
-.right{flex:1}
+.body{display:flex;gap:20px;margin-top:13px;flex:1;min-height:0}
+.c1{flex:0 0 360px;display:flex;flex-direction:column;gap:10px}
+.c2{flex:1;min-width:0}
+.c3{flex:0 0 300px;display:flex;flex-direction:column;gap:10px}
 
-.pbox{background:#1A1613;border:1px solid rgba(201,169,106,.3);border-radius:14px;padding:22px 24px}
-.pbox .nm{font-family:'Noto Serif TC',serif;font-size:21px;color:#F0D9A0;font-weight:900;line-height:1.5}
-.pbox .sku{font-size:12px;opacity:.5;margin-top:5px;letter-spacing:.05em}
-.pbox .price{font-family:'Noto Serif TC',serif;font-size:52px;color:#E0C285;font-weight:900;margin:16px 0 2px;letter-spacing:.02em}
-.pbox .price small{font-size:19px;opacity:.75;font-weight:700}
-.pbox .unit{font-size:13px;opacity:.7;line-height:1.9}
-.pbox hr{border:0;border-top:1px solid rgba(201,169,106,.22);margin:16px 0}
-.spec{font-size:13.5px;line-height:2.05}
-.spec span{color:#C9A96A;display:inline-block;width:82px}
+.pbox{background:#1A1613;border:1px solid rgba(201,169,106,.3);border-radius:12px;padding:15px 18px}
+.pbox .nm{font-family:'Noto Serif TC',serif;font-size:19px;color:#F0D9A0;font-weight:900;line-height:1.4}
+.pbox .sku{font-size:11.5px;opacity:.5;margin-top:4px}
+.pbox .price{font-family:'Noto Serif TC',serif;font-size:44px;color:#E0C285;font-weight:900;margin:9px 0 1px}
+.pbox .price small{font-size:17px;opacity:.75}
+.pbox .unit{font-size:12px;opacity:.68;line-height:1.75}
+.pbox hr{border:0;border-top:1px solid rgba(201,169,106,.22);margin:11px 0}
+.spec{font-size:12.5px;line-height:1.95}
+.spec span{color:#C9A96A;display:inline-block;width:74px}
 
-.stock{margin-top:16px;background:rgba(143,196,154,.08);border:1px solid rgba(143,196,154,.3);
-  border-radius:12px;padding:14px 18px;font-size:13px;line-height:1.9}
-.stock b{color:#8FC49A;font-size:14px}
-.stock code{font-family:ui-monospace,Menlo,Consolas,monospace;color:#F0D9A0;font-size:14.5px;letter-spacing:.06em}
+.mini{background:rgba(143,196,154,.07);border:1px solid rgba(143,196,154,.3);border-radius:11px;
+  padding:11px 15px;font-size:12px;line-height:1.75}
+.mini b{color:#8FC49A;font-size:12.5px;display:block;margin-bottom:3px}
+.mini code{font-family:ui-monospace,Menlo,Consolas,monospace;color:#F0D9A0;font-size:13px;letter-spacing:.05em}
 
-h2{font-family:'Noto Serif TC',serif;font-size:16.5px;color:#E0C285;letter-spacing:.12em;
-  margin:0 0 10px;padding-bottom:7px;border-bottom:1px solid rgba(201,169,106,.3)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border:1px solid rgba(201,169,106,.22);padding:7px 11px;text-align:left}
+.gbox{background:#1A1613;border:1px solid rgba(201,169,106,.24);border-radius:11px;padding:11px 15px;
+  font-size:12px;line-height:1.75;flex:1}
+.gbox b{color:#E0C285;font-size:12.5px;display:block;margin-bottom:3px}
+
+h2{font-family:'Noto Serif TC',serif;font-size:15px;color:#E0C285;letter-spacing:.1em;
+  margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(201,169,106,.3)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border:1px solid rgba(201,169,106,.22);padding:5.5px 10px;text-align:left}
 th{background:rgba(201,169,106,.18);color:#E8CE95;font-weight:700;white-space:nowrap}
-td.y{color:#8FC49A;white-space:nowrap;text-align:center;width:150px}
-td.n{color:#A79C8C;white-space:nowrap;text-align:center;width:120px}
-
-.ft{margin-top:22px;padding-top:14px;border-top:1px solid rgba(201,169,106,.3);
-  display:flex;gap:30px;font-size:12.5px;opacity:.72;line-height:1.85}
-.ft div{flex:1}
-.ft b{color:#E0C285;display:block;margin-bottom:2px;font-size:13px}
+td.y{color:#8FC49A;white-space:nowrap;text-align:center;width:132px}
+td.n{color:#A79C8C;white-space:nowrap;text-align:center;width:106px}
 </style></head><body>
 <div class="poster">
 
@@ -58,62 +59,59 @@ td.n{color:#A79C8C;white-space:nowrap;text-align:center;width:120px}
       <h1>抱朴隨緣堂・商品價目表</h1>
       <div class="s">全能玄學羅盤 Master Feng Shui Compass｜線上數位服務</div>
     </div>
+    <div class="cnt">目前販售商品共 1 項</div>
     <div class="url">
       銷售網頁<b>eason1388.github.io/99999/購買說明.html</b>
       客服信箱 jackkok1388@gmail.com
     </div>
   </div>
 
-  <div class="tag">本公司目前販售商品共 1 項</div>
-
   <div class="body">
-    <div class="left">
+
+    <div class="c1">
       <div class="pbox">
-        <div class="nm">全能玄學羅盤<br>深解授權碼</div>
+        <div class="nm">全能玄學羅盤・深解授權碼</div>
         <div class="sku">商品編號 BPSY-699｜數位內容授權(電腦軟體)</div>
         <div class="price">NT$ 699 <small>元</small></div>
         <div class="unit">新台幣計價・含稅・單次付款<br>永久授權,無月租、無自動續扣</div>
         <hr>
         <div class="spec">
           <div><span>商品型態</span>線上軟體授權碼</div>
-          <div><span>交付方式</span>付款完成即時發碼 + 寄送 Email</div>
+          <div><span>交付方式</span>付款完成即時發碼 + 寄 Email</div>
           <div><span>使用期限</span>永久有效,不限使用次數</div>
           <div><span>使用裝置</span>手機／平板／電腦(本人自用)</div>
-          <div><span>退費規定</span>數位內容,交付後恕不退費</div>
         </div>
       </div>
-
-      <div class="stock">
+      <div class="mini">
         <b>庫存說明(數位商品)</b>
-        本商品為線上數位授權,無實體物品與實體庫存。<br>
-        授權碼於付款完成時由系統即時產生,<b style="display:inline">庫存無上限</b>。<br>
+        本商品為線上數位授權,無實體物品與實體庫存。授權碼於付款完成時由系統即時產生,庫存無上限。<br>
         授權碼格式範例:<code>BPSY-MMAANX-UJ2Y</code>
       </div>
     </div>
 
-    <div class="right">
+    <div class="c2">
       <h2>商品內容(免費版／NT$699 授權版 對照)</h2>
       <table>
-        <tr><th>功能項目</th><th>免費</th><th>NT$699</th></tr>
-        <tr><td>全部排盤運算(飛星・八宅・八字・紫微・擇日・擇時・水法)</td><td class="y">完整可用</td><td class="y">完整可用</td></tr>
-        <tr><td>羅盤測向・平面圖疊盤・今日曆法盤</td><td class="y">完整可用</td><td class="y">完整可用</td></tr>
+        <tr><th>功能項目</th><th>免費</th><th>NT$699 授權版</th></tr>
+        <tr><td>全部排盤運算(飛星・八宅・八字・紫微・擇日・擇時・水法)</td><td class="n">完整可用</td><td class="y">完整可用</td></tr>
+        <tr><td>羅盤測向・平面圖疊盤・今日曆法盤</td><td class="n">完整可用</td><td class="y">完整可用</td></tr>
         <tr><td>房屋吉凶評分</td><td class="n">僅分數</td><td class="y">分數＋逐宮詳解</td></tr>
         <tr><td>飛星宮位深度論斷・流年吉凶</td><td class="n">摘要數句</td><td class="y">完整</td></tr>
         <tr><td>八字合婚專業論斷</td><td class="n">分數＋簡評</td><td class="y">八章完整報告</td></tr>
         <tr><td>八字・紫微命盤深解</td><td class="n">摘要數句</td><td class="y">完整</td></tr>
-        <tr><td>開運佈局與化解建議</td><td class="n">—</td><td class="y">✔</td></tr>
-        <tr><td>專業報告輸出(A4／PDF 可列印)</td><td class="n">—</td><td class="y">✔</td></tr>
-        <tr><td>客戶案件簿・資料自動帶入</td><td class="y">完整可用</td><td class="y">完整可用</td></tr>
+        <tr><td>開運佈局與化解建議</td><td class="n">—</td><td class="y">✔ 提供</td></tr>
+        <tr><td>專業報告輸出(A4／PDF 可列印)</td><td class="n">—</td><td class="y">✔ 提供</td></tr>
+        <tr><td>客戶案件簿・資料自動帶入</td><td class="n">完整可用</td><td class="y">完整可用</td></tr>
       </table>
     </div>
-  </div>
 
-  <div class="ft">
-    <div><b>付款方式</b>信用卡／ATM 轉帳／超商代碼<br>金流服務由綠界科技(ECPay)提供</div>
-    <div><b>交付與啟用</b>付款完成頁面即時顯示授權碼,並同步寄至付款人信箱<br>回本站點「輸入授權碼」貼上即永久解鎖</div>
-    <div><b>退換貨政策</b>依《通訊交易解除權合理例外情事適用準則》第2條第5款,<br>數位內容經同意後提供,不適用七日猶豫期,恕不退費</div>
-    <div><b>聯絡方式</b>jackkok1388@gmail.com<br>LINE ID:fengshui1388<br>週一至週六 09:00–21:00</div>
-  </div>
+    <div class="c3">
+      <div class="gbox"><b>付款方式</b>信用卡／ATM 轉帳／超商代碼<br>金流服務由綠界科技(ECPay)提供<br>全站以新台幣計價</div>
+      <div class="gbox"><b>交付與啟用</b>付款完成頁面即時顯示授權碼,並同步寄至付款人信箱。回本站點「輸入授權碼」貼上即永久解鎖。</div>
+      <div class="gbox"><b>退換貨政策</b>依《通訊交易解除權合理例外情事適用準則》第 2 條第 5 款,本商品為非以有形媒介提供之數位內容,經同意後始提供,不適用七日猶豫期,交付後恕不退費。</div>
+      <div class="gbox"><b>聯絡方式</b>jackkok1388@gmail.com<br>LINE ID:fengshui1388<br>週一至週六 09:00–21:00</div>
+    </div>
 
+  </div>
 </div>
 </body></html>
