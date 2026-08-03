@@ -138,9 +138,10 @@ function css(){
     'border-bottom:1px solid rgba(201,169,106,.4);backdrop-filter:blur(6px);'+
     '-webkit-backdrop-filter:blur(6px);color:#E8DCC8}'+
   '#bpcase .ic{color:#E0C285;font-family:"Noto Serif TC",serif;font-weight:900;flex:none}'+
-  '#bpcase .nm{font-weight:700;color:#F0D9A0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
-  '#bpcase .dt{opacity:.78;white-space:nowrap;font-size:12px}'+
-  '#bpcase .sp{flex:1;min-width:4px}'+
+  /* min-width:0 讓長文字可以被截斷,否則會把右邊的按鈕擠出螢幕 */
+  '#bpcase .nm{font-weight:700;color:#F0D9A0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}'+
+  '#bpcase .dt{opacity:.78;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto}'+
+  '#bpcase .sp{flex:0 1 4px;min-width:0}'+
   '#bpcase button{border:1px solid rgba(201,169,106,.5);background:rgba(0,0,0,.2);color:#E8DCC8;'+
     'border-radius:99px;padding:3px 11px;font-size:12px;cursor:pointer;font-family:inherit;flex:none}'+
   '#bpcase button.on{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent;font-weight:700}'+
@@ -180,12 +181,19 @@ function paint(){
     bar.querySelector('#bpcase-x').onclick=function(){clear()};
   }else{
     bar.innerHTML='<span class="ic">案</span>'+
-      '<span class="dt">未指定案件——指定後各頁自動帶入坐向與屋主資料</span>'+
-      '<span class="sp"></span>'+
-      '<button class="on" id="bpcase-sw">'+(n?'選擇案件':'尚無案件')+'</button>';
+      '<span class="dt">'+(n?'未指定案件':'尚無案件,請先到客戶案件簿建立')+'</span>'+
+      '<button class="on" id="bpcase-sw">'+(n?'選擇':'去建立')+'</button>';
   }
   var sw=bar.querySelector('#bpcase-sw');
-  if(sw)sw.onclick=pick;
+  if(sw)sw.onclick=function(){
+    if(!list().length){                       // 還沒有案件 → 直接帶去建立
+      try{ (window.top&&window.top!==window ? window.top : window).location.href=
+            location.href.replace(/[^\/]*$/,'')+encodeURIComponent('客戶案件簿.html'); }
+      catch(e){ location.href=encodeURIComponent('客戶案件簿.html'); }
+      return;
+    }
+    pick();
+  };
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
   return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
