@@ -1,0 +1,488 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>現場勘查・抱朴隨緣堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* 現場用:單手、站著、光線不定。觸控目標一律 ≥48px,字級不小於 15px。*/
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#0F0C0A;color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  font-size:15px;line-height:1.75}
+button{color:inherit;font-family:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px 30px}
+
+.hero{text-align:center;padding:20px 16px 16px;border-bottom:1px solid rgba(201,169,106,.22)}
+.hero h1{font-family:'Noto Serif TC',serif;font-size:22px;letter-spacing:.14em;color:#E0C285;font-weight:900}
+.hero p{font-size:12.5px;opacity:.62;margin-top:5px}
+
+/* 進度 */
+.prog{margin:14px 0 4px;background:#1A1613;border:1px solid rgba(201,169,106,.22);border-radius:12px;padding:12px 15px}
+.prog .t{display:flex;align-items:center;font-size:13px}
+.prog .t b{color:#E0C285;font-size:14px}
+.prog .t span{margin-left:auto;opacity:.7}
+.bar{height:8px;border-radius:99px;background:rgba(201,169,106,.15);margin-top:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#B8923F,#E0C285);width:0;transition:width .3s}
+.hint{font-size:12px;opacity:.6;margin-top:7px;line-height:1.7}
+
+/* 項目卡 */
+.item{background:#1A1613;border:1px solid rgba(201,169,106,.2);border-radius:14px;margin-top:11px;overflow:hidden}
+.item.done{border-color:rgba(201,169,106,.5)}
+.head{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;
+  padding:15px 15px;cursor:pointer;text-align:left;min-height:60px}
+.ic{width:40px;height:40px;border-radius:11px;background:rgba(201,169,106,.14);color:#E0C285;flex:none;
+  display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-weight:900;font-size:19px}
+.head .tx{flex:1;min-width:0}
+.head b{font-family:'Noto Serif TC',serif;font-size:17px;color:#F0D9A0;display:block}
+.head small{display:block;font-size:12px;opacity:.6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{flex:none;border-radius:99px;padding:4px 11px;font-size:12px;font-weight:700}
+.p-ok{background:rgba(143,196,154,.16);color:#8FC49A}
+.p-mid{background:rgba(201,169,106,.16);color:#E0C285}
+.p-bad{background:rgba(229,138,121,.16);color:#E58A79}
+.p-non{background:rgba(237,231,218,.08);color:#9C948A}
+.arw{flex:none;color:#C9A96A;opacity:.55;font-size:15px;transition:transform .2s}
+.item.open .arw{transform:rotate(90deg)}
+
+.body{display:none;padding:0 15px 15px;border-top:1px solid rgba(201,169,106,.14)}
+.item.open .body{display:block}
+.lbl{font-size:12.5px;color:#C9A96A;letter-spacing:.08em;margin:14px 0 7px}
+
+/* 八方大按鈕 */
+.dirs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.dirs button{min-height:52px;border:1px solid rgba(201,169,106,.3);background:#221C16;border-radius:11px;
+  font-size:15px;font-weight:700;cursor:pointer;line-height:1.3}
+.dirs button small{display:block;font-size:10.5px;opacity:.55;font-weight:400}
+.dirs button.on{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent}
+.fine{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fine button{min-height:40px;min-width:52px;border:1px solid rgba(201,169,106,.26);background:#221C16;
+  border-radius:9px;font-size:14px;cursor:pointer;padding:0 12px}
+.fine button.on{background:rgba(201,169,106,.3);border-color:#C9A96A;color:#F0D9A0;font-weight:700}
+
+/* 判語 */
+.vd{margin-top:13px;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.85;
+  border-left:3px solid #C9A96A;background:rgba(201,169,106,.08)}
+.vd.ok{border-color:#8FC49A;background:rgba(143,196,154,.08)}
+.vd.bad{border-color:#E58A79;background:rgba(229,138,121,.08)}
+.vd b{display:block;font-size:14.5px;margin-bottom:3px}
+.vd.ok b{color:#8FC49A}.vd.bad b{color:#E58A79}.vd b{color:#E0C285}
+.vd .st{font-size:12.5px;opacity:.78;margin-top:5px}
+
+/* 狀態 */
+.sts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sts button{min-height:48px;border:1px solid rgba(201,169,106,.28);background:#221C16;border-radius:11px;
+  font-size:14px;cursor:pointer}
+.sts button.on{font-weight:700;border-color:transparent}
+.sts button.on[data-s="吉"]{background:rgba(143,196,154,.25);color:#A8D8B2;border-color:#8FC49A}
+.sts button.on[data-s="平"]{background:rgba(201,169,106,.25);color:#F0D9A0;border-color:#C9A96A}
+.sts button.on[data-s="凶"]{background:rgba(229,138,121,.25);color:#F0A797;border-color:#E58A79}
+.sts button.on[data-s="待確認"]{background:rgba(138,176,206,.22);color:#A8C8E0;border-color:#8AB0CE}
+
+textarea{width:100%;min-height:76px;background:#221C16;border:1px solid rgba(201,169,106,.26);
+  border-radius:11px;color:#EDE7DA;padding:11px 13px;font-family:inherit;font-size:16px;line-height:1.7;resize:vertical}
+textarea:focus{outline:0;border-color:#C9A96A}
+
+/* 照片 */
+.ph{display:flex;gap:9px;align-items:flex-start;flex-wrap:wrap}
+.ph .cam{min-height:52px;flex:1;min-width:150px;border:1px dashed rgba(201,169,106,.45);background:#221C16;
+  border-radius:11px;font-size:14.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.ph img{width:96px;height:96px;object-fit:cover;border-radius:11px;border:1px solid rgba(201,169,106,.3)}
+.ph .del{min-height:36px;border:1px solid rgba(229,138,121,.4);background:transparent;color:#E58A79;
+  border-radius:9px;font-size:12.5px;padding:0 12px;cursor:pointer}
+input[type=file]{display:none}
+
+/* 底部工具 */
+.tools{display:flex;gap:9px;margin-top:18px}
+.tools button{flex:1;min-height:52px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  border:1px solid rgba(201,169,106,.4);background:#221C16}
+.tools button.pri{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent}
+.sum{margin-top:16px;background:#1A1613;border:1px solid rgba(201,169,106,.22);border-radius:14px;padding:15px 17px;display:none}
+.sum h3{font-family:'Noto Serif TC',serif;font-size:16px;color:#E0C285;letter-spacing:.1em;margin-bottom:9px}
+.sum table{width:100%;border-collapse:collapse;font-size:13px}
+.sum th,.sum td{border:1px solid rgba(201,169,106,.22);padding:7px 9px;text-align:left;vertical-align:top}
+.sum th{background:rgba(201,169,106,.17);color:#E8CE95;white-space:nowrap}
+.foot{font-size:11.5px;opacity:.45;text-align:center;padding:24px 10px 10px;line-height:1.85}
+@media print{.head .arw,.tools,.dirs,.fine,.sts,.ph .cam,.ph .del{display:none!important}
+  .item .body{display:block!important}body{background:#fff;color:#000}}
+</style></head><body>
+
+<div class="hero">
+  <h1>現 場 勘 查</h1>
+  <p>逐項紀錄・自動比對本宅飛星與八宅・存回案件</p>
+</div>
+
+<div class="wrap">
+  <div class="prog">
+    <div class="t"><b id="pTitle">尚未選擇案件</b><span id="pCnt">0 / 10</span></div>
+    <div class="bar"><i id="pBar"></i></div>
+    <div class="hint" id="pHint">先在上方案件列選定案件,系統會用該案的坐山與運自動判斷每個位置的吉凶。</div>
+  </div>
+
+  <div id="list"></div>
+
+  <div class="tools">
+    <button class="pri" id="btnSum">產生勘查總表</button>
+    <button id="btnClr">清除本案勘查</button>
+  </div>
+
+  <div class="sum" id="sum"></div>
+
+  <div class="foot">
+    照片僅儲存在本裝置瀏覽器內,不會上傳。清除瀏覽器資料會一併刪除,重要照片請另行備份。<br>
+    分析結果僅供參考,不構成醫療、財務或法律建議。
+  </div>
+</div>
+
+<input type="file" id="camIn" accept="image/*" capture="environment">
+
+<script src="lock.js?v=6"></script>
+<script src="report.js"></script>
+<script src="case.js?v=6"></script>
+<script>
+/* ═══════════ 玄空飛星引擎(與飛星模組同一份,勿各自改) ═══════════ */
+const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
+const FLY=['中','乾','兌','艮','離','坎','坤','震','巽'];
+const PAL_M={'坎':'壬子癸','艮':'丑艮寅','震':'甲卯乙','巽':'辰巽巳','離':'丙午丁','坤':'未坤申','兌':'庚酉辛','乾':'戌乾亥'};
+const NUM2PAL={1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兌',8:'艮',9:'離'};
+const PAL2NUM=Object.fromEntries(Object.entries(NUM2PAL).map(([k,v])=>[v,+k]));
+const YANG=new Set('乾坤艮巽甲庚壬丙寅申巳亥');
+const palaceOf=m=>Object.keys(PAL_M).find(p=>PAL_M[p].includes(m));
+function fly(c,fw){const o={};let s=c;for(const p of FLY){o[p]=s;s=fw?s%9+1:(s-2+9)%9+1}return o}
+function xkChart(period,sitting){
+  const facing=M24[(M24.indexOf(sitting)+12)%24];
+  const base=fly(period,true);
+  const sp=palaceOf(sitting),fp=palaceOf(facing);
+  const kind=PAL_M[sp].indexOf(sitting);
+  const sc=(pal,refIfFive)=>{
+    const s=base[pal];
+    if(s===5)return fly(5,YANG.has(refIfFive));
+    const ref=PAL_M[NUM2PAL[s]][kind];
+    return fly(s,YANG.has(ref));
+  };
+  return{period,sitting,facing,base,mountain:sc(sp,sitting),facing_stars:sc(fp,facing)};
+}
+/* ── 八宅遊星 ── */
+const TRIB={'乾':7,'兌':6,'離':5,'震':4,'巽':3,'坎':2,'艮':1,'坤':0};
+const XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延年'];
+const youxing=(zhai,gong)=>XSTAR[TRIB[zhai]^TRIB[gong]];
+const JI_X=new Set(['生氣','延年','天醫','伏位']);
+
+/* ═══════════ 星曜性質 ═══════════ */
+const STAR_NM={1:'一白貪狼',2:'二黑病符',3:'三碧祿存',4:'四綠文昌',5:'五黃廉貞',
+               6:'六白武曲',7:'七赤破軍',8:'八白左輔',9:'九紫右弼'};
+/* 依當運判旺衰:當運為旺,下一運為生(進氣),再下一為次生;二五恆凶 */
+function starLevel(s,per){
+  if(s===5||s===2)return -2;                       // 五黃、二黑不論運皆須慎
+  if(s===per)return 2;                             // 當旺
+  if(s===per%9+1)return 1;                         // 生氣
+  if(s===(per%9+1)%9+1)return 1;                   // 次生
+  if(s===(per-2+9)%9+1)return 0;                   // 剛退,尚可
+  if(s===3||s===7)return -1;                       // 鬥牛、破軍
+  return -1;                                       // 其餘衰死
+}
+const LV_TX={2:'當旺',1:'進氣',0:'剛退',[-1]:'衰死',[-2]:'凶星'};
+
+/* ═══════════ 勘查項目 ═══════════ */
+/* mode:  facing=以向星論(納氣口)  mountain=以山星論(人丁/靜處)
+   press: true 表示此處「宜壓凶方」,吉凶判讀反轉 */
+const ITEMS=[
+ {k:'door', ic:'門', n:'大門',        s:'全宅第一納氣口', mode:'facing',   press:false,
+  tip:'大門是全宅氣口,向星旺則財氣入。門外形煞(路沖、壁刀、電桿)一併拍照。'},
+ {k:'stove',ic:'灶', n:'爐灶／廚房',  s:'灶位壓凶、火門朝吉', mode:'facing', press:true,
+  tip:'灶位宜坐凶方以壓煞,火門(瓦斯爐開關面向)宜朝吉方。記錄灶背後是否為廁所或臥床。'},
+ {k:'bed',  ic:'床', n:'主臥床位',    s:'人丁健康所繫', mode:'mountain', press:false,
+  tip:'床頭方位為主。留意床頭是否靠實牆、上方有無橫樑壓頂、正對房門或廁所門。'},
+ {k:'god',  ic:'神', n:'神位／祖先',  s:'忌背廁、背水、樑壓', mode:'mountain', press:false,
+  tip:'神位需背後靠實牆,忌背廁所、背樓梯、背水路,忌與臥床同牆,忌樑壓。'},
+ {k:'wc',   ic:'廁', n:'廁所',        s:'宜居衰死、忌壓旺方', mode:'facing',  press:true,
+  tip:'廁所落在衰死方為佳(化煞),若壓住當旺向星或財位,主漏財。'},
+ {k:'stair',ic:'梯', n:'樓梯',        s:'動氣所在', mode:'facing',   press:true,
+  tip:'樓梯動氣強,居凶方可洩煞;若居旺方則旺氣被帶走。記錄樓梯是否正對大門。'},
+ {k:'water',ic:'水', n:'來水／去水',  s:'水管、水塔、水景、路氣', mode:'facing', press:false,
+  tip:'來水(進氣、明水、車流入口)宜在向星旺方;去水(排水、後門)宜在衰死方。'},
+ {k:'desk', ic:'書', n:'書桌／辦公桌',s:'文昌與事業', mode:'mountain', press:false,
+  tip:'坐位背後宜有靠,面向宜開闊。四綠文昌位利考試升遷。'},
+ {k:'money',ic:'財', n:'財位',        s:'向星當旺處', mode:'facing',   press:false,
+  tip:'財位宜靜、宜亮、宜聚氣,忌走道穿堂、忌堆雜物、忌開窗漏氣。'},
+ {k:'out',  ic:'外', n:'明堂／外局',  s:'屋外形勢與形煞', mode:'facing',   press:false,
+  tip:'明堂宜開闊平整。記錄外局形煞:路沖、反弓、壁刀、天斬、高壓電塔、廟宇、墳場。'}
+];
+const DIRS=[['坎','北'],['艮','東北'],['震','東'],['巽','東南'],
+            ['離','南'],['坤','西南'],['兌','西'],['乾','西北']];
+
+/* ═══════════ 儲存 ═══════════ */
+var CKEY='fsc_cases', AKEY='fsc_active';
+function cases(){try{return JSON.parse(localStorage.getItem(CKEY)||'[]')}catch(e){return[]}}
+function activeId(){try{return localStorage.getItem(AKEY)||''}catch(e){return''}}
+function curCase(){var id=activeId();return id?cases().find(c=>String(c.id)===String(id)):null}
+function surveyKey(){var c=curCase();return c?String(c.id):'_tmp'}
+function loadSurvey(){
+  var c=curCase();
+  if(c&&c.survey)return c.survey;
+  if(!c){try{return JSON.parse(localStorage.getItem('fsc_survey_tmp')||'{}')}catch(e){return{}}}
+  return{};
+}
+function saveSurvey(sv){
+  var c=curCase();
+  if(!c){try{localStorage.setItem('fsc_survey_tmp',JSON.stringify(sv))}catch(e){}return}
+  var a=cases(),i=a.findIndex(x=>String(x.id)===String(c.id));
+  if(i<0)return;
+  a[i].survey=sv; a[i].surveyAt=new Date().toISOString().slice(0,10);
+  try{localStorage.setItem(CKEY,JSON.stringify(a))}catch(e){alert('儲存失敗:瀏覽器空間可能已滿')}
+}
+
+/* ── 照片存 IndexedDB(localStorage 放不下)── */
+var DB=null;
+function db(){return new Promise(function(res,rej){
+  if(DB)return res(DB);
+  var r=indexedDB.open('bpsy_survey',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('ph')};
+  r.onsuccess=function(){DB=r.result;res(DB)};
+  r.onerror=function(){rej(r.error)};
+})}
+function phPut(k,v){return db().then(d=>new Promise((res,rej)=>{
+  var t=d.transaction('ph','readwrite');t.objectStore('ph').put(v,k);
+  t.oncomplete=res;t.onerror=()=>rej(t.error)}))}
+function phGet(k){return db().then(d=>new Promise((res,rej)=>{
+  var t=d.transaction('ph','readonly'),q=t.objectStore('ph').get(k);
+  q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)}))}
+function phDel(k){return db().then(d=>new Promise((res,rej)=>{
+  var t=d.transaction('ph','readwrite');t.objectStore('ph').delete(k);
+  t.oncomplete=res;t.onerror=()=>rej(t.error)}))}
+
+/* 手機原圖動輒 3–5MB,一定要先縮再存,否則十張就爆掉 */
+function shrink(file){return new Promise(function(res,rej){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      var MX=1280,w=im.width,h=im.height,r=Math.min(1,MX/Math.max(w,h));
+      var cv=document.createElement('canvas');cv.width=Math.round(w*r);cv.height=Math.round(h*r);
+      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      res(cv.toDataURL('image/jpeg',.72));
+    };
+    im.onerror=rej; im.src=fr.result;
+  };
+  fr.onerror=rej; fr.readAsDataURL(file);
+})}
+
+/* ═══════════ 判語 ═══════════ */
+function chart(){
+  var c=curCase(); if(!c||!c.sit||!c.per)return null;
+  var per=parseInt(c.per,10); if(!(per>=1&&per<=9))return null;
+  if(M24.indexOf(c.sit)<0)return null;
+  try{return xkChart(per,c.sit)}catch(e){return null}
+}
+function verdict(item,pal){
+  var ch=chart();
+  if(!ch)return{cls:'',t:'尚無本宅資料',d:'案件需填入坐山與運,才能自動判斷此處吉凶。可先拍照與記錄,之後補齊即自動生效。',st:''};
+  var per=ch.period;
+  var m=ch.mountain[pal], f=ch.facing_stars[pal], b=ch.base[pal];
+  var use=item.mode==='mountain'?m:f;
+  var lv=starLevel(use,per);
+  var zhai=palaceOf(ch.sitting);
+  var yx=youxing(zhai,pal);
+  var yxJi=JI_X.has(yx);
+
+  /* 宜壓凶方者(廁所、樓梯、灶位)判讀反轉 */
+  var good = item.press ? (lv<0) : (lv>0);
+  var bad  = item.press ? (lv>=2) : (lv<=-2);
+
+  var starTx=(item.mode==='mountain'?'山星':'向星')+use+'('+STAR_NM[use]+'・'+LV_TX[lv]+')';
+  var d='';
+  if(item.press){
+    d = good
+      ? '此處落在衰死方,'+(item.k==='wc'?'廁所':item.k==='stair'?'樓梯':'灶位')+'居此可壓制凶氣,配置得宜。'
+      : bad
+      ? '此處為當旺之方,'+(item.k==='wc'?'廁所污穢壓住旺氣,主漏財耗損':item.k==='stair'?'樓梯動氣將旺氣帶走,聚財不易':'灶位壓住旺方,反損財氣')+',建議調整或化解。'
+      : '此處星氣尚可,壓煞效果有限,亦無大礙,可維持現狀。';
+  }else{
+    d = good
+      ? '星氣當旺,'+(item.mode==='mountain'?'主人丁安穩、身體康健':'主財氣通暢、進益可期')+',宜保持此處潔淨開闊。'
+      : bad
+      ? (use===5?'五黃廉貞為至凶之星,主災病意外':'二黑病符主疾厄纏身')+',此處'+item.n+'受剋,建議移位;不能移者以金洩土化解,忌動土見紅。'
+      : '星氣平平,無大吉亦無大凶,'+(item.mode==='mountain'?'可增靠山、避樑壓以固之':'可增採光通風以助之')+'。';
+  }
+  /* 八宅補充 */
+  var yxTx='八宅'+zhai+'宅・'+pal+'方為「'+yx+'」'+(yxJi?'(吉星)':'(凶星)');
+  if(!item.press&&yxJi&&!good) d+=' 惟八宅論此為吉方,尚可補救。';
+  if(!item.press&&!yxJi&&good) d+=' 但八宅論此為凶方,飛星吉而卦氣不足,效力打折。';
+
+  var cls = bad?'bad':good?'ok':'';
+  var t   = bad?'此處不利':good?'此處合宜':'此處平平';
+  return{cls:cls,t:t,d:d,
+    st:starTx+'｜運盤'+b+'｜山'+m+'向'+f+'｜'+yxTx};
+}
+
+/* ═══════════ 畫面 ═══════════ */
+var SV=loadSurvey(), OPEN='';
+function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild}
+
+function paintAll(){
+  SV=loadSurvey();
+  var c=curCase(), ch=chart();
+  document.getElementById('pTitle').textContent = c?('案件:'+(c.name||'未命名')):'未選擇案件(暫存模式)';
+  document.getElementById('pHint').textContent = ch
+    ? ('本宅 '+ch.sitting+'山'+ch.facing+'向・'+ch.period+'運,以下判語皆依此盤推算。')
+    : (c?'此案件尚未填坐山或運,補齊後每一項會自動出現吉凶判語。'
+        :'目前未選案件,紀錄暫存在本機。選定案件後可再輸入一次歸檔。');
+
+  var L=document.getElementById('list'); L.innerHTML='';
+  var done=0;
+  ITEMS.forEach(function(it){
+    var d=SV[it.k]||{};
+    if(d.dir||d.status||d.note||d.photo)done++;
+    L.appendChild(card(it,d));
+  });
+  document.getElementById('pCnt').textContent=done+' / '+ITEMS.length;
+  document.getElementById('pBar').style.width=(done/ITEMS.length*100)+'%';
+}
+
+function card(it,d){
+  var pal=d.dir?palaceOf(d.dir):null;
+  var v=pal?verdict(it,pal):null;
+  var pill = d.status
+    ? '<span class="pill '+(d.status==='吉'?'p-ok':d.status==='凶'?'p-bad':d.status==='平'?'p-mid':'p-non')+'">'+d.status+'</span>'
+    : (v? '<span class="pill '+(v.cls==='ok'?'p-ok':v.cls==='bad'?'p-bad':'p-mid')+'">'+(v.cls==='ok'?'合宜':v.cls==='bad'?'不利':'平')+'</span>'
+        : '<span class="pill p-non">未填</span>');
+  var sub = d.dir? (d.dir+'山'+(pal?'('+pal+'宮)':'')+(d.note?'・'+d.note.slice(0,14):'')) : it.s;
+
+  var c=el('<div class="item'+(OPEN===it.k?' open':'')+(d.dir?' done':'')+'" id="it-'+it.k+'"></div>');
+  c.innerHTML=
+   '<button class="head"><span class="ic">'+it.ic+'</span>'+
+     '<span class="tx"><b>'+it.n+'</b><small>'+sub+'</small></span>'+
+     pill+'<span class="arw">›</span></button>'+
+   '<div class="body">'+
+     '<div class="lbl">所在方位(先選八方)</div>'+
+     '<div class="dirs">'+DIRS.map(function(x){
+        var on=pal===x[0]?' on':'';
+        return '<button data-pal="'+x[0]+'"'+(on)+'>'+x[0]+'<small>'+x[1]+'</small></button>';
+      }).join('')+'</div>'+
+     '<div class="fine" id="fine-'+it.k+'">'+(pal?fineHtml(pal,d.dir):'')+'</div>'+
+     (v?'<div class="vd '+v.cls+'"><b>'+v.t+'</b>'+v.d+'<div class="st">'+v.st+'</div></div>':'')+
+     '<div class="lbl">'+it.tip+'</div>'+
+     '<div class="lbl">師傅判定</div>'+
+     '<div class="sts">'+['吉','平','凶','待確認'].map(function(s){
+        return '<button data-s="'+s+'"'+(d.status===s?' class="on"':'')+'>'+s+'</button>'}).join('')+'</div>'+
+     '<div class="lbl">現場備註</div>'+
+     '<textarea placeholder="例:大門正對電梯,門外堆放雜物,門檻破損">'+(d.note||'')+'</textarea>'+
+     '<div class="lbl">現場照片</div>'+
+     '<div class="ph" id="ph-'+it.k+'">'+
+       '<button class="cam">📷 拍照／選擇照片</button>'+
+     '</div>'+
+   '</div>';
+
+  c.querySelector('.head').onclick=function(){OPEN=(OPEN===it.k?'':it.k);paintAll();
+    if(OPEN)setTimeout(function(){var e=document.getElementById('it-'+it.k);
+      if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},60);};
+
+  c.querySelectorAll('.dirs button').forEach(function(b){
+    b.onclick=function(){ set(it.k,{dir:PAL_M[b.dataset.pal][1]}); };   // 預設取該宮中山
+  });
+  c.querySelectorAll('.sts button').forEach(function(b){
+    b.onclick=function(){ set(it.k,{status:(SV[it.k]||{}).status===b.dataset.s?'':b.dataset.s}); };
+  });
+  var ta=c.querySelector('textarea');
+  ta.onchange=function(){ set(it.k,{note:ta.value},true) };
+
+  if(d.photo)loadPhoto(it.k);
+  c.querySelector('.cam').onclick=function(){ pickPhoto(it.k) };
+  return c;
+}
+function fineHtml(pal,cur){
+  return PAL_M[pal].split('').map(function(m){
+    return '<button data-m="'+m+'"'+(cur===m?' class="on"':'')+'>'+m+'山</button>'}).join('');
+}
+/* 細分 24 山用事件代理,避免每次重畫都重綁 */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.fine button'); if(!b)return;
+  var k=b.parentNode.id.replace('fine-','');
+  set(k,{dir:b.dataset.m});
+});
+
+function set(k,patch,quiet){
+  SV=loadSurvey();
+  SV[k]=Object.assign({},SV[k]||{},patch);
+  SV[k].ts=Date.now();
+  saveSurvey(SV);
+  if(!quiet){OPEN=k;paintAll();}
+}
+
+/* ── 照片 ── */
+var CAM_K='';
+document.getElementById('camIn').onchange=function(){
+  var f=this.files&&this.files[0]; this.value='';
+  if(!f||!CAM_K)return;
+  shrink(f).then(function(url){
+    return phPut(surveyKey()+'|'+CAM_K,url).then(function(){
+      set(CAM_K,{photo:true});
+    });
+  }).catch(function(){ alert('照片處理失敗,請再試一次'); });
+};
+function pickPhoto(k){ CAM_K=k; document.getElementById('camIn').click(); }
+function loadPhoto(k){
+  phGet(surveyKey()+'|'+k).then(function(url){
+    if(!url)return;
+    var box=document.getElementById('ph-'+k); if(!box)return;
+    var img=document.createElement('img'); img.src=url; box.insertBefore(img,box.firstChild);
+    var del=document.createElement('button'); del.className='del'; del.textContent='刪除照片';
+    del.onclick=function(){ phDel(surveyKey()+'|'+k).then(function(){ set(k,{photo:false}) }) };
+    box.appendChild(del);
+  }).catch(function(){});
+}
+
+/* ── 總表 ── */
+document.getElementById('btnSum').onclick=function(){
+  SV=loadSurvey();
+  var c=curCase(),ch=chart(),rows='',bad=[],miss=[];
+  ITEMS.forEach(function(it){
+    var d=SV[it.k]||{}, pal=d.dir?palaceOf(d.dir):null;
+    var v=pal?verdict(it,pal):null;
+    if(!d.dir){miss.push(it.n);return}
+    var res=d.status||(v?(v.cls==='ok'?'合宜':v.cls==='bad'?'不利':'平'):'—');
+    if(res==='凶'||res==='不利')bad.push(it.n+'('+d.dir+'山)');
+    rows+='<tr><td>'+it.n+'</td><td>'+d.dir+'山／'+pal+'宮</td><td>'+res+'</td><td>'+
+          (v?v.st:'')+(d.note?'<br>備註:'+esc(d.note):'')+'</td></tr>';
+  });
+  var html=
+   '<h3>勘查總表</h3>'+
+   '<div style="font-size:13px;opacity:.8;margin-bottom:10px">'+
+     (c?'案件:'+esc(c.name||'未命名')+(c.addr?'・'+esc(c.addr):''):'未指定案件')+
+     (ch?'<br>本宅:'+ch.sitting+'山'+ch.facing+'向・'+ch.period+'運':'')+
+     '<br>勘查日期:'+new Date().toLocaleDateString('zh-TW')+'</div>'+
+   (rows?'<table><tr><th>項目</th><th>方位</th><th>判定</th><th>依據與備註</th></tr>'+rows+'</table>'
+        :'<div style="font-size:13.5px;opacity:.7">尚未填寫任何項目。</div>')+
+   (bad.length?'<div style="margin-top:11px;font-size:13.5px;color:#E58A79">須優先處理:'+bad.join('、')+'</div>':'')+
+   (miss.length?'<div style="margin-top:7px;font-size:12.5px;opacity:.6">未勘查:'+miss.join('、')+'</div>':'')+
+   '<div id="rptBtn" style="margin-top:12px"></div>';
+  var s=document.getElementById('sum'); s.innerHTML=html; s.style.display='block';
+  s.scrollIntoView({behavior:'smooth',block:'start'});
+  if(window.BPRPT)BPRPT.button('#rptBtn',{
+    title:'現場勘查記錄',
+    meta:[['案件',(c&&c.name)||'—'],['地址',(c&&c.addr)||'—'],
+          ['本宅',ch?(ch.sitting+'山'+ch.facing+'向 '+ch.period+'運'):'—'],
+          ['勘查日期',new Date().toLocaleDateString('zh-TW')]],
+    source:function(){return s}
+  });
+};
+document.getElementById('btnClr').onclick=function(){
+  if(!confirm('確定清除本案所有勘查紀錄與照片?此動作無法復原。'))return;
+  var k=surveyKey();
+  Promise.all(ITEMS.map(function(it){return phDel(k+'|'+it.k).catch(function(){})}))
+   .then(function(){
+     var c=curCase();
+     if(c){var a=cases(),i=a.findIndex(x=>String(x.id)===String(c.id));
+       if(i>=0){delete a[i].survey;delete a[i].surveyAt;localStorage.setItem(CKEY,JSON.stringify(a))}}
+     else{localStorage.removeItem('fsc_survey_tmp')}
+     SV={};OPEN='';document.getElementById('sum').style.display='none';paintAll();
+   });
+};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
+  return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+
+paintAll();
+/* 案件列切換案件時同步重畫。case.js 是後載的,等它就緒再訂閱。 */
+(function sub(n){
+  if(window.BPCASE&&BPCASE.on){ BPCASE.on(function(){ OPEN=''; paintAll(); }); return; }
+  if(n<40)setTimeout(function(){sub(n+1)},100);
+})(0);
+window.addEventListener('storage',function(e){ if(e.key===AKEY||e.key===CKEY)paintAll(); });
+</script>
+</body></html>
