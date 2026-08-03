@@ -108,6 +108,22 @@ function autofill(c,force){
   return n;
 }
 
+/* 診斷:把帶入結果留在本機,供另一頁讀取
+   (有些頁面不會回報「載入完成」,無法直接在該頁檢查)*/
+function diag(){
+  try{
+    var o={page:decodeURIComponent(location.pathname.split('/').pop()),t:new Date().toISOString().slice(11,19),
+           bar:!!document.getElementById('bpcase'),v:{}};
+    ['sit','per','period','by','sex','bd','bt','y1','y2'].forEach(function(id){
+      var e=document.getElementById(id); if(e)o.v[id]=e.value;});
+    ['periods','mts'].forEach(function(id){
+      var b=document.getElementById(id); if(b){var on=b.querySelector('.on');o.v[id]=on?on.textContent:'(未選)';}});
+    var a=[];try{a=JSON.parse(localStorage.getItem('bpcase_diag')||'[]')}catch(e){}
+    a=a.filter(function(x){return x.page!==o.page}); a.push(o);
+    localStorage.setItem('bpcase_diag',JSON.stringify(a.slice(-20)));
+  }catch(e){}
+}
+
 /* ── 樣式 ── */
 function css(){
   if(document.getElementById('bpcase-css'))return;
@@ -214,7 +230,7 @@ function boot(){
     if(document.getElementById('cName'))return;   // 客戶案件簿
     var c=get(); if(!c)return;
     setTimeout(function(){autofill(c)},80);       // 等 select 的 option 建好
-    setTimeout(function(){autofill(c)},500);
+    setTimeout(function(){autofill(c);diag()},500);
   };
   if(document.readyState==='complete')setTimeout(go,120);
   else window.addEventListener('load',function(){setTimeout(go,120)});
