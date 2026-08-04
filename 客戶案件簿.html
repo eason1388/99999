@@ -21,7 +21,14 @@ input,select,textarea{padding:8px 10px;border:1.5px solid var(--gold2);border-ra
 .tag.mid{background:rgba(201,148,74,.18);color:#8a5a1a}
 .tag.good{background:rgba(74,107,79,.12);color:var(--green)}
 .note{font-size:12px;opacity:.65;margin-top:6px}
-.mini{border:1px solid var(--gold2);border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer;background:#fff;margin-left:4px}
+/* 手指要點得到:最小 40px 高。原本 3px padding 在手機上幾乎按不到,也看不見。 */
+.mini{border:1px solid var(--gold2);border-radius:9px;padding:0 13px;min-height:40px;font-size:13.5px;
+  cursor:pointer;background:#fff;margin-left:6px;font-family:inherit;white-space:nowrap}
+body:not([data-dark]) .mini{background:rgba(201,169,106,.14);color:#EDE7DA;border-color:rgba(201,169,106,.5)}
+body:not([data-dark]) .mini.act-edit{background:rgba(138,176,206,.18);color:#BBD6EA;border-color:rgba(138,176,206,.55)}
+body:not([data-dark]) .mini.act-del{background:rgba(229,138,121,.16);color:#F0A797;border-color:rgba(229,138,121,.5)}
+.mini.act-edit{color:#2a5578;border-color:#8AB0CE}
+.mini.act-del{color:#8c3323;border-color:#E58A79}
 @media print{#ctrl,.mini,.noprint{display:none!important}body{background:#fff}.box{box-shadow:none;border:0}}
 </style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=5"></head><body>
 <h1>📒 客戶案件簿・流年回訪</h1>
@@ -75,7 +82,7 @@ input,select,textarea{padding:8px 10px;border:1.5px solid var(--gold2);border-ra
 </div>
 </div>
 <script src="lock.js"></script>
-<script src="case.js?v=6"></script>
+<script src="case.js?v=7"></script>
 <script>
 // ── 引擎(飛星+八宅+流年)──
 const M24='壬子癸丑艮寅甲卯乙辰巽巳丙午丁未坤申庚酉辛戌乾亥';
@@ -126,7 +133,10 @@ document.getElementById('clear').onclick=()=>{editId=null;document.getElementByI
 document.getElementById('save').onclick=()=>{
   const nm=document.getElementById('cName').value.trim();
   if(!nm){alert('請至少填客戶姓名');return}
-  const o={id:editId||Date.now(),name:nm,
+  /* ⚠ 編輯時務必保留 survey(現場勘查)、jinsuo(金鎖玉關)等既有欄位,
+     否則改個電話就會把整份勘查紀錄洗掉。 */
+  const prev=(editId?cases.find(c=>c.id===editId):null)||{};
+  const o=Object.assign({},prev,{id:editId||Date.now(),name:nm,
     phone:document.getElementById('cPhone').value.trim(),
     addr:document.getElementById('cAddr').value.trim(),
     type:document.getElementById('cType').value,
@@ -137,7 +147,7 @@ document.getElementById('save').onclick=()=>{
     btime:document.getElementById('cBtime').value||'',
     sex:+document.getElementById('cSex').value,
     sp:+document.getElementById('cSp').value||0,
-    note:document.getElementById('cNote').value.trim()};
+    note:document.getElementById('cNote').value.trim()});
   if(editId){cases=cases.map(c=>c.id===editId?o:c)}else{cases.push(o)}
   if(save(cases)){editId=null;document.getElementById('editing').textContent='';
     ['cName','cPhone','cAddr','cBy','cNote'].forEach(i=>document.getElementById(i).value='');
@@ -154,8 +164,32 @@ window.editCase=id=>{const c=cases.find(x=>x.id===id);if(!c)return;
   scrollTo({top:0,behavior:'smooth'})};
 // 設為目前案件 → 各模組自動帶入
 window.useCase=id=>{ if(window.BPCASE){BPCASE.setActive(id);render();} };
-window.delCase=id=>{if(!confirm('確定刪除此案件?'))return;
-  cases=cases.filter(x=>x.id!==id);save(cases);render()};
+window.delCase=id=>{
+  const c=cases.find(x=>x.id===id); if(!c)return;
+  const extra=[];
+  if(c.survey&&Object.keys(c.survey).length)extra.push('現場勘查紀錄與照片');
+  if(c.jinsuo&&Object.keys(c.jinsuo).length)extra.push('金鎖玉關砂水判定');
+  if(!confirm('確定刪除「'+c.name+'」?\n'+
+      (extra.length?'連同 '+extra.join('、')+' 一併刪除。\n':'')+
+      '此動作無法復原,建議先用下方「匯出備份」存檔。'))return;
+  /* 照片存在 IndexedDB,不跟著刪會變成孤兒佔空間 */
+  try{
+    const r=indexedDB.open('bpsy_survey',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('ph');
+    r.onsuccess=()=>{ try{
+      const t=r.result.transaction('ph','readwrite'), st=t.objectStore('ph');
+      ['door','stove','bed','god','wc','stair','water','desk','money','out']
+        .forEach(k=>st.delete(String(id)+'|'+k));
+    }catch(e){} };
+  }catch(e){}
+  /* 若刪掉的正是目前案件,要一併解除,否則各模組會抓到不存在的案件 */
+  try{ if(String(localStorage.getItem('fsc_active'))===String(id)){
+    localStorage.removeItem('fsc_active');
+    if(window.BPCASE&&BPCASE.clear)BPCASE.clear();
+  } }catch(e){}
+  cases=cases.filter(x=>x.id!==id);save(cases);render();
+  if(window.BPCASE&&BPCASE.refresh)BPCASE.refresh();
+};
 document.getElementById('exp').onclick=()=>{
   const b=new Blob([JSON.stringify(cases,null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
@@ -226,7 +260,8 @@ function render(){
      +(window.BPCASE&&BPCASE.get()&&String(BPCASE.get().id)===String(c.id)
         ?' style="background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;font-weight:700;border-color:transparent">使用中'
         :'>設為目前案件')+'</button>'
-     +'<button class="mini" onclick="editCase('+c.id+')">編輯</button><button class="mini" onclick="delCase('+c.id+')">刪</button></span></div>'
+     +'<button class="mini act-edit" onclick="editCase('+c.id+')">✎ 編輯</button>'
+     +'<button class="mini act-del" onclick="delCase('+c.id+')">🗑 刪除</button></span></div>'
      +(c.addr||c.phone?'<div style="font-size:12.5px;opacity:.75">'+(c.addr||'')+(c.phone?' ・'+c.phone:'')+'</div>':'')
      +'<div style="margin-top:4px">'+s.alerts.map(a=>'<span class="tag '+(a[0]>=3?'warn':a[0]===2?'mid':'')+'">'+(a[0]>=3?'⚠ ':'')+a[1]+'</span>').join('')
      +s.goods.map(g=>'<span class="tag good">'+g+'</span>').join('')+'</div>'

@@ -229,10 +229,12 @@ function pick(){
     }).join('')
     :'<div style="opacity:.7;font-size:13px;line-height:1.9;padding:6px 2px">'+
      '目前還沒有案件。<br>請先到「客戶案件簿」建立一筆,之後各頁就會自動帶入。</div>')+
+    '<button class="cls" id="bpcase-edit">管理案件(新增／編輯／刪除)</button>'+
     '<button class="cls" id="bpcase-close">關閉</button>';
   card.querySelectorAll('.it').forEach(function(b){
     b.onclick=function(){setActive(b.dataset.id);w.classList.remove('on')};
   });
+  card.querySelector('#bpcase-edit').onclick=function(){w.classList.remove('on');gotoCases()};
   card.querySelector('#bpcase-close').onclick=function(){w.classList.remove('on')};
   w.classList.add('on');
 }
