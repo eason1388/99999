@@ -100,7 +100,7 @@ ol.pri b{color:#F0A797}
 
 <script src="lock.js?v=6"></script>
 <script src="report.js"></script>
-<script src="engine.js?v=1"></script>
+<script src="engine.js?v=2"></script>
 <script src="case.js?v=6"></script>
 <script>
 /* 整合報告:不自行輸入任何資料,全部取自「目前案件」。
@@ -197,7 +197,7 @@ function build(){
 
   /* 三、屋主命卦配位 */
   var gua=BPE.mingGua(c.by, c.sex, c.birth);
-  var gy=BPE.mingGua.year(c.by,c.birth);
+  var gy=BPE.guaYear(c.by,c.birth);
   h+='<h3><span class="no">參</span>屋主命卦與房間配位</h3>';
   if(!gua){
     h+='<div class="box">案件未填屋主出生年與性別,無法排定命卦。補齊後此節會列出屋主本命四吉方與最適房間。</div>';

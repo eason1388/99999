@@ -229,7 +229,7 @@ g.BPE={
   M24:M24,FLY:FLY,PAL_M:PAL_M,NUM2PAL:NUM2PAL,PAL2NUM:PAL2NUM,
   palaceOf:palaceOf,fly:fly,xkChart:xkChart,
   youxing:youxing,JI_X:JI_X,TRIB:TRIB,XSTAR:XSTAR,
-  mingGua:mingGua,guaGroup:guaGroup,zhaiGroup:zhaiGroup,
+  mingGua:mingGua,guaYear:guaYear,guaGroup:guaGroup,zhaiGroup:zhaiGroup,
   STAR_NM:STAR_NM,starLevel:starLevel,LV_TX:LV_TX,
   JS_GONGS:JS_GONGS,JS_M:JS_M,JS_FIX:JS_FIX,
   jsGong:jsGong,jsJudge:jsJudge,jsScore:jsScore,
