@@ -11,12 +11,10 @@ button{color:inherit;font-family:inherit}
 .hero{text-align:center;padding:20px 16px 15px;border-bottom:1px solid rgba(201,169,106,.22)}
 .hero h1{font-family:'Noto Serif TC',serif;font-size:22px;letter-spacing:.14em;color:#E0C285;font-weight:900}
 .hero p{font-size:12.5px;opacity:.62;margin-top:5px}
-
 .note{background:rgba(201,169,106,.08);border-left:3px solid #C9A96A;border-radius:0 11px 11px 0;
   padding:12px 15px;font-size:13px;margin:13px 0;line-height:1.85}
 .note b{color:#E0C285}
 
-/* 總評 */
 .score{background:#1A1613;border:1px solid rgba(201,169,106,.24);border-radius:14px;padding:15px 17px;margin-top:12px}
 .score .row{display:flex;align-items:baseline;gap:10px}
 .score .n{font-family:'Noto Serif TC',serif;font-size:40px;font-weight:900;color:#E0C285;line-height:1}
@@ -26,7 +24,6 @@ button{color:inherit;font-family:inherit}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,#B8923F,#E0C285);width:0;transition:width .35s}
 .score .d{font-size:13px;opacity:.8;margin-top:9px;line-height:1.8}
 
-/* 宮 */
 .gong{background:#1A1613;border:1px solid rgba(201,169,106,.2);border-radius:14px;margin-top:11px;padding:13px 14px}
 .gh{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .gh .bi{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
@@ -38,7 +35,6 @@ button{color:inherit;font-family:inherit}
 .w-shui{background:rgba(138,176,206,.2);color:#A8C8E0}
 
 .m{margin-top:10px;border-top:1px solid rgba(201,169,106,.13);padding-top:10px}
-.m:first-of-type{border-top:0}
 .mrow{display:flex;align-items:center;gap:8px}
 .mrow .nm{font-family:'Noto Serif TC',serif;font-size:17px;color:#F0D9A0;width:34px;flex:none;text-align:center}
 .seg{display:flex;gap:6px;flex:1}
@@ -52,9 +48,26 @@ button{color:inherit;font-family:inherit}
 .t-bad{background:rgba(229,138,121,.17);color:#E58A79}
 .t-non{background:rgba(237,231,218,.07);color:#9C948A}
 .txt{font-size:13px;line-height:1.8;margin-top:7px;padding-left:42px;opacity:.9}
-.txt.bad{color:#F0B4A6}
-.txt.ok{color:#B6D9BF}
+.txt.bad{color:#F0B4A6}.txt.ok{color:#B6D9BF}
 .txt .fix{display:block;margin-top:4px;font-size:12.5px;color:#E0C285;opacity:.95}
+
+/* 兩派互參 */
+.cc{margin-top:16px;background:#1A1613;border:1px solid rgba(201,169,106,.24);border-radius:14px;padding:15px 17px}
+.cc h3{font-family:'Noto Serif TC',serif;font-size:16px;color:#E0C285;letter-spacing:.1em;margin-bottom:4px}
+.cc .sub{font-size:12.5px;opacity:.62;margin-bottom:10px;line-height:1.75}
+.cr{border-top:1px solid rgba(201,169,106,.13);padding:10px 0}
+.cr:first-of-type{border-top:0}
+.crh{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.crh b{font-family:'Noto Serif TC',serif;font-size:15.5px;color:#F0D9A0;min-width:74px}
+.badge{font-size:11.5px;border-radius:99px;padding:3px 10px;font-weight:700;white-space:nowrap}
+.b3{background:rgba(229,138,121,.24);color:#F0A797}
+.b2{background:rgba(224,169,138,.18);color:#E0A88A}
+.b1{background:rgba(138,176,206,.2);color:#A8C8E0}
+.b0{background:rgba(237,231,218,.07);color:#9C948A}
+.bm1{background:rgba(201,169,106,.18);color:#E0C285}
+.bm2{background:rgba(143,196,154,.2);color:#8FC49A}
+.crh .p{font-size:12px;opacity:.72}
+.crd{font-size:12.8px;line-height:1.8;margin-top:5px;opacity:.88}
 
 .tools{display:flex;gap:9px;margin-top:18px}
 .tools button{flex:1;min-height:52px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
@@ -81,6 +94,7 @@ button{color:inherit;font-family:inherit}
   </div>
 
   <div class="score" id="score"></div>
+  <div id="cc"></div>
   <div id="list"></div>
 
   <div class="tools">
@@ -97,140 +111,33 @@ button{color:inherit;font-family:inherit}
 
 <script src="lock.js?v=6"></script>
 <script src="report.js"></script>
+<script src="engine.js?v=1"></script>
 <script src="case.js?v=6"></script>
 <script>
-/* ═══════ 金鎖玉關(過路陰陽)砂水斷 ═══════
-   總訣:洛書一二三四宮宜砂,六七八九宮宜水。
-   本檔以《二十四山砂水訣》經文所載吉凶為據,斷語為抱朴隨緣堂依卦象、
-   六親、房份與臟腑對應之自家表述,非引錄他人註本文字。            */
+/* 引擎與斷語表統一放在 engine.js,本頁只管介面與存取 */
+var GONGS=BPE.JS_GONGS, M=BPE.JS_M, FIX=BPE.JS_FIX;
 
-const GONGS=[
- {g:'坎',num:1,want:'砂',dir:'正北',  who:'中男・二房', body:'腎、膀胱、泌尿、耳、血液',
-  ms:['壬','子','癸']},
- {g:'艮',num:8,want:'水',dir:'東北',  who:'少男・三房', body:'脾胃、手、背、鼻、關節',
-  ms:['丑','艮','寅']},
- {g:'震',num:3,want:'砂',dir:'正東',  who:'長男・長房', body:'肝膽、足、筋、神經',
-  ms:['甲','卯','乙']},
- {g:'巽',num:4,want:'砂',dir:'東南',  who:'長女・長媳', body:'氣管、股、風疾、毛髮',
-  ms:['辰','巽','巳']},
- {g:'離',num:9,want:'水',dir:'正南',  who:'中女',       body:'心、眼目、血液循環、小腸',
-  ms:['丙','午','丁']},
- {g:'坤',num:2,want:'砂',dir:'西南',  who:'老母・主婦', body:'腹、脾胃、皮膚',
-  ms:['未','坤','申']},
- {g:'兌',num:7,want:'水',dir:'正西',  who:'少女・幼口', body:'肺、咽喉、口齒',
-  ms:['庚','酉','辛']},
- {g:'乾',num:6,want:'水',dir:'西北',  who:'老父・家長', body:'頭、肺、骨、大腸',
-  ms:['戌','乾','亥']}
-];
-
-/* 每山:ok=合訣之象  bad=違訣之象  fix=化解 */
-const M={
-/* 坎 1 宜砂 */
- 壬:{ok:'主武貴剛毅,中男體健有擔當,名聲外揚。若南方丙位得水相照,子孫更利文才。',
-     bad:'中男損傷、二房人丁不旺,主腎與泌尿之疾。水形如箭直射而來者應驗最速,如葫蘆狀者主腰腿之傷。'},
- 子:{ok:'家中男丁康健、子孫聰穎,主守成有道、根基穩固。',
-     bad:'中男漂泊不定,易犯桃花酒色,耳疾腎虧。水聚而不流者尤主淫佚暗昧。'},
- 癸:{ok:'出秀氣清貴之人,女眷賢淑,主聰明多才。',
-     bad:'主婦人隱疾與暗昧之事,男子腎虧體虛,家中易生曖昧口舌。'},
-/* 艮 8 宜水 */
- 丑:{ok:'三房進財,主田產倉廩豐盈,積蓄漸厚。',
-     bad:'少男傷病、手足關節之疾,破財損丁,家中小口難養。'},
- 艮:{ok:'三房大發,人丁財帛兩旺,主置產興家。',
-     bad:'少男愚鈍或有傷殘,脾胃不和,家宅不寧、進退兩難。'},
- 寅:{ok:'出文秀之人,進田產、得貴助。',
-     bad:'小兒多驚,跌撲傷手,主虛驚官非。'},
-/* 震 3 宜砂 */
- 甲:{ok:'長男顯貴,出武職有威權,長房興旺。',
-     bad:'長男敗財,主肝膽之疾與足傷,長房不利、家長受累。'},
- 卯:{ok:'長房人丁興旺,出剛強幹練、能立門戶之人。',
-     bad:'長男好動不安、離鄉背井,主官非爭訟、筋骨酸痛。'},
- 乙:{ok:'出文人秀士,長女亦賢,主科名文書之喜。',
-     bad:'肝木受損、筋骨酸痛,長房口舌是非不斷。'},
-/* 巽 4 宜砂 */
- 辰:{ok:'田產進益,家道殷實,主積穀藏金。',
-     bad:'長女長媳不利,主風濕氣喘,或有難言之惡疾。'},
- 巽:{ok:'出文貴、利科名考試,長女賢淑貌美,家出才女。',
-     bad:'長女長媳受損,主難產或風化之事,氣管毛髮之疾。'},
- 巳:{ok:'利文書功名,家出秀才,主聲名漸起。',
-     bad:'蛇蟲驚擾,婦人血症,長房媳婦不安於室。'},
-/* 離 9 宜水 */
- 丙:{ok:'財源廣進、名聲顯達,主科甲功名,文章傳世。',
-     bad:'中女不利,主眼目之疾、心火上炎,防火厄與血光。'},
- 午:{ok:'大發財祿,人口興旺,主聲名遠播、貴人扶持。',
-     bad:'血光、心疾、目病,中女多災,尤防火燭之患。'},
- 丁:{ok:'出文人,女眷秀慧,家道昌盛、書香不斷。',
-     bad:'中女血症、心神不寧,主口舌是非與虛火之症。'},
-/* 坤 2 宜砂 */
- 未:{ok:'田產豐厚,主婦持家有道,家宅厚實安穩。',
-     bad:'老母有疾、脾胃不和,主婦人病與皮膚之患。'},
- 坤:{ok:'人丁旺、婦人壽考,家宅安穩,主厚德綿長。',
-     bad:'主婦受損、腹疾纏身,家中陰盛陽衰,是非叢生。'},
- 申:{ok:'出武職或有力氣之人,主行動力強、能任事。',
-     bad:'婦人多病,防傷胎小產,家中不寧、奔波勞碌。'},
-/* 兌 7 宜水 */
- 庚:{ok:'進財迅速,利口才、談判與買賣交易。',
-     bad:'少女不利,主肺與咽喉之疾,防刀傷血光。'},
- 酉:{ok:'財帛豐盈,家出貌美女子,主人緣與偏財。',
-     bad:'少女多災,主口舌官非,齒疾、肺疾纏身。'},
- 辛:{ok:'利文書契約與金玉之財,主精巧之藝。',
-     bad:'女眷病痛,口舌爭訟,主無端破財。'},
-/* 乾 6 宜水 */
- 戌:{ok:'進財有道,老人康健,家中長輩得安。',
-     bad:'老父不利,主頭疾與筋骨之痛,家長多病。'},
- 乾:{ok:'主大貴,家長顯達,全家蒙其蔭庇。',
-     bad:'老父受剋,主頭風骨痛,家長早衰,重則主孤。'},
- 亥:{ok:'財源綿長,子孫得蔭,主根基深厚。',
-     bad:'肺與大腸之疾,老人氣喘,家運滯塞不通。'}
-};
-const FIX={
- 砂:'補砂:此方宜設實牆、高櫃、山石盆景或高大植栽填實,色用黃褐厚重,忌開大窗、忌留空。',
- 水:'見水:此方宜開窗採光、留出通道,或設水景、明鏡、淺色透亮之物,忌高櫃遮擋、忌堆置重物。'
-};
-
-/* ═══════ 儲存 ═══════ */
 var CKEY='fsc_cases', AKEY='fsc_active';
 function cases(){try{return JSON.parse(localStorage.getItem(CKEY)||'[]')}catch(e){return[]}}
-function curCase(){var id=localStorage.getItem(AKEY)||'';return id?cases().find(c=>String(c.id)===String(id)):null}
+function curCase(){var id=localStorage.getItem(AKEY)||'';return id?cases().find(function(c){return String(c.id)===String(id)}):null}
 function load(){var c=curCase();
   if(c&&c.jinsuo)return c.jinsuo;
   if(!c){try{return JSON.parse(localStorage.getItem('fsc_jinsuo_tmp')||'{}')}catch(e){return{}}}
   return{};}
 function save(d){var c=curCase();
   if(!c){try{localStorage.setItem('fsc_jinsuo_tmp',JSON.stringify(d))}catch(e){}return}
-  var a=cases(),i=a.findIndex(x=>String(x.id)===String(c.id)); if(i<0)return;
+  var a=cases(),i=-1;
+  for(var k=0;k<a.length;k++)if(String(a[k].id)===String(c.id))i=k;
+  if(i<0)return;
   a[i].jinsuo=d; a[i].jinsuoAt=new Date().toISOString().slice(0,10);
   try{localStorage.setItem(CKEY,JSON.stringify(a))}catch(e){}}
 
 var D=load();
 
-/* ═══════ 判斷 ═══════ */
-function judge(m,gong){
-  var v=D[m]; if(!v||v==='平')return{k:'non',t:'—'};
-  return v===gong.want?{k:'ok',t:'合訣'}:{k:'bad',t:'違訣'};
-}
-function tally(){
-  var ok=0,bad=0,fill=0,worst=[];
-  GONGS.forEach(function(g){g.ms.forEach(function(m){
-    var v=D[m]; if(!v)return; fill++;
-    if(v==='平')return;
-    if(v===g.want)ok++; else{bad++;worst.push({m:m,g:g})}
-  })});
-  return{ok:ok,bad:bad,fill:fill,worst:worst};
-}
-/* 評分:以已判定的砂水位為分母,合訣比例為主,違訣加重扣分 */
-function score(){
-  var t=tally(), n=t.ok+t.bad;
-  if(!n)return{s:null,t:t};
-  var s=Math.round(100*t.ok/n - t.bad*1.5);
-  return{s:Math.max(0,Math.min(100,s)),t:t};
-}
-
-/* ═══════ 畫面 ═══════ */
 function paint(){
   D=load();
-  var r=score(),t=r.t;
+  var c=curCase(), r=BPE.jsScore(D), t=r;
   var sc=document.getElementById('score');
-  var c=curCase();
   if(r.s===null){
     sc.innerHTML='<div class="row"><span class="n">—</span><span class="g" style="color:#9C948A">尚未判定</span></div>'+
       '<div class="d">'+(c?'案件:'+esc(c.name||'未命名')+'。':'目前未選案件,紀錄暫存本機。')+
@@ -238,13 +145,13 @@ function paint(){
   }else{
     var g = r.s>=80?['大吉之局','#8FC49A'] : r.s>=60?['吉多於凶','#C9E0B0']
           : r.s>=40?['吉凶參半','#E0C285'] : r.s>=20?['凶多於吉','#E0A88A'] : ['凶險之局','#E58A79'];
-    sc.innerHTML=
-      '<div class="row"><span class="n">'+r.s+'<small> 分</small></span>'+
+    sc.innerHTML='<div class="row"><span class="n">'+r.s+'<small> 分</small></span>'+
       '<span class="g" style="color:'+g[1]+'">'+g[0]+'</span></div>'+
       '<div class="bar"><i style="width:'+r.s+'%"></i></div>'+
       '<div class="d">已判定 '+t.fill+' / 24 山｜合訣 '+t.ok+' 處、違訣 '+t.bad+' 處'+
       (c?'<br>案件:'+esc(c.name||'未命名'):'')+'</div>';
   }
+  paintCross(c);
 
   var L=document.getElementById('list'); L.innerHTML='';
   GONGS.forEach(function(gg){
@@ -253,14 +160,13 @@ function paint(){
       '<span><b>'+gg.g+'宮・'+gg.dir+'</b><small>洛書'+gg.num+'｜'+gg.who+'｜'+gg.body+'</small></span>'+
       '<span class="want '+(gg.want==='砂'?'w-sha':'w-shui')+'">宜'+gg.want+'</span></div>';
     gg.ms.forEach(function(m){
-      var j=judge(m,gg), v=D[m]||'';
+      var j=BPE.jsJudge(m,D[m]), v=D[m]||'';
       h+='<div class="m"><div class="mrow"><span class="nm">'+m+'</span>'+
          '<span class="seg">'+['砂','水','平'].map(function(x){
             return '<button data-m="'+m+'" data-v="'+x+'"'+(v===x?' class="on"':'')+'>'+x+'</button>'}).join('')+
          '</span><span class="tagv t-'+j.k+'">'+j.t+'</span></div>';
       if(j.k!=='non'){
-        var txt=j.k==='ok'?M[m].ok:M[m].bad;
-        h+='<div class="txt '+j.k+'">'+txt+
+        h+='<div class="txt '+j.k+'">'+(j.k==='ok'?M[m].ok:M[m].bad)+
            (j.k==='bad'?'<span class="fix">'+FIX[gg.want]+'</span>':'')+'</div>';
       }
       h+='</div>';
@@ -268,39 +174,79 @@ function paint(){
     box.innerHTML=h; L.appendChild(box);
   });
 }
+
+/* ── 兩派互參 ── */
+function badgeCls(l){return l>=3?'b3':l===2?'b2':l===1?'b1':l===0?'b0':l===-1?'bm1':'bm2'}
+function paintCross(c){
+  var host=document.getElementById('cc');
+  var cc=BPE.crossCheck(c||{});
+  if(!cc.chart){
+    host.innerHTML='<div class="cc"><h3>與飛星八宅互參</h3>'+
+      '<div class="sub">此案尚未填入坐山與元運,補齊後這裡會自動把金鎖玉關與玄空飛星的結論並排比對,'+
+      '兩派同斷為凶的方位就是最該先動的地方。</div></div>';
+    return;
+  }
+  var use=cc.rows.filter(function(r){return r.level!==0});
+  if(!use.length){
+    host.innerHTML='<div class="cc"><h3>與飛星八宅互參</h3>'+
+      '<div class="sub">本宅 '+cc.chart.sitting+'山'+cc.chart.facing+'向・'+cc.chart.period+'運。'+
+      '下方點完砂水後,這裡會逐宮把兩派結論並排。</div></div>';
+    return;
+  }
+  use.sort(function(a,b){return b.level-a.level});
+  var h='<div class="cc"><h3>與飛星八宅互參</h3>'+
+    '<div class="sub">本宅 '+cc.chart.sitting+'山'+cc.chart.facing+'向・'+cc.chart.period+'運｜'+cc.chart.pattern+
+    '。形巒(金鎖玉關)與理氣(飛星八宅)同斷為凶者,列為最優先。</div>';
+  use.forEach(function(r){
+    h+='<div class="cr"><div class="crh"><b>'+r.pal+'宮 '+r.dir+'</b>'+
+       '<span class="badge '+badgeCls(r.level)+'">'+r.tag+'</span>'+
+       '<span class="p">金鎖玉關 '+(r.js==='bad'?'違訣':r.js==='ok'?'合訣':'未判')+
+       '｜飛星八宅 '+(r.xk.k==='bad'?'凶':r.xk.k==='ok'?'吉':'平')+'</span></div>'+
+       '<div class="crd">'+r.action+'<br><span style="opacity:.62">'+r.xk.why+'｜應'+r.who+'('+r.body+')</span></div></div>';
+  });
+  host.innerHTML=h+'</div>';
+}
+
 document.addEventListener('click',function(e){
   var b=e.target.closest('.seg button'); if(!b)return;
   D=load();
-  D[b.dataset.m] = (D[b.dataset.m]===b.dataset.v) ? '' : b.dataset.v;
+  D[b.dataset.m]=(D[b.dataset.m]===b.dataset.v)?'':b.dataset.v;
   if(!D[b.dataset.m])delete D[b.dataset.m];
   save(D); paint();
 });
 
 document.getElementById('btnSum').onclick=function(){
-  D=load(); var r=score(),t=r.t,c=curCase();
+  D=load(); var r=BPE.jsScore(D), c=curCase();
   if(r.s===null){alert('請先點選各方位的砂水情形');return}
-  /* 違訣依宮位輕重排序:傷及家長與人丁者優先 */
   var W={乾:1,坤:2,坎:3,離:4,艮:5,震:6,巽:7,兌:8};
-  var bad=t.worst.slice().sort(function(a,b){return W[a.g.g]-W[b.g.g]});
+  var bad=r.worst.slice().sort(function(a,b){return W[a.g.g]-W[b.g.g]});
   var rows='';
   GONGS.forEach(function(g){g.ms.forEach(function(m){
     var v=D[m]; if(!v)return;
-    var j=judge(m,g);
+    var j=BPE.jsJudge(m,v);
     rows+='<tr><td>'+m+'</td><td>'+g.g+'／'+g.dir+'</td><td>'+v+'</td><td>宜'+g.want+'</td>'+
           '<td>'+j.t+'</td><td>'+(j.k==='non'?'—':(j.k==='ok'?M[m].ok:M[m].bad))+'</td></tr>';
   })});
+  var cc=BPE.crossCheck(c||{}), ccHtml='';
+  if(cc.chart){
+    var pr=cc.rows.filter(function(x){return x.level>=2}).sort(function(a,b){return b.level-a.level});
+    ccHtml='<div style="margin-top:14px;font-size:13.5px"><b style="color:#E0C285">兩派互參</b>('+
+      cc.chart.sitting+'山'+cc.chart.facing+'向 '+cc.chart.period+'運)<br>'+
+      (pr.length?pr.map(function(x){return '・'+x.pal+'宮'+x.dir+'——'+x.tag+':'+x.action}).join('<br>')
+                :'兩派並無同時報凶之宮位。')+'</div>';
+  }
   var s=document.getElementById('sum');
   s.innerHTML='<h3>金鎖玉關砂水總斷</h3>'+
     '<div style="font-size:13px;opacity:.85;margin-bottom:10px">'+
       (c?'案件:'+esc(c.name||'未命名')+(c.addr?'・'+esc(c.addr):''):'未指定案件')+
-      '<br>總評:'+r.s+' 分｜合訣 '+t.ok+' 處、違訣 '+t.bad+' 處(已判定 '+t.fill+'／24 山)'+
+      '<br>總評:'+r.s+' 分｜合訣 '+r.ok+' 處、違訣 '+r.bad+' 處(已判定 '+r.fill+'／24 山)'+
       '<br>勘斷日期:'+new Date().toLocaleDateString('zh-TW')+'</div>'+
     '<table><tr><th>山</th><th>宮位</th><th>現況</th><th>本宜</th><th>判定</th><th>斷語</th></tr>'+rows+'</table>'+
     (bad.length?'<div style="margin-top:12px;font-size:13.5px"><b style="color:#E58A79">化解優先順序</b><br>'+
-       bad.map(function(x,i){return (i+1)+'. '+x.m+'山('+x.g.g+'宮'+x.g.dir+')——'+
-         '本宜'+x.g.want+'而見'+D[x.m]+',應'+x.g.who+'。'+FIX[x.g.want]}).join('<br>')+'</div>'
+       bad.map(function(x,i){return (i+1)+'. '+x.m+'山('+x.g.g+'宮'+x.g.dir+')——本宜'+x.g.want+
+         '而見'+D[x.m]+',應'+x.g.who+'。'+FIX[x.g.want]}).join('<br>')+'</div>'
      :'<div style="margin-top:12px;font-size:13.5px;color:#8FC49A">全盤無違訣之處,砂水配置合乎經旨。</div>')+
-    '<div id="rptBtn" style="margin-top:12px"></div>';
+    ccHtml+'<div id="rptBtn" style="margin-top:12px"></div>';
   s.style.display='block'; s.scrollIntoView({behavior:'smooth',block:'start'});
   if(window.BPRPT)BPRPT.button('#rptBtn',{
     title:'金鎖玉關砂水勘斷',
@@ -311,7 +257,8 @@ document.getElementById('btnSum').onclick=function(){
 document.getElementById('btnClr').onclick=function(){
   if(!confirm('確定清除本案全部砂水判定?'))return;
   var c=curCase();
-  if(c){var a=cases(),i=a.findIndex(x=>String(x.id)===String(c.id));
+  if(c){var a=cases(),i=-1;
+    for(var k=0;k<a.length;k++)if(String(a[k].id)===String(c.id))i=k;
     if(i>=0){delete a[i].jinsuo;delete a[i].jinsuoAt;localStorage.setItem(CKEY,JSON.stringify(a))}}
   else localStorage.removeItem('fsc_jinsuo_tmp');
   D={};document.getElementById('sum').style.display='none';paint();
