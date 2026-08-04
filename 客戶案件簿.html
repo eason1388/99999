@@ -76,10 +76,13 @@ body:not([data-dark]) .mini.act-del{background:rgba(229,138,121,.16);color:#F0A7
 
 <div class="box noprint">
 <div class="row">
- <button class="chip" id="exp">⬇ 匯出備份(JSON)</button>
+ <button class="chip" id="exp">⬇ 匯出完整備份(含照片)</button>
  <label class="chip" style="display:inline-block">⬆ 匯入備份<input type="file" id="imp" accept=".json" hidden></label>
  <button class="chip" id="prt">🖨 列印回訪名單</button>
 </div>
+<div class="note" id="quota"></div>
+<div class="note">備份檔含全部案件、現場勘查紀錄與照片,換手機時匯入即可完整還原。<br>
+資料只存在這台裝置,清除瀏覽器資料會一併消失——<b>請養成每次勘察後匯出一次的習慣</b>,並把檔案存到雲端硬碟或電腦。</div>
 </div>
 <script src="lock.js"></script>
 <script src="case.js?v=7"></script>
@@ -190,18 +193,97 @@ window.delCase=id=>{
   cases=cases.filter(x=>x.id!==id);save(cases);render();
   if(window.BPCASE&&BPCASE.refresh)BPCASE.refresh();
 };
-document.getElementById('exp').onclick=()=>{
-  const b=new Blob([JSON.stringify(cases,null,1)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='案件簿備份_'+new Date().toISOString().slice(0,10)+'.json';a.click()};
+/* ══════ 備份 ══════
+   ⚠ 舊版只匯出案件 JSON,現場照片存在 IndexedDB 完全沒被帶走,
+     匯出成功的假象比沒有備份更危險。此版一律連照片一起封存。   */
+const PH_KEYS=['door','stove','bed','god','wc','stair','water','desk','money','out'];
+function phDB(){return new Promise((res,rej)=>{
+  const r=indexedDB.open('bpsy_survey',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('ph');
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);});}
+function phRead(id,k){return phDB().then(d=>new Promise(res=>{
+  try{const t=d.transaction('ph','readonly'),q=t.objectStore('ph').get(id+'|'+k);
+      q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null);}catch(e){res(null)}}));}
+function phWrite(id,k,v){return phDB().then(d=>new Promise(res=>{
+  try{const t=d.transaction('ph','readwrite');t.objectStore('ph').put(v,id+'|'+k);
+      t.oncomplete=()=>res(true); t.onerror=()=>res(false);}catch(e){res(false)}}));}
+
+document.getElementById('exp').onclick=async()=>{
+  const btn=document.getElementById('exp'), old=btn.textContent;
+  btn.textContent='封存中…'; btn.disabled=true;
+  try{
+    const photos={};
+    let n=0;
+    for(const c of cases){
+      if(!c.survey)continue;
+      for(const k of PH_KEYS){
+        if(!(c.survey[k]&&c.survey[k].photo))continue;
+        const url=await phRead(String(c.id),k);
+        if(url){photos[c.id+'|'+k]=url;n++;}
+      }
+    }
+    const bundle={format:'bpsy-backup',version:2,
+      exportedAt:new Date().toISOString(),
+      cases:cases, photos:photos};
+    const json=JSON.stringify(bundle);
+    const mb=(json.length/1048576).toFixed(1);
+    const b=new Blob([json],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+    a.download='抱朴案件簿備份_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    alert('已封存 '+cases.length+' 筆案件、'+n+' 張照片(約 '+mb+' MB)。\n'+
+          '此檔含全部資料,換手機時匯入即可完整還原。');
+  }catch(e){ alert('備份失敗:'+e.message); }
+  btn.textContent=old; btn.disabled=false;
+};
+
 document.getElementById('imp').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
-    if(!Array.isArray(d))throw 0;
-    if(confirm('匯入 '+d.length+' 筆?(將與現有合併)')){
-      const ids=new Set(cases.map(c=>c.id));
-      cases=cases.concat(d.filter(c=>!ids.has(c.id)));save(cases);render()}
-  }catch(err){alert('檔案格式錯誤')}};r.readAsText(f)};
+  const f=e.target.files[0]; if(!f)return;
+  e.target.value='';
+  const r=new FileReader();
+  r.onload=async()=>{
+    let d;
+    try{ d=JSON.parse(r.result); }catch(err){ alert('檔案不是有效的備份檔'); return; }
+    /* 相容舊版(純陣列)與新版(含照片的封存檔) */
+    const isNew = d && d.format==='bpsy-backup' && Array.isArray(d.cases);
+    const list  = isNew ? d.cases : (Array.isArray(d)?d:null);
+    if(!list){ alert('檔案格式無法辨識,請確認選到的是本工具匯出的備份檔。'); return; }
+    const pc = isNew ? Object.keys(d.photos||{}).length : 0;
+    if(!confirm('準備匯入 '+list.length+' 筆案件'+(pc?'、'+pc+' 張照片':'(此檔不含照片)')+'。\n'+
+                '同 ID 的既有案件會保留不覆蓋。要繼續嗎?'))return;
+    const ids=new Set(cases.map(c=>c.id));
+    const add=list.filter(c=>!ids.has(c.id));
+    cases=cases.concat(add); save(cases);
+    let ok=0,fail=0;
+    if(isNew&&d.photos){
+      for(const key of Object.keys(d.photos)){
+        const [id,k]=key.split('|');
+        if(!add.some(c=>String(c.id)===String(id)))continue;   // 只還原這次真的匯入的案件
+        (await phWrite(id,k,d.photos[key])) ? ok++ : fail++;
+      }
+    }
+    render();
+    if(window.BPCASE&&BPCASE.refresh)BPCASE.refresh();
+    alert('匯入完成:新增 '+add.length+' 筆案件'+
+          (list.length-add.length?'(略過 '+(list.length-add.length)+' 筆重複)':'')+
+          (ok?'、還原 '+ok+' 張照片':'')+
+          (fail?'\n有 '+fail+' 張照片還原失敗,可能是儲存空間不足。':''));
+  };
+  r.readAsText(f);
+};
+
+/* 儲存空間用量:滿了會靜默寫入失敗,必須事先讓使用者看得到 */
+async function quota(){
+  const el=document.getElementById('quota'); if(!el)return;
+  let used=0,total=0;
+  try{ const es=await navigator.storage.estimate(); used=es.usage||0; total=es.quota||0; }catch(e){}
+  if(!total){ el.textContent=''; return; }
+  const pct=Math.min(100,Math.round(used/total*100));
+  const mb=x=>(x/1048576).toFixed(1);
+  el.innerHTML='本機已用 <b>'+mb(used)+' MB</b> / '+mb(total)+' MB('+pct+'%)'+
+    (pct>=80?' <b style="color:var(--red)">— 空間快滿了,請先匯出備份並刪除舊案件,否則新照片會存不進去。</b>':'');
+}
+quota();
 document.getElementById('prt').onclick=()=>window.print();
 // ── 掃描 ──
 function scan(c,yr){
