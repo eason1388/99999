@@ -45,17 +45,34 @@ var XSTAR=['伏位','生氣','絕命','五鬼','禍害','六煞','天醫','延�
 var JI_X=new Set(['生氣','延年','天醫','伏位']);
 function youxing(zhai,gong){return XSTAR[TRIB[zhai]^TRIB[gong]]}
 
-/* 命卦:三元年命。1924 起甲子,男逆女順,五寄坤(男)／艮(女) */
-function mingGua(year,sex){          // sex:1男 0女
-  if(!year)return null;
-  var s=0,y=String(year);
-  for(var i=0;i<y.length;i++)s+=+y[i];
+/* 命卦:三元年命。男逆女順,五寄坤(男)／艮(女)。
+   ⚠ 年命以「立春」換年,不是元旦。立春逐年落在 2/3–2/5,
+   本函式以 2/4 為界近似;birth 落在 2/3–2/5 者回傳 nearTerm=true,
+   提醒需查當年立春確切時刻,不可逕自採用。                        */
+function guaYear(year,birth){
+  var y=parseInt(year,10)||0;
+  if(!birth)return{y:y,nearTerm:false,adjusted:false};
+  var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(birth));
+  if(!m)return{y:y,nearTerm:false,adjusted:false};
+  var Y=+m[1],M=+m[2],D=+m[3];
+  if(!y)y=Y;
+  var before = (M<2)||(M===2&&D<4);
+  return{y: before? y-1 : y,
+         nearTerm: (M===2&&D>=3&&D<=5),
+         adjusted: before};
+}
+function mingGua(year,sex,birth){    // sex:1男 0女;birth 可省略
+  var g=guaYear(year,birth);
+  if(!g.y)return null;
+  var s=0,ys=String(g.y);
+  for(var i=0;i<ys.length;i++)s+=+ys[i];
   while(s>9)s=String(s).split('').reduce(function(a,b){return a+ +b},0);
   var n = sex ? (11-s) : (4+s);
   n=((n-1)%9+9)%9+1;
   if(n===5)n=sex?2:8;
   return NUM2PAL[n];
 }
+mingGua.year=guaYear;
 var EAST4=new Set(['坎','離','震','巽']);
 function guaGroup(gua){return EAST4.has(gua)?'東四命':'西四命'}
 function zhaiGroup(pal){return EAST4.has(pal)?'東四宅':'西四宅'}

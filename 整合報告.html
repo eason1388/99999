@@ -196,13 +196,15 @@ function build(){
   }
 
   /* 三、屋主命卦配位 */
-  var gua=BPE.mingGua(c.by, c.sex);
+  var gua=BPE.mingGua(c.by, c.sex, c.birth);
+  var gy=BPE.mingGua.year(c.by,c.birth);
   h+='<h3><span class="no">參</span>屋主命卦與房間配位</h3>';
   if(!gua){
     h+='<div class="box">案件未填屋主出生年與性別,無法排定命卦。補齊後此節會列出屋主本命四吉方與最適房間。</div>';
   }else{
     var grp=BPE.guaGroup(gua);
-    h+='<p>屋主生於民國／西元 <b>'+esc(String(c.by))+'</b> 年,'+(c.sex?'男':'女')+
+    h+='<p>屋主生於 <b>'+esc(String(gy.y))+'</b> 年'+
+       (gy.adjusted?'(生日在立春之前,年命已回推一年)':'')+',' +(c.sex?'男':'女')+
        '命,本命卦為 <b style="color:#F0D9A0">'+gua+'命('+grp+')</b>。'+
        (ch?'本宅為 '+ch.sitPal+'宅('+BPE.zhaiGroup(ch.sitPal)+'),與屋主命卦'+
             (BPE.zhaiGroup(ch.sitPal)===grp?'<b style="color:#8FC49A">相配</b>。':
@@ -216,6 +218,8 @@ function build(){
          '<td>'+USE_FOR(yx)+'</td></tr>';
     });
     h+='</table><p class="muted">睡床床頭、書桌座向、大門開向宜取上表四吉方;廁所、儲藏、樓梯宜置於四凶方以壓之。</p>';
+    if(gy.nearTerm)h+='<div class="box warn">屋主生日落在 <b>2月3日至5日</b>,正值立春交節前後。'+
+      '年命以立春換年,本報告以2月4日為界推算,請另查該年立春確切時刻再行確認,以免差之一年。</div>';
   }
 
   /* 四、金鎖玉關 */
