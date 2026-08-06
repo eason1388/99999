@@ -176,29 +176,45 @@ function scanAll(){
       var doorHit=doorPal&&cells.some(function(a){
         return a.pal===doorPal&&(a.ann===5||a.ann===2||a.ownLevel>0)});
       if(doorHit)score+=4;
-      return{c:c,ch:ch,bad:bad,good:good,cells:cells,doorPal:doorPal,doorHit:doorHit,score:score};
+
+      /* 分級不用總分,用「凶星有沒有犯到要方」——這才是師傅實際判斷急不急的依據。
+         每年總有幾個宮位二五交加,若只看總分,家家戶戶都會變成急需回訪。 */
+      var keyHit=cells.filter(function(a){
+        return key.indexOf(a.pal)>=0 &&
+          (a.ann===5 || a.ownTags.indexOf('二五交加')>=0 || a.ownTags.indexOf('流年凶星疊本宅凶星')>=0);
+      });
+      var otherHit=cells.filter(function(a){
+        return key.indexOf(a.pal)<0 && a.ownLevel>0;
+      });
+      var lv = keyHit.length ? 3 : otherHit.length ? 2 : (score>=3 ? 1 : 0);
+      return{c:c,ch:ch,bad:bad,good:good,cells:cells,doorPal:doorPal,doorHit:doorHit,
+             score:score,lv:lv,keyHit:keyHit,otherHit:otherHit,keyPals:key};
     }
-    return{c:c,ch:null,bad:[],good:[],cells:cells,doorPal:null,doorHit:false,score:-1};
-  }).sort(function(a,b){return b.score-a.score});
+    return{c:c,ch:null,bad:[],good:[],cells:cells,doorPal:null,doorHit:false,
+           score:-1,lv:-1,keyHit:[],otherHit:[],keyPals:[]};
+  }).sort(function(a,b){return (b.lv-a.lv)||(b.score-a.score)});
 
   var f0=BPE.yearFacts(y);
   list.innerHTML=rows.map(function(r,i){
-    var lv = r.score<0 ? 0 : r.score>=9?3 : r.score>=5?2 : r.score>=2?1 : 0;
-    var label = r.score<0?'待補資料' : lv>=3?'急需回訪' : lv===2?'建議回訪' : lv===1?'可回訪' : '例行問候';
+    var lv = r.lv<0 ? 0 : r.lv;
+    var label = r.lv<0?'待補資料' : lv===3?'急需回訪' : lv===2?'建議回訪' : lv===1?'可回訪' : '例行問候';
     var say;
+    function what(a){return PALDIR[a.pal]+'('+(a.ownTags.length?a.ownTags.join('、'):a.yrTags.join('、'))+')'}
     if(!r.ch){
       say='此案缺坐山或元運,無法批流年。<b>先補齊資料</b>,補完這裡就會自動排進名單。';
-    }else if(r.score<2){
+    }else if(lv===3){
+      var kp=r.keyHit.map(function(a){
+        var role=a.pal===r.ch.sitPal?'坐山':a.pal===r.ch.facePal?'向首':'大門';
+        return PALDIR[a.pal]+'('+role+',&nbsp;'+(a.ownTags.length?a.ownTags.join('、'):'五黃到宮')+')';
+      }).join('、');
+      say='<b style="color:#F0A797">凶星正犯要方:'+kp+'</b>。這是本宅今年最該處理的地方,務必優先聯絡屋主。';
+    }else if(lv===2){
+      say='本年 <b>'+r.otherHit.slice(0,2).map(what).join('、')+'</b>,雖未犯坐向與大門,仍宜提醒屋主留意並作佈局。';
+    }else if(lv===1){
+      say='本年僅太歲、歲破或三煞掃到要方,<b>無宅盤交沖</b>。可順道提醒忌動土,不必急。';
+    }else{
       say='本年凶星未犯本宅坐、向與大門,<b>可作例行問候</b>,順帶提醒本年'+PALDIR[f0.wu]+
           '(五黃)、'+PALDIR[f0.er]+'(二黑)忌動土修造。';
-    }else{
-      var own=r.cells.filter(function(a){return a.ownLevel>0});
-      var t=own.length
-        ? own.slice(0,2).map(function(a){return PALDIR[a.pal]+'('+a.ownTags.join('、')+')'}).join('、')
-        : r.bad.slice(0,2).map(function(b){return PALDIR[b.pal]+'('+b.tags.join('、')+')'}).join('、');
-      say='本年 <b>'+t+'</b>。'+
-        (r.doorHit?'<b style="color:#F0A797">凶星正犯大門所在的'+PALDIR[r.doorPal]+'方,務必優先聯絡。</b>':'')+
-        '可告知屋主此數方今年忌動土修造,並建議依批書調整。';
     }
     return '<div class="case'+(lv>=3?' hot':'')+'">'+
       '<div class="ch"><b>'+esc(r.c.name||'未命名')+'</b>'+
