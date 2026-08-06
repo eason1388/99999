@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>形煞圖鑑・抱朴隨緣堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#0F0C0A;color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  font-size:15px;line-height:1.78}
+button,input{color:inherit;font-family:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:0 14px 34px}
+.hero{text-align:center;padding:20px 16px 15px;border-bottom:1px solid rgba(201,169,106,.22)}
+.hero h1{font-family:'Noto Serif TC',serif;font-size:22px;letter-spacing:.14em;color:#E0C285;font-weight:900}
+.hero p{font-size:12.5px;opacity:.62;margin-top:5px}
+
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 4px}
+.bar input{flex:1;min-width:160px;background:#221C16;border:1px solid rgba(201,169,106,.35);
+  border-radius:11px;padding:11px 13px;font-size:16px}
+.chip{min-height:42px;border-radius:99px;padding:0 15px;font-size:13.5px;cursor:pointer;
+  border:1px solid rgba(201,169,106,.35);background:#221C16}
+.chip.on{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent;font-weight:700}
+.cnt{font-size:12.5px;opacity:.6;margin:6px 0 12px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:11px}
+.card{background:#1A1613;border:1px solid rgba(201,169,106,.2);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column}
+.card.open{border-color:rgba(201,169,106,.55)}
+.hd{display:flex;align-items:center;gap:11px;padding:12px 13px;cursor:pointer;text-align:left;
+  background:transparent;border:0;width:100%;min-height:64px}
+.hd svg{width:56px;height:44px;flex:none;background:#120F0C;border-radius:8px;
+  border:1px solid rgba(201,169,106,.2)}
+.hd .tx{flex:1;min-width:0}
+.hd b{font-family:'Noto Serif TC',serif;font-size:16px;color:#F0D9A0;display:block}
+.hd small{display:block;font-size:11.5px;opacity:.62;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:10.5px;border-radius:99px;padding:2px 8px;flex:none;font-weight:700}
+.t-out{background:rgba(138,176,206,.18);color:#A8C8E0}
+.t-in{background:rgba(201,169,106,.18);color:#E0C285}
+.bd{display:none;padding:0 13px 13px;border-top:1px solid rgba(201,169,106,.14)}
+.card.open .bd{display:block}
+.sec{margin-top:11px}
+.sec b{display:block;font-size:12.5px;color:#C9A96A;letter-spacing:.08em;margin-bottom:3px}
+.sec div{font-size:13.5px;line-height:1.85}
+.fix{border-left:3px solid #8FC49A;background:rgba(143,196,154,.07);border-radius:0 9px 9px 0;padding:8px 11px}
+.add{width:100%;min-height:42px;margin-top:11px;border-radius:10px;font-size:13px;cursor:pointer;
+  border:1px solid rgba(201,169,106,.4);background:rgba(201,169,106,.14);color:#F0D9A0}
+.note{background:rgba(201,169,106,.08);border-left:3px solid #C9A96A;border-radius:0 11px 11px 0;
+  padding:12px 15px;font-size:13px;margin:12px 0;line-height:1.85}
+.foot{font-size:11.5px;opacity:.45;text-align:center;padding:24px 10px 8px;line-height:1.85}
+@media print{.bar,.add,.hero{display:none!important}.bd{display:block!important}body{background:#fff;color:#000}}
+</style></head><body>
+
+<div class="hero">
+  <h1>形 煞 圖 鑑</h1>
+  <p>判準・主應・化解　現場即翻即用</p>
+</div>
+
+<div class="wrap">
+  <div class="bar">
+    <input id="q" placeholder="搜尋:路沖、壁刀、樑壓、穿堂…">
+    <button class="chip on" data-f="all">全部</button>
+    <button class="chip" data-f="外">外煞</button>
+    <button class="chip" data-f="內">內煞</button>
+  </div>
+  <div class="cnt" id="cnt"></div>
+  <div class="note">
+    形煞論的是<b>形</b>,與坐向元運無關,任何宅皆適用。判斷三原則:<b>愈近愈重、愈正對愈重、體量愈大愈重</b>。
+    現場請連同距離、寬度、是否正對一併記錄並拍照,寫進報告才有說服力。
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot">
+    形煞之說為傳統堪輿經驗歸納,所載主應為傾向而非必然。<br>
+    分析結果僅供參考,不構成醫療、財務或法律建議。
+  </div>
+</div>
+
+<script src="lock.js?v=6"></script>
+<script src="case.js?v=7"></script>
+<script>
+/* 圖示:統一 120×90 示意圖。灰塊=本宅,紅=煞,線=路或視線 */
+function S(inner){return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">'+
+  '<rect x="0" y="0" width="120" height="90" fill="none"/>'+inner+'</svg>'}
+var H='fill="#3E5C76" stroke="#8AB0CE" stroke-width="1.5"';      // 本宅
+var R='stroke="#E58A79" stroke-width="2.5" fill="none"';         // 煞
+var Rf='fill="#E58A79" opacity=".85"';
+var G='stroke="#7a6a55" stroke-width="1.2" fill="#241d17"';      // 他物
+
+var DATA=[
+{n:'路沖(槍煞)',k:'外',s:'道路直對大門或主窗',
+ svg:S('<rect x="42" y="52" width="36" height="30" '+H+'/><path d="M60 52 L60 6" '+R+'/><path d="M55 16 L60 6 L65 16" '+Rf+'/>'),
+ j:'道路、巷弄、走廊直線正對大門、主臥窗或客廳窗。記錄:路寬幾米、屋距幾米、是否正對中線。距離小於路寬三倍者最重。',
+ y:'主意外血光、家宅不寧、財來財去。沖大門應全家,沖臥室窗應該房之人。車流量愈大、車速愈快愈驗。',
+ f:'外設圍牆、綠籬或高大植栽阻擋;內以玄關屏風擋之,忌一眼望穿。可置石敢當或凸面鏡(凸面鏡屬反煞,慎用於鄰里關係)。'},
+{n:'反弓煞(鐮刀煞)',k:'外',s:'弧形路或水以弓背朝宅',
+ svg:S('<rect x="44" y="50" width="34" height="30" '+H+'/><path d="M10 74 Q60 20 110 74" '+R+'/>'),
+ j:'彎道、高架、河渠、天橋以<b>凸出的弓背</b>朝向本宅(若弓內抱宅則為玉帶環腰,反為吉)。看清楚是「背」還是「抱」,這是最常判反的一項。',
+ y:'主破財、離散、意外損傷,亦主人事不睦、留不住人。',
+ f:'弓背方向設實牆、密植常綠喬木遮擋視線;室內該側減少開窗與久坐,或以厚窗簾隔斷。'},
+{n:'壁刀煞',k:'外',s:'鄰屋牆角如刀切向本宅',
+ svg:S('<rect x="16" y="46" width="34" height="34" '+H+'/><path d="M78 12 L78 84" '+R+'/><rect x="78" y="12" width="30" height="72" '+G+'/>'),
+ j:'鄰近建物的牆面邊緣(轉角垂直線)正切向本宅牆面或窗。距離愈近、對方樓層愈高愈重;二十米內尤驗。',
+ y:'主開刀、外傷、莫名病痛。切到哪一面應該面所屬房間之人。',
+ f:'該面設遮擋(百葉、實牆、櫃體);屋外可植樹化其銳氣。床位、書桌避開被切位置。'},
+{n:'天斬煞',k:'外',s:'兩高樓夾縫正對',
+ svg:S('<rect x="46" y="54" width="30" height="28" '+H+'/><rect x="26" y="8" width="30" height="34" '+G+'/><rect x="66" y="8" width="30" height="34" '+G+'/><path d="M61 42 L61 54" '+R+'/><path d="M56 8 L56 42 M66 8 L66 42" stroke="#E58A79" stroke-width="1.5" fill="none" opacity=".7"/>'),
+ j:'前方兩棟高樓之間的狹長縫隙正對本宅。縫愈窄、樓愈高、距離愈近愈重。此處風壓集中,現場常可實測到穿堂風。',
+ y:'主血光、開刀、意外,亦主頭痛與呼吸道不適。',
+ f:'正對面加裝厚簾或不透光隔屏;陽台加設實牆女兒牆。此煞化解有限,若為選屋階段應直接避開。'},
+{n:'尖角煞',k:'外',s:'尖銳物體正對',
+ svg:S('<rect x="20" y="48" width="34" height="32" '+H+'/><path d="M104 20 L72 46 L104 72 Z" '+R+'/>'),
+ j:'鄰屋屋角、招牌尖端、雕塑尖角、屋脊尖端正對本宅門窗。以「是否正對」為主要判準。',
+ y:'主口舌是非、皮膚外傷、無端衝突。',
+ f:'視線遮擋為上;可植樹、設格柵。忌以尖銳物回擊,徒增糾紛。'},
+{n:'蜈蚣煞',k:'外',s:'電桿與分支管線如蜈蚣',
+ svg:S('<rect x="18" y="48" width="32" height="32" '+H+'/><path d="M86 8 L86 82" '+R+'/><path d="M86 22 L98 16 M86 22 L74 16 M86 38 L98 32 M86 38 L74 32 M86 54 L98 48 M86 54 L74 48" stroke="#E58A79" stroke-width="1.5" fill="none"/>'),
+ j:'電線桿、變電箱或外牆水管主幹帶多條分支,形似蜈蚣,正對門窗。台灣舊市區極常見。',
+ y:'主暗疾纏綿、是非小人、家中易生蟲害異味。',
+ f:'視線遮擋;可置銅製或金屬器物於該方(金克木)。若為變電箱另見電磁煞。'},
+{n:'天橋煞／穿心煞',k:'外',s:'高架或天橋貼近、穿越',
+ svg:S('<rect x="40" y="46" width="38" height="36" '+H+'/><path d="M4 58 L116 58" '+R+'/><path d="M20 58 L20 74 M100 58 L100 74" stroke="#E58A79" stroke-width="2" fill="none"/>'),
+ j:'高架道路、天橋、捷運高架貼近本宅通過,尤其與樓層等高者。若正穿本宅中央樓層,稱穿心。',
+ y:'主財氣不聚、心神不寧、睡眠不安;貼近之樓層應驗最明顯。',
+ f:'該側減少停留與臥床;厚重窗簾與隔音窗並用(此煞兼有聲煞)。選屋階段宜避開與高架等高之樓層。'},
+{n:'探頭煞',k:'外',s:'前方屋頂後探出小屋',
+ svg:S('<rect x="20" y="50" width="32" height="30" '+H+'/><rect x="70" y="46" width="40" height="34" '+G+'/><rect x="82" y="28" width="16" height="18" '+R+'/>'),
+ j:'前方建物屋頂後方,再探出一小塊構造物(水塔、加蓋、機房),如人探頭窺望。',
+ y:'主小人窺伺、遭竊、暗中被算計。',
+ f:'該方設遮擋;實務上多以提醒屋主加強門戶安全為主,不必過度渲染。'},
+{n:'孤峰煞',k:'外',s:'四周空曠、獨高無依',
+ svg:S('<rect x="50" y="16" width="24" height="64" '+H+'/><path d="M4 80 L116 80" '+G+'/><path d="M14 74 L30 74 M92 74 L108 74" stroke="#7a6a55" stroke-width="1.2"/>'),
+ j:'本宅明顯高於四鄰且周遭空曠,前後左右俱無屏障,無靠山。',
+ y:'主孤立無援、貴人不顯、子女疏離、事業獨木難支。',
+ f:'室內加強「靠」的元素:座位背實牆、床頭靠牆、玄關設實體。忌四面開窗通透。'},
+{n:'割腳煞',k:'外',s:'水或路貼近屋基',
+ svg:S('<rect x="34" y="40" width="40" height="30" '+H+'/><path d="M4 72 L116 72" '+R+'/><path d="M34 70 L74 70" stroke="#E58A79" stroke-width="4" opacity=".5"/>'),
+ j:'河渠、大排、道路緊貼建物基腳而過,幾乎無緩衝空間。',
+ y:'主根基不穩、財來不聚、下肢與腎泌尿易患。',
+ f:'基腳側設實牆或花台墊高作緩衝;室內該側避免作臥房。'},
+{n:'電磁煞',k:'外',s:'高壓電塔、變電箱、基地台',
+ svg:S('<rect x="18" y="50" width="32" height="30" '+H+'/><path d="M84 82 L84 20 M70 82 L84 40 L98 82" '+R+'/><path d="M74 34 L94 34" stroke="#E58A79" stroke-width="2"/>'),
+ j:'高壓電塔、變電箱、電信基地台、大型機房緊鄰。此煞有現代物理依據,不必只講玄理。',
+ y:'主頭痛失眠、精神不寧、慢性疲勞。距離愈近愈明顯。',
+ f:'該方避作臥房與長時間停留處;可實測電磁場強度作客觀依據,必要時建議屋主考慮遷移床位或搬遷。'},
+{n:'味煞・聲煞・光煞',k:'外',s:'異味、噪音、反光',
+ svg:S('<rect x="42" y="48" width="34" height="32" '+H+'/><path d="M20 24 Q30 14 40 24 T60 24" '+R+'/><path d="M86 20 L104 12 M86 30 L106 30 M86 40 L104 48" stroke="#E58A79" stroke-width="2"/>'),
+ j:'味煞:鄰近垃圾場、化糞池、餐廳排煙。聲煞:主幹道、鐵路、工廠、宮廟。光煞:對面玻璃帷幕反光、招牌強光直射。',
+ y:'味煞主腸胃與呼吸;聲煞主神經衰弱、易怒失眠;光煞主眼疾與心神不寧。此三者最易被忽略,卻最直接影響生活品質。',
+ f:'務實處理:換氣設備、氣密隔音窗、遮光簾。這一類化解不必求諸符咒,把物理條件改善就是最好的化解。'},
+{n:'穿堂煞',k:'內',s:'前後門窗直通,氣一穿而過',
+ svg:S('<rect x="18" y="24" width="84" height="46" '+H+' fill-opacity=".35"/><path d="M18 47 L102 47" '+R+'/><path d="M95 41 L102 47 L95 53" '+Rf+'/>'),
+ j:'大門正對後門、或大門正對落地窗、或前後窗成一直線可望穿。站在門口能一眼看到屋後即是。',
+ y:'主財來財去、聚不住錢、家人各行其是難凝聚。這是內煞第一常見,也最容易化解。',
+ f:'設玄關屏風、端景櫃或半高隔屏,使氣「迂迴」而非「直穿」。屏風高度以擋住視線為度,不必到頂。'},
+{n:'樑壓煞',k:'內',s:'橫樑壓床、灶、座、神位',
+ svg:S('<rect x="16" y="20" width="88" height="52" '+H+' fill-opacity=".3"/><rect x="16" y="34" width="88" height="8" '+R+' fill="#E58A79" fill-opacity=".6"/><rect x="40" y="52" width="40" height="16" '+G+'/>'),
+ j:'橫樑、大型風管、樓板落差直接位於床頭、床身、爐灶、座位或神位正上方。裝潢包覆後仍存在,要問屋主或看天花高低差。',
+ y:'壓床頭主頭痛失眠;壓床身主該部位不適;壓灶主腸胃與財;壓座主事業受阻;壓神位最忌,主家運不順。',
+ f:'首選移位。不能移者以天花板包覆抹平使其不外露;忌僅懸掛葫蘆而位置不動——那是心理安慰,不是化解。'},
+{n:'開門見灶',k:'內',s:'入門即見爐火',
+ svg:S('<rect x="16" y="22" width="88" height="50" '+H+' fill-opacity=".3"/><path d="M16 47 L70 47" '+R+'/><rect x="70" y="36" width="24" height="22" '+G+'/><path d="M76 46 Q82 38 88 46" '+R+'/>'),
+ j:'一進大門即可直接看見爐灶或爐火。',
+ y:'主漏財、腸胃不適、家人易急躁口角。',
+ f:'設遮擋使入門不見灶;若格局無法改,至少於視線動線上設隔屏或拉門。'},
+{n:'開門見廁',k:'內',s:'入門即見廁所門',
+ svg:S('<rect x="16" y="22" width="88" height="50" '+H+' fill-opacity=".3"/><path d="M16 47 L66 47" '+R+'/><rect x="66" y="34" width="26" height="26" '+G+'/><path d="M72 42 L86 56 M86 42 L72 56" '+R+'/>'),
+ j:'一進大門即正對廁所門。',
+ y:'穢氣迎門,主健康不佳、財氣受損、家宅氣場濁滯。',
+ f:'廁門常閉、加裝門簾或改為隱藏門;廁內保持乾燥通風,置除濕與綠植。'},
+{n:'廁居中宮',k:'內',s:'廁所位於全宅中心',
+ svg:S('<rect x="16" y="20" width="88" height="54" '+H+' fill-opacity=".3"/><rect x="48" y="36" width="24" height="22" '+R+' fill="#E58A79" fill-opacity=".35"/>'),
+ j:'廁所落在全宅九宮的中宮位置。以立極點劃九宮判定,不可目測。',
+ y:'中宮為全宅之心,穢氣居中主全家健康受累、諸事不順、財氣渙散。此為內煞中最重者之一。',
+ f:'難以根治。務必強力排風、保持全時乾燥、常明燈;能改格局者建議改建。若客戶正在看房,此點應明確勸退。'},
+{n:'門對門(對門煞)',k:'內',s:'兩門相對相沖',
+ svg:S('<rect x="16" y="20" width="88" height="54" '+H+' fill-opacity=".3"/><path d="M40 20 L40 74 M80 20 L80 74" '+G+'/><path d="M44 47 L76 47" '+R+'/>'),
+ j:'房門與房門正對、房門對廁門、房門對廚房門。門幅愈大、距離愈近愈驗。',
+ y:'主口角爭執、兄弟不睦、住該二房之人易起摩擦。房對廁主健康。',
+ f:'錯開門位為上;不能改者加門簾、於兩門之間置矮櫃或綠植緩衝。'},
+{n:'樓梯沖門',k:'內',s:'樓梯直對大門',
+ svg:S('<rect x="16" y="20" width="88" height="54" '+H+' fill-opacity=".3"/><path d="M16 47 L54 47" '+R+'/><path d="M56 34 L66 34 L66 42 L76 42 L76 50 L86 50 L86 58 L96 58" stroke="#E58A79" stroke-width="2" fill="none"/>'),
+ j:'樓梯正對大門,尤其下行樓梯,氣自門入即被引下。',
+ y:'主財氣外洩、聚財不易;若為下行更驗。',
+ f:'門與梯間設屏風或端景;梯口置地毯與植栽緩衝,梯下不宜作廁所或神位。'},
+{n:'鏡照床',k:'內',s:'鏡面正照睡床',
+ svg:S('<rect x="16" y="20" width="88" height="54" '+H+' fill-opacity=".3"/><rect x="24" y="42" width="34" height="24" '+G+'/><rect x="82" y="34" width="8" height="30" '+R+' fill="#E58A79" fill-opacity=".3"/><path d="M80 49 L62 49" stroke="#E58A79" stroke-width="1.5" stroke-dasharray="3 3"/>'),
+ j:'梳妝鏡、衣櫃鏡門、電視螢幕正對床鋪(尤其正照頭部)。',
+ y:'主睡眠不安、多夢驚悸、精神耗弱;久之影響感情。此煞有明確生理依據,夜間視覺殘影確實干擾睡眠。',
+ f:'最易解:移位、轉向,或加簾布覆蓋。這是每一場勘察都值得順手提醒的一項。'},
+{n:'缺角',k:'內',s:'格局缺失某一宮',
+ svg:S('<path d="M16 20 L104 20 L104 74 L70 74 L70 50 L16 50 Z" '+H+' fill-opacity=".3"/><path d="M70 50 L104 50 L104 74 L70 74 Z" stroke="#E58A79" stroke-width="2" stroke-dasharray="4 3" fill="none"/>'),
+ j:'將平面補成完整矩形後,凹入超過該邊三分之一者為缺角。九宮中缺哪一宮,即應該宮所主之人。',
+ y:'缺乾傷家長、缺坤傷主婦、缺坎傷中男、缺離傷中女、缺震傷長男、缺巽傷長女、缺艮傷少男、缺兌傷少女。',
+ f:'於缺角處以鏡面、燈光或該宮五行屬性之物補之;或於室內對應宮位加強佈置。實務上以「補氣」為主,難以真正補回。'}
+];
+
+var filt='all', q='';
+function paint(){
+  var kw=q.trim();
+  var list=DATA.filter(function(d){
+    if(filt!=='all'&&d.k!==filt)return false;
+    if(!kw)return true;
+    return (d.n+d.s+d.j+d.y+d.f).indexOf(kw)>=0;
+  });
+  document.getElementById('cnt').textContent='共 '+list.length+' 項'+(kw?'(搜尋:'+kw+')':'');
+  document.getElementById('grid').innerHTML=list.map(function(d,i){
+    return '<div class="card" data-n="'+d.n+'">'+
+      '<button class="hd">'+d.svg+'<span class="tx"><b>'+d.n+'</b><small>'+d.s+'</small></span>'+
+      '<span class="tag '+(d.k==='外'?'t-out':'t-in')+'">'+d.k+'煞</span></button>'+
+      '<div class="bd">'+
+        '<div class="sec"><b>判　準</b><div>'+d.j+'</div></div>'+
+        '<div class="sec"><b>主　應</b><div>'+d.y+'</div></div>'+
+        '<div class="sec"><b>化　解</b><div class="fix">'+d.f+'</div></div>'+
+        '<button class="add">＋ 記入目前案件的勘查備註</button>'+
+      '</div></div>';
+  }).join('');
+  document.querySelectorAll('.card').forEach(function(c){
+    c.querySelector('.hd').onclick=function(){c.classList.toggle('open')};
+    c.querySelector('.add').onclick=function(){addNote(c.dataset.n)};
+  });
+}
+document.getElementById('q').oninput=function(){q=this.value;paint()};
+document.querySelectorAll('.chip').forEach(function(b){
+  b.onclick=function(){filt=b.dataset.f;
+    document.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===b)});
+    paint();};
+});
+
+/* 記入案件:寫進現場勘查的「明堂／外局」備註,外煞歸外局、內煞歸大門 */
+function addNote(name){
+  var CK='fsc_cases', AK='fsc_active';
+  var id=localStorage.getItem(AK);
+  if(!id){alert('請先在上方案件列選定案件');return}
+  var a; try{a=JSON.parse(localStorage.getItem(CK)||'[]')}catch(e){a=[]}
+  var i=-1; for(var k=0;k<a.length;k++)if(String(a[k].id)===String(id))i=k;
+  if(i<0){alert('找不到目前案件');return}
+  var d=DATA.filter(function(x){return x.n===name})[0];
+  var slot=d.k==='外'?'out':'door';
+  a[i].survey=a[i].survey||{};
+  a[i].survey[slot]=a[i].survey[slot]||{};
+  var prev=a[i].survey[slot].note||'';
+  if(prev.indexOf(name)>=0){alert('「'+name+'」已在備註中');return}
+  a[i].survey[slot].note=(prev?prev+'；':'')+name;
+  a[i].survey[slot].ts=Date.now();
+  try{localStorage.setItem(CK,JSON.stringify(a))}catch(e){alert('儲存失敗');return}
+  if(window.BPCASE&&BPCASE.refresh)BPCASE.refresh();
+  alert('已記入「'+(d.k==='外'?'明堂／外局':'大門')+'」備註:'+name+'\n可到現場勘查module補充距離與照片。');
+}
+
+paint();
+</script>
+</body></html>
