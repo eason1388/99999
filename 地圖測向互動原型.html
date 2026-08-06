@@ -35,6 +35,8 @@ button{font-family:inherit}
   <button class="chip" data-t="house">畫房輪廓</button>
   <button class="chip" data-t="clear">清除</button>
   <button class="chip" id="satBtn">衛星圖</button>
+  <button class="chip" id="locBtn">📍 我的位置</button>
+  <button class="chip" id="hereBtn">以我的位置立極</button>
   <span style="font-size:13px;align-self:center">磁偏角 <input id="dec" type="number" value="-4.5" step="0.1" style="width:64px;border:1px solid var(--gold);border-radius:8px;background:transparent;padding:3px">°(台灣約 -4.5,西偏)</span>
 </div>
 <div id="map"></div>
@@ -136,4 +138,56 @@ map.on('dblclick',e=>{
   }
 });
 map.doubleClickZoom.disable();
+
+/* ══════ 現場定位 ══════
+   站在客戶家門口就能直接立極,不必再手動把地圖拖到台北以外的地方。
+   注意:GPS 只給位置,不給方向。方位仍以羅盤實測為準,誤差圈只是參考範圍。 */
+let meMk=null, meCir=null, meLatLng=null, watchId=null;
+const locBtn=document.getElementById('locBtn'), hereBtn=document.getElementById('hereBtn');
+
+function msg(t){document.getElementById('big').textContent=t}
+
+function drawMe(pos){
+  const ll=L.latLng(pos.coords.latitude,pos.coords.longitude);
+  const acc=Math.round(pos.coords.accuracy||0);
+  meLatLng=ll;
+  if(!meMk){
+    meMk=L.circleMarker(ll,{radius:7,color:'#fff',weight:2,fillColor:'#2C7BE5',fillOpacity:1})
+          .addTo(map).bindTooltip('我的位置');
+    meCir=L.circle(ll,{radius:acc,color:'#2C7BE5',weight:1,fillOpacity:.08}).addTo(map);
+  }else{ meMk.setLatLng(ll); meCir.setLatLng(ll).setRadius(acc); }
+  return acc;
+}
+
+locBtn.onclick=()=>{
+  if(!navigator.geolocation){alert('此裝置或瀏覽器不支援定位');return}
+  if(watchId!==null){                      // 再按一次關閉追蹤,省電
+    navigator.geolocation.clearWatch(watchId); watchId=null;
+    locBtn.classList.remove('on'); msg('已停止定位追蹤。'); return;
+  }
+  locBtn.classList.add('on'); msg('定位中…請允許瀏覽器取得位置權限。');
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const acc=drawMe(pos);
+    if(!locBtn.dataset.once){ map.setView(meLatLng,19); locBtn.dataset.once='1'; }
+    msg('目前位置精度約 ±'+acc+' 公尺。'+
+        (acc>30?'誤差偏大,建議走到戶外或空曠處再定位。':'可按「以我的位置立極」直接定極點。'));
+  },err=>{
+    locBtn.classList.remove('on');
+    navigator.geolocation.clearWatch(watchId); watchId=null;
+    msg(err.code===1?'定位被拒絕。請到瀏覽器設定開啟本站的位置權限。'
+        :err.code===3?'定位逾時,請到收訊較好的地方再試。':'無法取得位置:'+err.message);
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+};
+
+hereBtn.onclick=()=>{
+  if(!meLatLng){ alert('請先按「📍 我的位置」取得定位'); return; }
+  tool='house';
+  document.querySelectorAll('.chip[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==='house'));
+  houseLayer.clearLayers(); housePts=[]; facingPt=null;
+  jiji=L.marker(meLatLng,{draggable:true,title:'立極點(可拖曳微調)'}).addTo(houseLayer);
+  drawSectors(meLatLng,null);
+  jiji.on('drag',()=>drawSectors(jiji.getLatLng(),facingPt?((bearing(jiji.getLatLng(),facingPt)+180)%360):null));
+  map.setView(meLatLng,19);
+  msg('已以你目前的位置立極。再點地圖上一點設「向」,或拖曳極點微調到房子正中心。');
+};
 </script></body></html>
