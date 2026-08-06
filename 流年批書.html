@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>流年批書・回訪引擎|抱朴隨緣堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#0F0C0A;color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  font-size:15px;line-height:1.78}
+button{color:inherit;font-family:inherit}
+.wrap{max-width:840px;margin:0 auto;padding:0 14px 34px}
+.hero{text-align:center;padding:20px 16px 15px;border-bottom:1px solid rgba(201,169,106,.22)}
+.hero h1{font-family:'Noto Serif TC',serif;font-size:22px;letter-spacing:.14em;color:#E0C285;font-weight:900}
+.hero p{font-size:12.5px;opacity:.62;margin-top:5px}
+
+.bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.bar input{width:92px;background:#221C16;border:1px solid rgba(201,169,106,.35);border-radius:10px;
+  color:#EDE7DA;padding:9px 11px;font-size:16px;font-family:inherit}
+.bar button{min-height:44px;border-radius:11px;padding:0 15px;font-size:14px;cursor:pointer;
+  border:1px solid rgba(201,169,106,.4);background:#221C16}
+.bar button.pri{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent;font-weight:700}
+
+.facts{background:#1A1613;border:1px solid rgba(201,169,106,.24);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.facts h3{font-family:'Noto Serif TC',serif;font-size:16px;color:#E0C285;letter-spacing:.1em;margin-bottom:8px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px}
+.fi{background:#221C16;border:1px solid rgba(201,169,106,.2);border-radius:10px;padding:9px 11px}
+.fi b{display:block;font-size:11.5px;color:#C9A96A;letter-spacing:.06em}
+.fi span{font-size:15px;font-weight:700}
+
+.case{background:#1A1613;border:1px solid rgba(201,169,106,.2);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.case.hot{border-color:rgba(229,138,121,.5)}
+.ch{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ch b{font-family:'Noto Serif TC',serif;font-size:17px;color:#F0D9A0}
+.ch .meta{font-size:12px;opacity:.68}
+.ch .sp{flex:1}
+.lv{font-size:11.5px;border-radius:99px;padding:3px 10px;font-weight:700;white-space:nowrap}
+.lv3{background:rgba(229,138,121,.2);color:#F0A797}
+.lv2{background:rgba(224,169,138,.18);color:#E0A88A}
+.lv1{background:rgba(201,169,106,.16);color:#E0C285}
+.lv0{background:rgba(143,196,154,.15);color:#8FC49A}
+.say{margin-top:7px;font-size:13.5px;line-height:1.85;background:rgba(201,169,106,.07);
+  border-left:3px solid #C9A96A;border-radius:0 10px 10px 0;padding:9px 12px}
+.say b{color:#E0C285}
+.acts{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.acts button{min-height:40px;border-radius:10px;padding:0 13px;font-size:13px;cursor:pointer;
+  border:1px solid rgba(201,169,106,.4);background:#221C16}
+.acts button.go{background:rgba(201,169,106,.22);color:#F0D9A0;font-weight:700}
+.acts a{min-height:40px;display:inline-flex;align-items:center;border-radius:10px;padding:0 13px;font-size:13px;
+  border:1px solid rgba(143,196,154,.4);background:rgba(143,196,154,.1);color:#8FC49A;text-decoration:none}
+
+/* 批書 */
+#doc{display:none;background:#15120F;border:1px solid rgba(201,169,106,.22);border-radius:14px;padding:20px 22px;margin-top:14px}
+#doc .rh{text-align:center;padding-bottom:13px;border-bottom:2px solid rgba(201,169,106,.4)}
+#doc .rh .seal{width:46px;height:46px;margin:0 auto 9px;border-radius:50%;border:2px solid #C9A96A;
+  display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-weight:900;color:#C9A96A;font-size:21px}
+#doc h2{font-family:'Noto Serif TC',serif;font-size:20px;letter-spacing:.16em;color:#E0C285;font-weight:900}
+#doc h4{font-family:'Noto Serif TC',serif;font-size:15.5px;color:#E0C285;letter-spacing:.1em;
+  margin:20px 0 9px;padding-bottom:6px;border-bottom:1px solid rgba(201,169,106,.28)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+th,td{border:1px solid rgba(201,169,106,.22);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:rgba(201,169,106,.17);color:#E8CE95;white-space:nowrap}
+td.c{text-align:center;white-space:nowrap}
+.box{background:#1A1613;border:1px solid rgba(201,169,106,.2);border-radius:12px;padding:11px 14px;margin-bottom:9px;font-size:13.5px}
+.box.warn{border-left:3px solid #E58A79;background:rgba(229,138,121,.07)}
+.box.good{border-left:3px solid #8FC49A;background:rgba(143,196,154,.07)}
+.foot{font-size:11.5px;opacity:.45;text-align:center;padding:22px 10px 8px;line-height:1.85}
+@media print{
+  body{background:#fff;color:#000}.hero,.bar,#list,.acts,.foot{display:none!important}
+  #doc{background:#fff;border:0;padding:0;display:block!important}
+  #doc h2,#doc h4,.rh .seal{color:#6b5220;border-color:#6b5220}
+  th{background:#f2ead6!important;color:#3a2f18!important}td,th{border-color:#b9a274}
+  .box{background:#faf7f0;border-color:#d8c9a5}
+  tr,.box{break-inside:avoid;page-break-inside:avoid}
+}
+</style></head><body>
+
+<div class="hero">
+  <h1>流 年 批 書</h1>
+  <p>掃全部舊案・排回訪順序・一鍵產出交付批書</p>
+</div>
+
+<div class="wrap">
+  <div class="bar">
+    <span style="font-size:13.5px">批算年度</span>
+    <input id="yr" type="number" step="1">
+    <button class="pri" id="scan">掃描全部案件</button>
+    <button id="prt">列印本頁批書</button>
+  </div>
+  <div id="facts"></div>
+  <div id="list"></div>
+  <div id="doc"></div>
+  <div class="foot">
+    流年批書依玄空飛星流年盤與本宅盤疊算,並參太歲、歲破、三煞方位。<br>
+    分析結果僅供參考,不構成醫療、財務或法律建議。
+  </div>
+</div>
+
+<script src="lock.js?v=6"></script>
+<script src="report.js"></script>
+<script src="engine.js?v=3"></script>
+<script src="case.js?v=7"></script>
+<script>
+var CKEY='fsc_cases', AKEY='fsc_active';
+function cases(){try{return JSON.parse(localStorage.getItem(CKEY)||'[]')}catch(e){return[]}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
+  return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+var GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
+var PALDIR={坎:'正北',艮:'東北',震:'正東',巽:'東南',離:'正南',坤:'西南',兌:'正西',乾:'西北'};
+
+/* 立春之後才換年。一月批下一年的書沒有意義,二月中以後才提醒明年。 */
+function defaultYear(){
+  var d=new Date(), y=d.getFullYear();
+  return (d.getMonth()>=10) ? y+1 : y;      // 11月起提前備明年
+}
+document.getElementById('yr').value=defaultYear();
+
+function chartOf(c){
+  if(!c.sit||!c.per)return null;
+  var p=parseInt(c.per,10);
+  if(!(p>=1&&p<=9)||BPE.M24.indexOf(c.sit)<0)return null;
+  try{return BPE.xkChart(p,c.sit)}catch(e){return null}
+}
+
+/* ── 一、年度總覽 ── */
+function paintFacts(y){
+  var f=BPE.yearFacts(y);
+  document.getElementById('facts').innerHTML=
+   '<div class="facts"><h3>'+y+' 年（'+f.gz+'）流年總覽</h3><div class="fg">'+
+   [['中宮入中',f.centre+'白紫'],['太歲方',PALDIR[f.taisui]+'（'+f.taisuiZhi+'）'],
+    ['歲破方',PALDIR[f.suipo]+'（'+f.suipoZhi+'）'],['三煞方',f.sanshaTx||'—'],
+    ['五黃到',PALDIR[f.wu]],['二黑到',PALDIR[f.er]],
+    ['文昌到',PALDIR[f.wenchang]],['旺氣到',PALDIR[f.wang]]]
+   .map(function(x){return '<div class="fi"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('')+
+   '</div><div style="font-size:12.5px;opacity:.72;margin-top:9px;line-height:1.8">'+
+   '本年<b style="color:#E58A79">'+PALDIR[f.wu]+'、'+PALDIR[f.er]+'、'+(f.sanshaTx||'')+'、'+PALDIR[f.suipo]+
+   '</b>諸方忌動土、修造、開門、放水;臥床爐灶亦宜避開。</div></div>';
+}
+
+/* ── 二、掃描全部案件 ── */
+function scanAll(){
+  var y=parseInt(document.getElementById('yr').value,10)||new Date().getFullYear();
+  paintFacts(y);
+  var list=document.getElementById('list'), all=cases();
+  document.getElementById('doc').style.display='none';
+  if(!all.length){
+    list.innerHTML='<div class="case"><div class="ch"><b>尚無案件</b></div>'+
+      '<div class="say">請先到客戶案件簿建立案件。有了舊案之後,這裡每年會自動幫你排出該聯絡誰、為什麼、要說什麼。</div></div>';
+    return;
+  }
+  var rows=all.map(function(c){
+    var ch=chartOf(c);
+    var pals=['坎','艮','震','巽','離','坤','兌','乾'];
+    var bad=[],good=[];
+    pals.forEach(function(p){
+      var a=BPE.annualPalace(ch,p,y);
+      if(a.kind==='重'||a.kind==='中')bad.push(a);
+      else if(a.kind==='吉')good.push(a);
+    });
+    bad.sort(function(x,z){return z.level-x.level});
+    /* 大門所在宮若中招,優先度再拉高 */
+    var doorPal=(c.survey&&c.survey.door&&c.survey.door.dir)?BPE.palaceOf(c.survey.door.dir):null;
+    var doorHit=doorPal&&bad.some(function(b){return b.pal===doorPal});
+    var score=bad.reduce(function(s,b){return s+b.level},0)+(doorHit?4:0);
+    return{c:c,ch:ch,bad:bad,good:good,doorPal:doorPal,doorHit:doorHit,score:score};
+  }).sort(function(a,b){return b.score-a.score});
+
+  list.innerHTML=rows.map(function(r,i){
+    var lv=r.score>=10?3:r.score>=6?2:r.score>=2?1:0;
+    var say;
+    if(!r.ch){
+      say='此案缺坐山或元運,無法批流年。<b>先補資料再聯絡。</b>';
+    }else if(!r.bad.length){
+      say='本年無凶星犯及要方,<b>可作例行問候</b>,順帶提醒本年'+PALDIR[BPE.yearFacts(y).wu]+'忌動土。';
+    }else{
+      var t=r.bad.slice(0,2).map(function(b){return PALDIR[b.pal]+'('+b.tags.join('、')+')'}).join('、');
+      say='本年 <b>'+t+'</b>。'+
+        (r.doorHit?'<b style="color:#F0A797">凶星正犯大門所在的'+PALDIR[r.doorPal]+'方,務必優先聯絡。</b>':'')+
+        '可告知屋主:此數方今年忌動土修造,並建議依批書調整。';
+    }
+    return '<div class="case'+(lv>=3?' hot':'')+'">'+
+      '<div class="ch"><b>'+esc(r.c.name||'未命名')+'</b>'+
+      '<span class="meta">'+esc(r.c.type||'')+'・'+(r.ch?r.ch.sitting+'山'+r.ch.facing+'向 '+r.ch.period+'運':'資料不全')+
+      (r.c.date?'・勘於'+r.c.date:'')+'</span><span class="sp"></span>'+
+      '<span class="lv lv'+lv+'">'+(lv>=3?'急需回訪':lv===2?'建議回訪':lv===1?'可回訪':'例行問候')+'</span></div>'+
+      (r.c.phone||r.c.addr?'<div class="meta" style="font-size:12px;opacity:.6">'+esc(r.c.addr||'')+(r.c.phone?'　'+esc(r.c.phone):'')+'</div>':'')+
+      '<div class="say">'+say+'</div>'+
+      '<div class="acts">'+
+        (r.ch?'<button class="go" data-id="'+r.c.id+'">產生流年批書</button>':'')+
+        (r.c.phone?'<a href="tel:'+esc(r.c.phone)+'">撥號</a>':'')+
+      '</div></div>';
+  }).join('');
+
+  list.querySelectorAll('.go').forEach(function(b){
+    b.onclick=function(){makeDoc(b.dataset.id,y)};
+  });
+}
+
+/* ── 三、產生單一案件的流年批書 ── */
+function makeDoc(id,y){
+  var c=cases().filter(function(x){return String(x.id)===String(id)})[0];
+  if(!c)return;
+  var ch=chartOf(c), f=BPE.yearFacts(y);
+  var pals=['坎','艮','震','巽','離','坤','兌','乾'];
+  var rows=pals.map(function(p){return BPE.annualPalace(ch,p,y)});
+  var bad=rows.filter(function(r){return r.kind==='重'||r.kind==='中'}).sort(function(a,b){return b.level-a.level});
+  var good=rows.filter(function(r){return r.kind==='吉'});
+
+  var h='<div class="rh"><div class="seal">抱</div><h2>'+y+' 年流年批書</h2>'+
+        '<div style="font-size:12px;opacity:.6;margin-top:4px;letter-spacing:.1em">抱朴隨緣堂 敬呈</div></div>';
+
+  h+='<h4>壹　本宅與年度</h4><table>'+
+     '<tr><th>屋主</th><td>'+esc(c.name||'—')+'</td><th>宅址</th><td>'+esc(c.addr||'—')+'</td></tr>'+
+     '<tr><th>坐向</th><td>'+ch.sitting+'山 '+ch.facing+'向</td><th>元運</th><td>'+ch.period+'運（'+ch.pattern+'）</td></tr>'+
+     '<tr><th>批算年度</th><td>'+y+' 年 '+f.gz+'</td><th>年星入中</th><td>'+f.centre+'　（'+
+     '自立春起算）</td></tr></table>';
+
+  /* 九宮:山向年三星 */
+  h+='<h4>貳　流年星疊本宅盤</h4>';
+  h+='<table><tr><th>方位</th><th>山星</th><th>向星</th><th>流年星</th><th>本年狀況</th></tr>';
+  GRID.flat().filter(function(p){return p!=='中'}).forEach(function(p){
+    var r=rows[pals.indexOf(p)];
+    var col=r.kind==='重'?'#E58A79':r.kind==='中'?'#E0A88A':r.kind==='吉'?'#8FC49A':'#A79C8C';
+    h+='<tr><td>'+p+'／'+PALDIR[p]+'</td><td class="c">'+r.mt+'</td><td class="c">'+r.fc+'</td>'+
+       '<td class="c">'+r.ann+'</td><td style="color:'+col+'">'+(r.tags.length?r.tags.join('、'):'平順')+'</td></tr>';
+  });
+  h+='</table>';
+
+  h+='<h4>參　本年須避之方</h4>';
+  h+='<div class="box warn"><b>忌動土、修造、開門、放水:</b>'+
+     PALDIR[f.wu]+'（五黃）、'+PALDIR[f.er]+'（二黑）、'+(f.sanshaTx||'')+'（三煞）、'+
+     PALDIR[f.suipo]+'（歲破）。太歲在'+PALDIR[f.taisui]+',宜靜不宜動。<br>'+
+     '上述諸方今年若須施工,務必先擇日並知會本堂。</div>';
+  if(bad.length){
+    h+='<table><tr><th>方位</th><th>本年犯</th><th>主應</th><th>建議</th></tr>';
+    bad.forEach(function(r){
+      var g=BPE.jsGong(r.pal);
+      var adv = r.tags.indexOf('二五交加')>=0 ? '此方最重。宜置金屬重物洩土氣,忌紅色、忌動土、忌久坐久臥。'
+              : r.tags.indexOf('五黃到宮')>=0 ? '宜靜。置金屬(銅鈴、六帝錢)化之,忌動土見紅。'
+              : r.tags.indexOf('二黑到宮')>=0 ? '主病符。保持乾燥通風,置金屬化之,病弱者避開此方久居。'
+              : r.tags.indexOf('歲破方')>=0   ? '沖太歲之方,忌大動,宜緩不宜急。'
+              : r.tags.indexOf('三煞方')>=0   ? '忌動土興工,宜靜守。'
+              : '留意此方,減少長時間停留與擾動。';
+      h+='<tr><td>'+r.pal+'／'+PALDIR[r.pal]+'</td><td>'+r.tags.join('、')+'</td>'+
+         '<td>'+(g?g.who+'／'+g.body:'—')+'</td><td>'+adv+'</td></tr>';
+    });
+    h+='</table>';
+  }else{
+    h+='<div class="box good">本年凶星未犯本宅要方,可安心度歲。</div>';
+  }
+
+  h+='<h4>肆　本年可用之方</h4>';
+  h+='<div class="box good"><b>文昌位:</b>'+PALDIR[f.wenchang]+'——利考試、升遷、簽約,宜置書桌。<br>'+
+     '<b>旺氣位:</b>'+PALDIR[f.wang]+'——宜開門、走動、聚人氣。<br>'+
+     '<b>財位:</b>'+PALDIR[f.cai]+'——宜靜宜亮,忌雜物堆積。'+
+     (good.length?'<br><b>本宅本年得力之方:</b>'+good.map(function(r){return PALDIR[r.pal]}).join('、'):'')+
+     '</div>';
+
+  /* 應期 */
+  var mostBad=bad[0];
+  if(mostBad){
+    var yq=BPE.yingqi({pal:mostBad.pal,star:(mostBad.mt===5||mostBad.mt===2)?mostBad.mt:((mostBad.fc===5||mostBad.fc===2)?mostBad.fc:0),
+                       from:y,span:6}).slice(0,3);
+    if(yq.length){
+      h+='<h4>伍　後續應期</h4><table><tr><th>年份</th><th>輕重</th><th>引動之由</th></tr>'+
+         yq.map(function(x){return '<tr><td class="c">'+x.year+'<br><small style="opacity:.6">'+x.gz+'</small></td>'+
+           '<td class="c">'+x.level+'</td><td>'+x.reasons.join('、')+'</td></tr>'}).join('')+'</table>'+
+         '<div class="box">上列為'+PALDIR[mostBad.pal]+'方後續較可能顯現之年份,宜提前佈置。'+
+         '應期為傾向而非必然,亦非全年皆應。</div>';
+    }
+  }
+
+  h+='<div style="margin-top:22px;padding-top:13px;border-top:1px solid rgba(201,169,106,.3);'+
+     'display:flex;gap:22px;font-size:12px;opacity:.72;line-height:1.9">'+
+     '<div><b style="color:#E0C285">堪輿</b><br>抱朴隨緣堂</div>'+
+     '<div><b style="color:#E0C285">批書日期</b><br>'+new Date().toLocaleDateString('zh-TW')+'</div>'+
+     '<div><b style="color:#E0C285">聯絡</b><br>jackkok1388@gmail.com<br>LINE:fengshui1388</div></div>'+
+     '<div style="margin-top:12px;font-size:11.5px;opacity:.5;line-height:1.85">'+
+     '本批書依玄空飛星流年盤疊本宅盤推算,並參太歲、歲破、三煞方位。所載為傳統堪輿學說之推演,'+
+     '僅供參考,不構成醫療、財務或法律建議,亦不保證特定結果。</div>';
+
+  var d=document.getElementById('doc');
+  d.innerHTML=h; d.style.display='block';
+  d.scrollIntoView({behavior:'smooth',block:'start'});
+  window.__docTitle=y+'年流年批書・'+(c.name||'');
+  window.__docCase=c; window.__docYear=y;
+}
+
+document.getElementById('scan').onclick=scanAll;
+document.getElementById('yr').onchange=scanAll;
+document.getElementById('prt').onclick=function(){
+  var d=document.getElementById('doc');
+  if(d.style.display==='none'||!d.innerHTML){alert('請先在名單中按「產生流年批書」');return}
+  var c=window.__docCase||{};
+  if(window.BPRPT)BPRPT.print({title:window.__docYear+' 年流年批書',
+    meta:[['屋主',c.name||'—'],['宅址',c.addr||'—'],
+          ['坐向',(c.sit?c.sit+'山':'—')+(c.per?'・'+c.per+'運':'')],
+          ['批書日期',new Date().toLocaleDateString('zh-TW')]],
+    html:d.innerHTML});
+  else window.print();
+};
+
+scanAll();
+(function sub(n){ if(window.BPCASE&&BPCASE.on){BPCASE.on(scanAll);return}
+  if(n<40)setTimeout(function(){sub(n+1)},100); })(0);
+window.addEventListener('storage',function(e){if(e.key===CKEY)scanAll()});
+</script>
+</body></html>

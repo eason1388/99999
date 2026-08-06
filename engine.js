@@ -288,8 +288,50 @@ function yingqiText(list,n){
   }).join(';');
 }
 
+/* ═══════ 七、流年方位神煞 ═══════ */
+var ZHI2PAL={};
+Object.keys(PAL_ZHI).forEach(function(p){PAL_ZHI[p].forEach(function(z){ZHI2PAL[z]=p})});
+/* 三煞:依年支三合局取其對沖之方 */
+var SANSHA={'申子辰':'離','亥卯未':'兌','寅午戌':'坎','巳酉丑':'震'};
+var SANSHA_TX={'離':'正南','兌':'正西','坎':'正北','震':'正東'};
+function palOfStar(chart,n){for(var p in chart){if(p!=='中'&&chart[p]===n)return p}return null}
+function yearFacts(y){
+  var yz=yearZhi(y), ann=yearChart(y);
+  var taisui=ZHI2PAL[yz], suipo=ZHI2PAL[chong(yz)];
+  var sansha=null;
+  for(var k in SANSHA){if(k.indexOf(yz)>=0){sansha=SANSHA[k];break}}
+  return{year:y, gz:yearGZ(y), zhi:yz, centre:yearStar(y), chart:ann,
+    taisui:taisui, taisuiZhi:yz, suipo:suipo, suipoZhi:chong(yz),
+    sansha:sansha, sanshaTx:sansha?SANSHA_TX[sansha]:null,
+    wu:palOfStar(ann,5), er:palOfStar(ann,2),
+    wenchang:palOfStar(ann,4), cai:palOfStar(ann,8), wang:palOfStar(ann,9)};
+}
+/* 流年星疊本宅盤,逐宮出判語。chart 為 xkChart 結果,可為 null */
+function annualPalace(chart,pal,y){
+  var f=yearFacts(y), a=f.chart[pal];
+  var m=chart?chart.mountain[pal]:0, v=chart?chart.facing_stars[pal]:0;
+  var tags=[], lv=0;
+  if(a===5){tags.push('五黃到宮');lv+=3}
+  if(a===2){tags.push('二黑到宮');lv+=2}
+  if(f.taisui===pal){tags.push('太歲方');lv+=1}
+  if(f.suipo===pal){tags.push('歲破方');lv+=2}
+  if(f.sansha===pal){tags.push('三煞方');lv+=2}
+  /* 二五交加:流年與宅盤一為二、一為五 */
+  var pair=[a,m,v];
+  if(pair.indexOf(5)>=0&&pair.indexOf(2)>=0){tags.push('二五交加');lv+=3}
+  if(a===3&&(m===7||v===7)||a===7&&(m===3||v===3)){tags.push('鬥牛煞(三七)');lv+=2}
+  if(chart){
+    if(a===chart.period){tags.push('流年旺星到宮');lv-=2}
+    if(a===4&&(m===1||v===1)){tags.push('一四同宮利文昌');lv-=2}
+    if(a===8||a===9){lv-=1}
+  }
+  return{pal:pal, ann:a, mt:m, fc:v, tags:tags, level:lv,
+    kind: lv>=4?'重':lv>=2?'中':lv<=-2?'吉':'平'};
+}
+
 g.BPE={
-  ZHI:ZHI,GAN:GAN,PAL_ZHI:PAL_ZHI,yearZhi:yearZhi,yearGZ:yearGZ,
+  ZHI:ZHI,GAN:GAN,PAL_ZHI:PAL_ZHI,ZHI2PAL:ZHI2PAL,yearZhi:yearZhi,yearGZ:yearGZ,
+  yearFacts:yearFacts,annualPalace:annualPalace,palOfStar:palOfStar,
   yearStar:yearStar,yearChart:yearChart,chong:chong,
   yingqi:yingqi,yingqiText:yingqiText,
   M24:M24,FLY:FLY,PAL_M:PAL_M,NUM2PAL:NUM2PAL,PAL2NUM:PAL2NUM,
