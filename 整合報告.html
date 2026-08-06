@@ -100,7 +100,7 @@ ol.pri b{color:#F0A797}
 
 <script src="lock.js?v=6"></script>
 <script src="report.js"></script>
-<script src="engine.js?v=2"></script>
+<script src="engine.js?v=3"></script>
 <script src="case.js?v=7"></script>
 <script>
 /* 整合報告:不自行輸入任何資料,全部取自「目前案件」。
@@ -274,8 +274,50 @@ function build(){
     h+='</table><div class="shots" id="shots"></div>';
   }
 
-  /* 七、化解優先順序 */
-  h+='<h3><span class="no">柒</span>化解優先順序</h3>';
+  /* 柒、應期 */
+  h+='<h3><span class="no">柒</span>應期推算・何時引動</h3>';
+  if(!ch){
+    h+='<div class="box">需先補齊坐向與元運,才能推算應期。</div>';
+  }else{
+    var YR=new Date().getFullYear();
+    var watch=cc.rows.filter(function(r){return r.level>=2});
+    if(!watch.length){
+      h+='<div class="box good">本宅目前無須特別留意之宮位,近年亦無明顯引動之虞。</div>';
+    }else{
+      h+='<p class="muted">宅盤為潛勢,須待流年引動方才顯現。下表推算未來九年各問題宮位可能被引動的年份,'+
+         '依年紫白飛臨、同星加臨、值年太歲、歲破沖動、三合會局五項判定強弱。</p>';
+      h+='<table><tr><th>宮位</th><th>所應</th><th>引動年份</th><th>輕重</th><th>引動之由</th></tr>';
+      var earliest=null;
+      watch.forEach(function(r){
+        var badStar = r.xk.k==='bad' ? (starIsBad(r.xk.mt)?r.xk.mt:starIsBad(r.xk.fc)?r.xk.fc:0) : 0;
+        var ys=BPE.yingqi({pal:r.pal,star:badStar,from:YR,span:9}).slice(0,3);
+        if(!ys.length){
+          h+='<tr><td>'+r.pal+'／'+r.dir+'</td><td>'+r.who+'</td><td colspan="3">九年內無明顯引動</td></tr>';
+          return;
+        }
+        ys.forEach(function(x,i){
+          if(earliest===null||x.year<earliest)earliest=x.year;
+          h+='<tr>'+(i===0?'<td rowspan="'+ys.length+'">'+r.pal+'／'+r.dir+'</td>'+
+                            '<td rowspan="'+ys.length+'">'+r.who+'</td>':'')+
+             '<td class="c">'+x.year+'<br><small style="opacity:.6">'+x.gz+'</small></td>'+
+             '<td class="c" style="color:'+(x.level==='重'?'#E58A79':x.level==='中'?'#E0C285':'#A79C8C')+'">'+x.level+'</td>'+
+             '<td>'+x.reasons.join('、')+'</td></tr>';
+        });
+      });
+      h+='</table>';
+      if(earliest!==null){
+        h+='<div class="box act">建議於 <b>'+earliest+' 年之前</b>完成下節所列之化解,'+
+           '避開引動之年方為上策。已引動者亦非無救,惟需加重佈局並縮短觀察週期。</div>';
+      }
+      h+='<div class="box"><b>應期如何解讀</b><br>'+
+         '應期所推為「較可能顯現的時段」,非必然發生,亦非發生於該年全年。'+
+         '通常於引動之年的<b>該宮所屬月份</b>感受最明顯。輕重僅代表引動力道疊加之多寡,'+
+         '仍須以現場實況與屋主本命綜合斟酌。</div>';
+    }
+  }
+
+  /* 捌、化解優先順序 */
+  h+='<h3><span class="no">捌</span>化解優先順序</h3>';
   var acts=[];
   cc.rows.filter(function(r){return r.level>=3}).forEach(function(r){
     acts.push({w:0,t:'<b>'+r.pal+'宮 '+r.dir+'(雙重凶)</b>——形巒與理氣同斷為凶,應'+r.who+
@@ -313,6 +355,8 @@ function build(){
   R.innerHTML=h;
   if(filled.length)loadShots(c,filled);
 }
+/* 二黑五黃恆凶,三七次之;其餘視當運,此處只挑要追應期的病星 */
+function starIsBad(s){return s===2||s===5||s===3||s===7}
 function USE_FOR(yx){
   return{'生氣':'主臥、大門、辦公座向','延年':'主臥、神位,利感情','天醫':'床位、廚房,利健康',
          '伏位':'書房、神位,主安定','絕命':'廁所、儲藏、樓梯','五鬼':'廁所、雜物、樓梯',

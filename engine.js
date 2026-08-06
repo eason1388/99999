@@ -225,7 +225,73 @@ function crossCheck(caseObj){
                       .sort(function(a,b){return b.level-a.level})};
 }
 
+/* ═══════ 六、應期推算 ═══════
+   宅盤是「潛勢」,要有流年引動才會發作。本引擎推的是「何時會被引動」。
+   五種引動途徑,分強弱累計:
+     ① 年紫白凶星(二、五)飛臨該宮
+     ② 流年星與該宮病星同數 —— 同星加臨,力量倍增
+     ③ 值年太歲坐該宮地支
+     ④ 歲破 —— 太歲沖該宮地支
+     ⑤ 三合會局會齊該宮地支
+   ⚠ 應期是「較可能顯現的時段」,不是保證。對客戶務必如此表述。 */
+var ZHI='子丑寅卯辰巳午未申酉戌亥';
+var GAN='甲乙丙丁戊己庚辛壬癸';
+var PAL_ZHI={'坎':['子'],'艮':['丑','寅'],'震':['卯'],'巽':['辰','巳'],
+             '離':['午'],'坤':['未','申'],'兌':['酉'],'乾':['戌','亥']};
+var SANHE=[['申','子','辰'],['亥','卯','未'],['寅','午','戌'],['巳','酉','丑']];
+function yearZhi(y){return ZHI[((y-4)%12+12)%12]}
+function yearGan(y){return GAN[((y-4)%10+10)%10]}
+function yearGZ(y){return yearGan(y)+yearZhi(y)}
+/* 年紫白中宮星,與案件簿流年掃描同一式 */
+function yearStar(y){return (11-(y%9)-1+9)%9+1}
+function yearChart(y){return fly(yearStar(y),true)}
+function chong(z){return ZHI[(ZHI.indexOf(z)+6)%12]}
+
+/* opts:{pal, star, period, from, span}
+   star 為該宮要追的星(病星或旺星),可省略 */
+function yingqi(opts){
+  opts=opts||{};
+  var pal=opts.pal; if(!pal||!PAL_ZHI[pal])return [];
+  var star=opts.star||0;
+  var from=opts.from||new Date().getFullYear();
+  var span=opts.span||9;
+  var zs=PAL_ZHI[pal], out=[];
+  for(var y=from;y<from+span;y++){
+    var yz=yearZhi(y), ann=yearChart(y), a=ann[pal], hits=[], sc=0;
+    if(a===5){hits.push('五黃廉貞飛臨本宮');sc+=3}
+    else if(a===2){hits.push('二黑病符飛臨本宮');sc+=2}
+    if(star&&a===star){hits.push('流年'+a+'與本宮'+star+'同星加臨,力量倍增');sc+=3}
+    if(zs.indexOf(yz)>=0){hits.push('太歲'+yz+'坐守本宮');sc+=2}
+    /* 歲破:流年支正沖本宮所含之支 */
+    for(var k=0;k<zs.length;k++){
+      if(chong(zs[k])===yz){hits.push('歲破——太歲'+yz+'正沖本宮'+zs[k]);sc+=3;break}
+    }
+    /* 三合:流年支與本宮之支同屬一局(同支者已計入值年,不重複) */
+    for(var i=0;i<SANHE.length;i++){
+      var g=SANHE[i];
+      if(g.indexOf(yz)<0)continue;
+      var mate=zs.filter(function(z){return g.indexOf(z)>=0 && z!==yz})[0];
+      if(mate){hits.push('三合'+g.join('')+'局,'+yz+'會本宮'+mate);sc+=1;break}
+    }
+    if(!hits.length)continue;
+    out.push({year:y, gz:yearGZ(y), zhi:yz, annStar:a, score:sc,
+              level: sc>=5?'重':sc>=3?'中':'輕', reasons:hits});
+  }
+  return out.sort(function(a,b){return b.score-a.score||a.year-b.year});
+}
+/* 給判語用的一句話 */
+function yingqiText(list,n){
+  if(!list||!list.length)return '未來數年內無明顯引動之年,可從容安排。';
+  var top=list.slice(0,n||3);
+  return top.map(function(x){
+    return x.year+'('+x.gz+'年,'+x.level+')——'+x.reasons.join('、');
+  }).join(';');
+}
+
 g.BPE={
+  ZHI:ZHI,GAN:GAN,PAL_ZHI:PAL_ZHI,yearZhi:yearZhi,yearGZ:yearGZ,
+  yearStar:yearStar,yearChart:yearChart,chong:chong,
+  yingqi:yingqi,yingqiText:yingqiText,
   M24:M24,FLY:FLY,PAL_M:PAL_M,NUM2PAL:NUM2PAL,PAL2NUM:PAL2NUM,
   palaceOf:palaceOf,fly:fly,xkChart:xkChart,
   youxing:youxing,JI_X:JI_X,TRIB:TRIB,XSTAR:XSTAR,
