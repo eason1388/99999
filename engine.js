@@ -306,27 +306,39 @@ function yearFacts(y){
     wu:palOfStar(ann,5), er:palOfStar(ann,2),
     wenchang:palOfStar(ann,4), cai:palOfStar(ann,8), wang:palOfStar(ann,9)};
 }
-/* 流年星疊本宅盤,逐宮出判語。chart 為 xkChart 結果,可為 null */
+/* 流年星疊本宅盤,逐宮出判語。chart 為 xkChart 結果,可為 null。
+   ⚠ tags 分兩類:
+     yr  = 太歲、歲破、三煞、五黃二黑落宮 —— 全年共通,家家戶戶一樣
+     own = 與「本宅盤」交互作用才成立者 —— 只有這類能用來比較案件輕重
+   排序若把 yr 也算進去,每間房子都會同分,名單就失去意義。         */
 function annualPalace(chart,pal,y){
   var f=yearFacts(y), a=f.chart[pal];
   var m=chart?chart.mountain[pal]:0, v=chart?chart.facing_stars[pal]:0;
-  var tags=[], lv=0;
-  if(a===5){tags.push('五黃到宮');lv+=3}
-  if(a===2){tags.push('二黑到宮');lv+=2}
-  if(f.taisui===pal){tags.push('太歲方');lv+=1}
-  if(f.suipo===pal){tags.push('歲破方');lv+=2}
-  if(f.sansha===pal){tags.push('三煞方');lv+=2}
-  /* 二五交加:流年與宅盤一為二、一為五 */
-  var pair=[a,m,v];
-  if(pair.indexOf(5)>=0&&pair.indexOf(2)>=0){tags.push('二五交加');lv+=3}
-  if(a===3&&(m===7||v===7)||a===7&&(m===3||v===3)){tags.push('鬥牛煞(三七)');lv+=2}
+  var yr=[], own=[], lv=0, own_lv=0;
+  if(a===5)yr.push('五黃到宮');
+  if(a===2)yr.push('二黑病符到宮');
+  if(f.taisui===pal)yr.push('太歲方');
+  if(f.suipo===pal)yr.push('歲破方');
+  if(f.sansha===pal)yr.push('三煞方');
+  lv=yr.length?(a===5?3:a===2?2:0)+(f.suipo===pal?2:0)+(f.sansha===pal?2:0)+(f.taisui===pal?1:0):0;
+
   if(chart){
-    if(a===chart.period){tags.push('流年旺星到宮');lv-=2}
-    if(a===4&&(m===1||v===1)){tags.push('一四同宮利文昌');lv-=2}
-    if(a===8||a===9){lv-=1}
+    /* 二五交加:流年與宅盤之間一為二、一為五,主病災,最忌 */
+    var pair=[a,m,v];
+    if(pair.indexOf(5)>=0&&pair.indexOf(2)>=0){own.push('二五交加');own_lv+=5}
+    /* 流年凶星再臨本已為凶之宮,凶上加凶 */
+    if((a===5||a===2)&&(m===5||m===2||v===5||v===2)&&own.indexOf('二五交加')<0){
+      own.push('流年凶星疊本宅凶星');own_lv+=3}
+    if((a===3&&(m===7||v===7))||(a===7&&(m===3||v===3))){own.push('鬥牛煞(三七疊臨)');own_lv+=2}
+    if(a===chart.period){own.push('流年旺星到宮');own_lv-=2}
+    if(a===4&&(m===1||v===1)){own.push('一四同宮利文昌');own_lv-=2}
+    if(a===9&&(m===9||v===9)){own.push('九紫喜慶重疊');own_lv-=2}
   }
-  return{pal:pal, ann:a, mt:m, fc:v, tags:tags, level:lv,
-    kind: lv>=4?'重':lv>=2?'中':lv<=-2?'吉':'平'};
+  var tags=own.concat(yr);
+  return{pal:pal, ann:a, mt:m, fc:v, hasChart:!!chart,
+         tags:tags, yrTags:yr, ownTags:own,
+         level:lv+own_lv, ownLevel:own_lv,
+         kind:(lv+own_lv)>=4?'重':(lv+own_lv)>=2?'中':(lv+own_lv)<=-2?'吉':'平'};
 }
 
 g.BPE={

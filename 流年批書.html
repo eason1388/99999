@@ -96,7 +96,7 @@ td.c{text-align:center;white-space:nowrap}
 
 <script src="lock.js?v=6"></script>
 <script src="report.js"></script>
-<script src="engine.js?v=3"></script>
+<script src="engine.js?v=4"></script>
 <script src="case.js?v=7"></script>
 <script>
 var CKEY='fsc_cases', AKEY='fsc_active';
@@ -105,6 +105,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
   return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
 var GRID=[['巽','離','坤'],['震','中','兌'],['艮','坎','乾']];
 var PALDIR={坎:'正北',艮:'東北',震:'正東',巽:'東南',離:'正南',坤:'西南',兌:'正西',乾:'西北'};
+/* 五黃、三煞、歲破常落同一方,列出來要去重,否則會出現「正北、正北」 */
+function dedupe(a){var o=[];a.forEach(function(x){if(x&&o.indexOf(x)<0)o.push(x)});return o}
 
 /* 立春之後才換年。一月批下一年的書沒有意義,二月中以後才提醒明年。 */
 function defaultYear(){
@@ -125,14 +127,15 @@ function paintFacts(y){
   var f=BPE.yearFacts(y);
   document.getElementById('facts').innerHTML=
    '<div class="facts"><h3>'+y+' 年（'+f.gz+'）流年總覽</h3><div class="fg">'+
-   [['中宮入中',f.centre+'白紫'],['太歲方',PALDIR[f.taisui]+'（'+f.taisuiZhi+'）'],
+   [['入中之星',BPE.STAR_NM[f.centre]],['太歲方',PALDIR[f.taisui]+'（'+f.taisuiZhi+'）'],
     ['歲破方',PALDIR[f.suipo]+'（'+f.suipoZhi+'）'],['三煞方',f.sanshaTx||'—'],
     ['五黃到',PALDIR[f.wu]],['二黑到',PALDIR[f.er]],
     ['文昌到',PALDIR[f.wenchang]],['旺氣到',PALDIR[f.wang]]]
    .map(function(x){return '<div class="fi"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('')+
    '</div><div style="font-size:12.5px;opacity:.72;margin-top:9px;line-height:1.8">'+
-   '本年<b style="color:#E58A79">'+PALDIR[f.wu]+'、'+PALDIR[f.er]+'、'+(f.sanshaTx||'')+'、'+PALDIR[f.suipo]+
-   '</b>諸方忌動土、修造、開門、放水;臥床爐灶亦宜避開。</div></div>';
+   '本年<b style="color:#E58A79">'+dedupe([PALDIR[f.wu],PALDIR[f.er],f.sanshaTx,PALDIR[f.suipo]]).join('、')+
+   '</b>諸方忌動土、修造、開門、放水;臥床爐灶亦宜避開。'+
+   '<br><span style="opacity:.75">以上為全年共通,家家戶戶皆同。下方名單的輕重,只依各宅本身盤局與流年的交互而定。</span></div></div>';
 }
 
 /* ── 二、掃描全部案件 ── */
@@ -149,38 +152,59 @@ function scanAll(){
   var rows=all.map(function(c){
     var ch=chartOf(c);
     var pals=['坎','艮','震','巽','離','坤','兌','乾'];
-    var bad=[],good=[];
+    var bad=[],good=[],cells=[];
     pals.forEach(function(p){
-      var a=BPE.annualPalace(ch,p,y);
+      var a=BPE.annualPalace(ch,p,y); cells.push(a);
       if(a.kind==='重'||a.kind==='中')bad.push(a);
       else if(a.kind==='吉')good.push(a);
     });
     bad.sort(function(x,z){return z.level-x.level});
-    /* 大門所在宮若中招,優先度再拉高 */
-    var doorPal=(c.survey&&c.survey.door&&c.survey.door.dir)?BPE.palaceOf(c.survey.door.dir):null;
-    var doorHit=doorPal&&bad.some(function(b){return b.pal===doorPal});
-    var score=bad.reduce(function(s,b){return s+b.level},0)+(doorHit?4:0);
-    return{c:c,ch:ch,bad:bad,good:good,doorPal:doorPal,doorHit:doorHit,score:score};
+
+    /* ⚠ 排序只能看「本宅專屬」的因素。太歲、歲破、三煞、五黃落宮是全年共通,
+       家家戶戶都一樣,算進去會讓每一筆同分,名單就沒有意義。          */
+    var score=0;
+    if(ch){
+      cells.forEach(function(a){ if(a.ownLevel>0)score+=a.ownLevel });   // 宅盤×流年交互
+      var doorPal=(c.survey&&c.survey.door&&c.survey.door.dir)?BPE.palaceOf(c.survey.door.dir):null;
+      var key=[ch.sitPal,ch.facePal].concat(doorPal?[doorPal]:[]);
+      cells.forEach(function(a){                                        // 凶星犯要方才加重
+        if(key.indexOf(a.pal)<0)return;
+        if(a.ann===5)score+=4; else if(a.ann===2)score+=2;
+        if(a.yrTags.indexOf('歲破方')>=0)score+=2;
+        if(a.yrTags.indexOf('三煞方')>=0)score+=1;
+      });
+      var doorHit=doorPal&&cells.some(function(a){
+        return a.pal===doorPal&&(a.ann===5||a.ann===2||a.ownLevel>0)});
+      if(doorHit)score+=4;
+      return{c:c,ch:ch,bad:bad,good:good,cells:cells,doorPal:doorPal,doorHit:doorHit,score:score};
+    }
+    return{c:c,ch:null,bad:[],good:[],cells:cells,doorPal:null,doorHit:false,score:-1};
   }).sort(function(a,b){return b.score-a.score});
 
+  var f0=BPE.yearFacts(y);
   list.innerHTML=rows.map(function(r,i){
-    var lv=r.score>=10?3:r.score>=6?2:r.score>=2?1:0;
+    var lv = r.score<0 ? 0 : r.score>=9?3 : r.score>=5?2 : r.score>=2?1 : 0;
+    var label = r.score<0?'待補資料' : lv>=3?'急需回訪' : lv===2?'建議回訪' : lv===1?'可回訪' : '例行問候';
     var say;
     if(!r.ch){
-      say='此案缺坐山或元運,無法批流年。<b>先補資料再聯絡。</b>';
-    }else if(!r.bad.length){
-      say='本年無凶星犯及要方,<b>可作例行問候</b>,順帶提醒本年'+PALDIR[BPE.yearFacts(y).wu]+'忌動土。';
+      say='此案缺坐山或元運,無法批流年。<b>先補齊資料</b>,補完這裡就會自動排進名單。';
+    }else if(r.score<2){
+      say='本年凶星未犯本宅坐、向與大門,<b>可作例行問候</b>,順帶提醒本年'+PALDIR[f0.wu]+
+          '(五黃)、'+PALDIR[f0.er]+'(二黑)忌動土修造。';
     }else{
-      var t=r.bad.slice(0,2).map(function(b){return PALDIR[b.pal]+'('+b.tags.join('、')+')'}).join('、');
+      var own=r.cells.filter(function(a){return a.ownLevel>0});
+      var t=own.length
+        ? own.slice(0,2).map(function(a){return PALDIR[a.pal]+'('+a.ownTags.join('、')+')'}).join('、')
+        : r.bad.slice(0,2).map(function(b){return PALDIR[b.pal]+'('+b.tags.join('、')+')'}).join('、');
       say='本年 <b>'+t+'</b>。'+
         (r.doorHit?'<b style="color:#F0A797">凶星正犯大門所在的'+PALDIR[r.doorPal]+'方,務必優先聯絡。</b>':'')+
-        '可告知屋主:此數方今年忌動土修造,並建議依批書調整。';
+        '可告知屋主此數方今年忌動土修造,並建議依批書調整。';
     }
     return '<div class="case'+(lv>=3?' hot':'')+'">'+
       '<div class="ch"><b>'+esc(r.c.name||'未命名')+'</b>'+
-      '<span class="meta">'+esc(r.c.type||'')+'・'+(r.ch?r.ch.sitting+'山'+r.ch.facing+'向 '+r.ch.period+'運':'資料不全')+
+      '<span class="meta">'+esc(r.c.type||'')+'・'+(r.ch?r.ch.sitting+'山'+r.ch.facing+'向 '+r.ch.period+'運':'缺坐向')+
       (r.c.date?'・勘於'+r.c.date:'')+'</span><span class="sp"></span>'+
-      '<span class="lv lv'+lv+'">'+(lv>=3?'急需回訪':lv===2?'建議回訪':lv===1?'可回訪':'例行問候')+'</span></div>'+
+      '<span class="lv lv'+lv+'">'+label+'</span></div>'+
       (r.c.phone||r.c.addr?'<div class="meta" style="font-size:12px;opacity:.6">'+esc(r.c.addr||'')+(r.c.phone?'　'+esc(r.c.phone):'')+'</div>':'')+
       '<div class="say">'+say+'</div>'+
       '<div class="acts">'+
@@ -226,8 +250,9 @@ function makeDoc(id,y){
 
   h+='<h4>參　本年須避之方</h4>';
   h+='<div class="box warn"><b>忌動土、修造、開門、放水:</b>'+
-     PALDIR[f.wu]+'（五黃）、'+PALDIR[f.er]+'（二黑）、'+(f.sanshaTx||'')+'（三煞）、'+
-     PALDIR[f.suipo]+'（歲破）。太歲在'+PALDIR[f.taisui]+',宜靜不宜動。<br>'+
+     dedupe([PALDIR[f.wu]+'（五黃）',PALDIR[f.er]+'（二黑）',
+             (f.sanshaTx?f.sanshaTx+'（三煞）':null),PALDIR[f.suipo]+'（歲破）']).join('、')+
+     '。太歲在'+PALDIR[f.taisui]+',宜靜不宜動。<br>'+
      '上述諸方今年若須施工,務必先擇日並知會本堂。</div>';
   if(bad.length){
     h+='<table><tr><th>方位</th><th>本年犯</th><th>主應</th><th>建議</th></tr>';
