@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>主訴反查・抱朴隨緣堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#0F0C0A;color:#EDE7DA;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;font-size:15px;line-height:1.78}
+button{color:inherit;font-family:inherit}
+.wrap{max-width:840px;margin:0 auto;padding:0 14px 34px}
+.hero{text-align:center;padding:20px 16px 15px;border-bottom:1px solid rgba(201,169,106,.22)}
+.hero h1{font-family:'Noto Serif TC',serif;font-size:22px;letter-spacing:.14em;color:#E0C285;font-weight:900}
+.hero p{font-size:12.5px;opacity:.62;margin-top:5px}
+.note{background:rgba(201,169,106,.08);border-left:3px solid #C9A96A;border-radius:0 11px 11px 0;padding:12px 15px;font-size:13px;margin:13px 0;line-height:1.85}
+.sym{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:8px;margin-bottom:12px}
+.sym button{min-height:56px;border:1px solid rgba(201,169,106,.3);background:#221C16;border-radius:12px;font-size:14.5px;cursor:pointer;padding:8px 6px;line-height:1.4}
+.sym button small{display:block;font-size:11px;opacity:.55;margin-top:2px}
+.sym button.on{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent;font-weight:700}
+.sym button.on small{opacity:.72}
+.tools{display:flex;gap:9px;margin-bottom:12px}
+.tools button{flex:1;min-height:48px;border-radius:12px;font-size:14.5px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,106,.4);background:#221C16}
+.tools button.pri{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410;border-color:transparent}
+.blk{background:#1A1613;border:1px solid rgba(201,169,106,.22);border-radius:14px;padding:15px 17px;margin-bottom:11px}
+.blk h3{font-family:'Noto Serif TC',serif;font-size:16px;color:#E0C285;letter-spacing:.1em;margin-bottom:9px}
+.chk{border-top:1px solid rgba(201,169,106,.13);padding:11px 0}
+.chk:first-of-type{border-top:0}
+.ch1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ch1 b{font-family:'Noto Serif TC',serif;font-size:15.5px;color:#F0D9A0}
+.pri3{font-size:11.5px;border-radius:99px;padding:3px 10px;font-weight:700;white-space:nowrap}
+.p-hot{background:rgba(229,138,121,.2);color:#F0A797}
+.p-mid{background:rgba(224,169,138,.16);color:#E0A88A}
+.p-low{background:rgba(201,169,106,.15);color:#E0C285}
+.why{font-size:12px;opacity:.68}
+.det{font-size:13.5px;line-height:1.85;margin-top:5px}
+.det .live{color:#8AB0CE}
+.empty{text-align:center;padding:30px 18px;opacity:.6;font-size:14px;line-height:2}
+.foot{font-size:11.5px;opacity:.45;text-align:center;padding:24px 10px 8px;line-height:1.85}
+@media print{.hero,.sym,.tools{display:none!important}body{background:#fff;color:#000}}
+</style></head><body>
+<div class="hero"><h1>主 訴 反 查</h1><p>客戶說症狀・系統列出該查哪裡</p></div>
+<div class="wrap">
+  <div class="note">客戶坐下來先說的往往不是「我家坐向不好」,而是「我最近一直睡不好」。這裡把主訴反過來對應到<b>該檢核的方位與項目</b>,現場照單走一遍就不會漏。<b>選好主訴後,若已指定案件,系統會再用本宅盤標出哪幾項真的中了。</b></div>
+  <div class="sym" id="sym"></div>
+  <div class="tools"><button class="pri" id="go">產生查核清單</button><button id="clr">清除</button></div>
+  <div id="out"></div>
+  <div class="foot">本清單為現場查核之提示,非診斷結論。實際吉凶仍須以羅盤實測與現場所見為準。<br>分析結果僅供參考,不構成醫療、財務或法律建議。</div>
+</div>
+<script src="lock.js?v=6"></script>
+<script src="report.js"></script>
+<script src="engine.js?v=4"></script>
+<script src="case.js?v=7"></script>
+<script>
+var SYM=[
+ {k:'sleep',n:'睡不好・多夢',s:'失眠、淺眠、易驚醒',chk:[
+   {t:'主臥床位',w:5,pal:'山星',why:'山星主人丁與健康',d:'看床頭方位之山星。二黑五黃主病;三碧七赤主驚擾。同時看床頭是否靠實牆。'},
+   {t:'床頭樑壓',w:5,why:'最直接的物理干擾',d:'床頭正上方有無橫樑、風管、吊櫃。裝潢包平者仍要問屋主原始樑位。'},
+   {t:'鏡照床',w:4,why:'夜間視覺殘影確實干擾睡眠',d:'梳妝鏡、衣櫃鏡門、電視螢幕是否正照床鋪,尤其照到頭部。'},
+   {t:'床頭無靠',w:4,why:'無靠山則潛意識戒備',d:'床頭是否靠窗、靠廁所牆、靠走道。靠窗者最常見。'},
+   {t:'聲煞・光煞',w:3,why:'物理性干擾最容易被忽略',d:'臨主幹道、鐵路、宮廟、對面招牌強光或玻璃反光。務必實地在夜間確認。'},
+   {t:'房門沖床',w:3,why:'氣直沖臥處',d:'房門、廁所門是否正對床。'}]},
+ {k:'money',n:'破財・存不住錢',s:'漏財、投資失利、開銷失控',chk:[
+   {t:'大門納氣',w:5,pal:'向星',why:'向星主財,大門為全宅唯一總氣口',d:'大門所在宮之向星。當旺進氣則財路通;二黑五黃則氣口帶病。'},
+   {t:'穿堂煞',w:5,why:'內煞第一常見的漏財格局',d:'站門口能否一眼望穿到後陽台或後窗。這一項幾乎每場都要看。'},
+   {t:'廁所壓旺方',w:5,pal:'向星',why:'污穢壓住當旺向星',d:'廁所是否落在當旺向星或財位。若是,主漏財且是慢性的。'},
+   {t:'財位狀況',w:4,why:'財位宜靜宜聚',d:'財位是否被走道穿過、堆雜物、開大窗漏氣、或作成廁所儲藏。'},
+   {t:'樓梯沖門',w:3,why:'動氣把旺氣帶走',d:'樓梯是否正對大門,尤其下行者。'},
+   {t:'割腳煞・反弓',w:3,why:'外局主財之來去',d:'屋外水路道路是弓抱還是弓背,是否貼近屋基。'}]},
+ {k:'health',n:'病痛纏身',s:'久病、慢性病、家人輪流生病',chk:[
+   {t:'二黑五黃所在',w:5,pal:'凶星',why:'二黑病符、五黃廉貞為病之根',d:'找出宅盤與流年二黑五黃所落之宮,對照該宮所主之人與臟腑。二五交加者最重。'},
+   {t:'臥床與座位',w:5,pal:'山星',why:'久待之處影響最深',d:'床位、常坐位是否落在二黑五黃之方。'},
+   {t:'爐灶方位',w:4,why:'病從口入',d:'灶位是否壓凶方(宜)或壓旺方(忌);灶背後是否為廁所牆。'},
+   {t:'廁所與濕氣',w:4,why:'穢濕之氣主病',d:'廁所是否居中宮、是否長期潮濕不通風。'},
+   {t:'採光通風',w:3,why:'最務實的一項',d:'該房是否終年不見光、空氣不流通。此項改善往往立竿見影。'},
+   {t:'電磁煞',w:3,why:'有現代依據',d:'附近有無高壓電塔、變電箱、基地台;可實測作客觀依據。'}]},
+ {k:'quarrel',n:'口舌是非・家人不睦',s:'爭吵、官非、小人',chk:[
+   {t:'三碧七赤所在',w:5,pal:'凶星',why:'三碧主是非、七赤主口舌',d:'找出三七所落之宮。三七疊臨為爭訟之象,尤其與流年三七相會之年。'},
+   {t:'門對門',w:4,why:'兩門相沖主兩房不和',d:'房門對房門、房門對廁門。住該二房之人最易起摩擦。'},
+   {t:'尖角煞',w:4,why:'尖銳主衝突',d:'屋內外有無尖角正對門窗或座位。'},
+   {t:'廚廁相鄰',w:3,why:'水火交戰',d:'廚房與廁所是否共牆或同門進出。'},
+   {t:'大門與明堂',w:3,why:'氣口不清則人事不清',d:'門前是否雜亂、堆物、光線陰暗。'}]},
+ {k:'study',n:'學業・考試不順',s:'孩子讀不下去、考不上',chk:[
+   {t:'四綠文昌位',w:5,pal:'文昌',why:'四綠主文,一四同宮尤利',d:'找出宅盤四綠與流年四綠所在。書桌宜置此方。'},
+   {t:'書桌座向',w:5,why:'坐有靠、面開闊',d:'座位背後是否有實牆可靠,忌背門、背窗、背走道。'},
+   {t:'臥房方位',w:4,pal:'八宅',why:'學子宜居本命四吉方',d:'以孩子的命卦取其生氣、天醫、延年、伏位之房。'},
+   {t:'房內雜亂與電子',w:3,why:'最直接的干擾源',d:'書桌是否兼作遊戲桌、房內有無電視遊戲機。'},
+   {t:'樑壓書桌',w:3,why:'壓則思路滯',d:'書桌上方有無橫樑或吊櫃壓迫。'}]},
+ {k:'love',n:'感情・婚姻不順',s:'桃花不現、夫妻失和、難成家',chk:[
+   {t:'延年方',w:5,pal:'八宅',why:'延年主感情與壽元',d:'以屋主命卦取延年方,宜作主臥或常待之處。'},
+   {t:'主臥格局',w:5,why:'夫妻宮之實體',d:'主臥是否過大過小、床是否一邊靠牆、房內有無鏡照床。'},
+   {t:'桃花位',w:4,why:'催動人緣',d:'依屋主生年三合取桃花位;宜置鮮花水養,忌枯萎。'},
+   {t:'廁所壓延年',w:4,why:'吉方受污',d:'廁所是否壓在延年或主臥所在之宮。'},
+   {t:'孤峰・無靠',w:3,why:'無依則孤',d:'房屋是否四周空曠獨高、床頭是否無靠。'}]},
+ {k:'career',n:'事業・工作不順',s:'升遷無望、生意清淡、部屬難帶',chk:[
+   {t:'向首與大門',w:5,pal:'向星',why:'向首主事業與外緣',d:'向首宮之向星旺衰,大門是否得旺氣。'},
+   {t:'辦公座向',w:5,pal:'八宅',why:'坐吉向吉',d:'以命卦取生氣方為座向;背後宜實牆,忌背門背窗。'},
+   {t:'明堂',w:4,why:'明堂主前程',d:'門前是否開闊平整,或逼仄傾瀉。'},
+   {t:'人格與總格',w:3,why:'姓名亦為後天之助',d:'若客戶有意改名,可查其人格、總格數理與三才配置。'},
+   {t:'流年引動',w:3,why:'時機問題',d:'查應期——是否正逢凶星引動之年,若是則宜守不宜攻。'}]},
+ {k:'child',n:'子女問題',s:'叛逆、體弱、不親近',chk:[
+   {t:'地格與子女宮',w:4,why:'地格主前運與子女',d:'姓名地格數理;宅則看子女房所在之宮。'},
+   {t:'子女房方位',w:5,pal:'八宅',why:'宜居其本命四吉方',d:'以孩子命卦取吉方安床;忌居絕命、五鬼之方。'},
+   {t:'長男長女對應宮',w:4,pal:'金鎖',why:'震主長男、巽主長女',d:'金鎖玉關:震、巽、艮、兌四宮之砂水是否違訣。'},
+   {t:'房內形煞',w:3,why:'孩子更敏感',d:'樑壓、鏡照、門沖、床頭無靠。'}]}
+];
+var picked={}, PALDIR={坎:'正北',艮:'東北',震:'正東',巽:'東南',離:'正南',坤:'西南',兌:'正西',乾:'西北'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
+  return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+function curCase(){
+  try{var id=localStorage.getItem('fsc_active'); if(!id)return null;
+    var a=JSON.parse(localStorage.getItem('fsc_cases')||'[]');
+    for(var i=0;i<a.length;i++)if(String(a[i].id)===String(id))return a[i];
+  }catch(e){} return null; }
+function chartOf(c){
+  if(!c||!c.sit||!c.per)return null;
+  var p=parseInt(c.per,10);
+  if(!(p>=1&&p<=9)||BPE.M24.indexOf(c.sit)<0)return null;
+  try{return BPE.xkChart(p,c.sit)}catch(e){return null} }
+document.getElementById('sym').innerHTML=SYM.map(function(s){
+  return '<button data-k="'+s.k+'">'+s.n+'<small>'+s.s+'</small></button>'}).join('');
+document.querySelectorAll('#sym button').forEach(function(b){
+  b.onclick=function(){picked[b.dataset.k]=!picked[b.dataset.k];
+    b.classList.toggle('on',!!picked[b.dataset.k]);}; });
+document.getElementById('clr').onclick=function(){
+  picked={};document.querySelectorAll('#sym button').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('out').innerHTML=''; };
+document.getElementById('go').onclick=function(){
+  var ks=Object.keys(picked).filter(function(k){return picked[k]});
+  var o=document.getElementById('out');
+  if(!ks.length){o.innerHTML='<div class="blk"><div class="empty">請先點選客戶的主訴,可複選。</div></div>';return}
+  var c=curCase(), ch=chartOf(c);
+  var map={};
+  ks.forEach(function(k){
+    var s=SYM.filter(function(x){return x.k===k})[0];
+    s.chk.forEach(function(it){
+      var key=it.t;
+      if(!map[key])map[key]=Object.assign({},it,{w:0,from:[]});
+      map[key].w+=it.w; map[key].from.push(s.n); }); });
+  var list=Object.keys(map).map(function(k){return map[k]}).sort(function(a,b){return b.w-a.w});
+  var h='<div class="blk"><h3>查核清單</h3>';
+  h+='<div style="font-size:13px;opacity:.8;margin-bottom:8px">主訴:'+
+     ks.map(function(k){return SYM.filter(function(x){return x.k===k})[0].n}).join('、')+
+     (c?'　案件:'+esc(c.name||'')+(ch?'('+ch.sitting+'山'+ch.facing+'向 '+ch.period+'運)':''):'　未指定案件')+'</div>';
+  list.forEach(function(it){
+    var lvl=it.w>=9?'p-hot':it.w>=5?'p-mid':'p-low';
+    var lab=it.w>=9?'必查':it.w>=5?'應查':'可查';
+    h+='<div class="chk"><div class="ch1"><b>'+it.t+'</b><span class="pri3 '+lvl+'">'+lab+'</span>'+
+      '<span class="why">'+it.why+(it.from.length>1?'　(主訴:'+it.from.join('、')+')':'')+'</span></div>'+
+      '<div class="det">'+it.d+live(it,ch)+'</div></div>'; });
+  h+='</div>';
+  if(!ch){h+='<div class="blk"><div class="empty">此案尚未填坐山與元運。<br>補齊之後,系統會再用本宅盤直接標出「哪幾項真的中了」。</div></div>';}
+  o.innerHTML=h; o.scrollIntoView({behavior:'smooth',block:'start'}); };
+function live(it,ch){
+  if(!ch||!it.pal)return '';
+  var pals=['坎','艮','震','巽','離','坤','兌','乾'], out=[];
+  if(it.pal==='凶星'){
+    pals.forEach(function(p){ var m=ch.mountain[p], f=ch.facing_stars[p];
+      if(m===2||m===5||f===2||f===5)out.push(PALDIR[p]+'(山'+m+'向'+f+')'); });
+    return out.length?'<br><span class="live">本宅實算:二黑五黃落於 '+out.join('、')+'</span>':''; }
+  if(it.pal==='文昌'){
+    pals.forEach(function(p){ if(ch.mountain[p]===4||ch.facing_stars[p]===4)out.push(PALDIR[p]) });
+    return out.length?'<br><span class="live">本宅實算:四綠在 '+out.join('、')+'</span>':''; }
+  if(it.pal==='向星'){
+    var best=[]; pals.forEach(function(p){ if(ch.facing_stars[p]===ch.period)best.push(PALDIR[p]) });
+    var bad=[]; pals.forEach(function(p){ if(ch.facing_stars[p]===2||ch.facing_stars[p]===5)bad.push(PALDIR[p]) });
+    return '<br><span class="live">本宅實算:當旺向星在 '+(best.join('、')||'—')+
+      (bad.length?';向星二五在 '+bad.join('、'):'')+'</span>'; }
+  if(it.pal==='山星'){
+    var b2=[]; pals.forEach(function(p){ if(ch.mountain[p]===2||ch.mountain[p]===5)b2.push(PALDIR[p]) });
+    var g2=[]; pals.forEach(function(p){ if(ch.mountain[p]===ch.period)g2.push(PALDIR[p]) });
+    return '<br><span class="live">本宅實算:當旺山星在 '+(g2.join('、')||'—')+
+      (b2.length?';山星二五在 '+b2.join('、'):'')+'</span>'; }
+  if(it.pal==='八宅'){
+    return '<br><span class="live">本宅為 '+ch.sitPal+'宅('+BPE.zhaiGroup(ch.sitPal)+'),四吉方:'+
+      pals.filter(function(p){return BPE.JI_X.has(BPE.youxing(ch.sitPal,p))})
+        .map(function(p){return PALDIR[p]}).join('、')+'</span>'; }
+  if(it.pal==='金鎖'){
+    return '<br><span class="live">到金鎖玉關module點完砂水後,可直接看震、巽、艮、兌四宮是否違訣。</span>'; }
+  return ''; }
+(function sub(n){ if(window.BPCASE&&BPCASE.on){BPCASE.on(function(){
+    if(document.getElementById('out').innerHTML)document.getElementById('go').click();});return}
+  if(n<40)setTimeout(function(){sub(n+1)},100); })(0);
+</script>
+</body></html>
