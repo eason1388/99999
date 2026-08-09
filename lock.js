@@ -10,7 +10,7 @@
 'use strict';
 var KEY='bpsy_lic_v1', LINE_ID='fengshui1388', PRICE='NT$699 永久解碼';
 // 線上刷卡購買頁(Google Apps Script 部署後把網址貼進來,留空則只顯示 LINE)
-var BUY_URL='';
+var BUY_URL='https://script.google.com/macros/s/AKfycbyPQKpwFDieQBgJsS3Y_N7sL4opTW5gfAWNwwfsjK550dLYhf6P5Eyo8ZgisytPr3Q6/exec';
 var ABC='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';           // 去掉 0O1I,避免抄錯
 
 function h32(s){var x=2166136261>>>0;for(var i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0}return x>>>0}
