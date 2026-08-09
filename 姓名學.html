@@ -13,7 +13,16 @@ button,input,select{color:inherit;font-family:inherit}
 .hero p{font-size:12.5px;opacity:.62;margin-top:5px}
 .box{background:#1A1613;border:1px solid rgba(201,169,106,.22);border-radius:14px;padding:15px 17px;margin-top:12px}
 .box h3{font-family:'Noto Serif TC',serif;font-size:16px;color:#E0C285;letter-spacing:.1em;margin-bottom:10px}
-.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.row label{font-weight:700;color:#C9A96A}
+.wx{display:inline-block;min-width:26px;text-align:center;border-radius:6px;padding:1px 6px;font-weight:700;margin:0 2px}
+.wx-木{background:rgba(143,196,154,.2);color:#8FC49A}.wx-火{background:rgba(229,138,121,.2);color:#F0A797}
+.wx-土{background:rgba(201,169,106,.22);color:#E0C285}.wx-金{background:rgba(237,231,218,.16);color:#EDE7DA}
+.wx-水{background:rgba(138,176,206,.22);color:#A8C8E0}
+.pil{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.pil .p{background:#221C16;border:1px solid rgba(201,169,106,.24);border-radius:11px;padding:11px 6px;text-align:center}
+.pil .p b{display:block;font-size:11.5px;color:#C9A96A;letter-spacing:.1em;margin-bottom:3px}
+.pil .p .gz{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:900;color:#F0D9A0;line-height:1.35}
 label{font-size:13px;opacity:.8;min-width:58px}
 input,select{background:#221C16;border:1px solid rgba(201,169,106,.32);border-radius:10px;
   padding:10px 12px;font-size:16px;min-height:44px}
@@ -55,8 +64,7 @@ td.c{text-align:center;white-space:nowrap}
     <div class="row"><label>名　字</label>
       <input id="n1c" class="ch" placeholder="名一" maxlength="1"><input id="n1" type="number" placeholder="劃" min="1">
       <input id="n2c" class="ch" placeholder="名二" maxlength="1"><input id="n2" type="number" placeholder="劃" min="1"></div>
-    <div class="row"><label>出生年</label><input id="by" type="number" placeholder="西元" style="width:110px">
-      <span class="hint" id="zod"></span></div>
+    <div class="row"><label>出生日</label><input id="bd" type="date" style="width:170px"><input id="bt" type="time" style="width:120px"><select id="sex"><option value="1">男</option><option value="0">女</option></select></div><div class="row"><label>出生年</label><input id="by" type="number" placeholder="西元" style="width:110px"><span class="hint" id="zod"></span></div><div class="hint">填完整出生日與時辰,系統會排四柱、判日主強弱、定喜用五行,再反推名字該補什麼。只填年份則僅論生肖。</div>
     <div class="hint"><b style="color:#E0C285">筆劃務必用康熙字典筆劃</b>,與現在的寫法不同。字打進去只是為了報告上好看,<b>算的是你填的劃數</b>——我不內建字典,寧可讓你自己查對,也不給你一個可能算錯的數字。常見特例見下方對照表。</div>
     <div class="row" style="margin-top:12px">
       <button class="btn pri" id="go">開始論名</button><button class="btn" id="prt">列印報告</button></div>
@@ -70,6 +78,7 @@ td.c{text-align:center;white-space:nowrap}
 <script src="lock.js?v=6"></script>
 <script src="report.js"></script>
 <script src="name81.js?v=1"></script>
+<script src="bazi.js?v=1"></script>
 <script src="case.js?v=7"></script>
 <script>
 var B=BPNAME;
@@ -77,6 +86,9 @@ document.getElementById('kx').innerHTML+=B.KANGXI_NOTE.map(function(x){
   return '<tr><td>'+x[0]+'</td><td class="c">'+x[1]+'</td><td>'+x[2]+'</td></tr>'}).join('');
 document.getElementById('s1c').oninput=function(){
   var v=B.SURNAME[this.value.trim()]; if(v)document.getElementById('s1').value=v; };
+document.getElementById('bd').onchange=function(){
+  var v=this.value; if(!v)return;
+  var e=document.getElementById('by'); e.value=parseInt(v.slice(0,4),10); e.oninput.call(e); };
 document.getElementById('by').oninput=function(){
   var y=parseInt(this.value,10);
   document.getElementById('zod').textContent=(y>1900&&y<2200)?('生肖:'+B.zodiacOf(y)):''; };
@@ -114,6 +126,33 @@ document.getElementById('go').onclick=function(){
   if(zod){ var z=B.Z_LIKE[zod];
     h+='<div class="box"><h3>生肖喜忌　'+by+' 年'+zod+'</h3><div class="good"><b>喜用部首</b>　'+z.y+
       '</div><div class="warn"><b>忌用部首</b>　'+z.n+'</div><div class="hint">生肖姓名學看的是字的<b>部首與字義</b>,與筆劃數理是兩套系統,兩者相合最佳;若有衝突,以數理與三才為主、生肖為輔。</div></div>'; }
+  /* ── 八字喜用 ── */
+  var bdv=document.getElementById('bd').value, btv=document.getElementById('bt').value;
+  var fav=null;
+  function WXS(c){return '<span class="wx wx-'+c+'">'+c+'</span>';}
+  if(bdv&&window.BPBAZI){
+    var Y=+bdv.slice(0,4),M2=+bdv.slice(5,7),D2=+bdv.slice(8,10);
+    var hh=btv?(+btv.slice(0,2)+(+btv.slice(3,5))/60):12;
+    var pil=BPBAZI.pillars(Y,M2,D2,hh); fav=BPBAZI.favor(pil);
+    h+='<div class="box"><h3>八字喜用</h3>';
+    h+='<div class="pil">'+[['年柱',pil.year],['月柱',pil.month],['日柱',pil.day],['時柱',pil.hour]]
+      .map(function(x){return '<div class="p"><b>'+x[0]+'</b><span class="gz">'+x[1].gan+'<br>'+x[1].zhi+'</span></div>';}).join('')+'</div>';
+    if(!btv)h+='<div class="hint" style="margin-bottom:8px">未填出生時間,時柱以午時暫代。時柱會影響喜用判斷,建議補填。</div>';
+    h+='<div class="'+(fav.strength.warn?'warn':'act')+'"><b>日主 '+pil.day.gan+WXS(fav.strength.dayWX)+'　'+fav.strength.kind+'</b>(強弱指數 '+fav.strength.score+')<br>'+
+       fav.text.replace(/[木火土金水]/g,function(c){return WXS(c);})+'</div>';
+    if(fav.strength.warn)h+='<div class="warn"><b>需人工判斷</b><br>'+fav.strength.warn+'</div>';
+    h+='<div class="good"><b>名字宜補 '+WXS(fav.primary)+'</b><br>常用部首與字例:'+BPBAZI.WX_RADICAL[fav.primary]+
+       '<br>數理五行亦可取 '+WXS(fav.primary)+'('+BPBAZI.WX_STROKE[fav.primary]+')</div>';
+    var conflict=[];
+    ['人格','地格','總格'].forEach(function(k){
+      var w2=B.wuxing(g[k]);
+      if(fav.avoid.indexOf(w2)>=0)conflict.push(k+' 為'+w2+',屬忌神');
+    });
+    h+=conflict.length
+      ?'<div class="warn"><b>與八字衝突</b><br>'+conflict.join('、')+'。數理雖吉,但補到忌神之五行,力道相抵,建議改字。</div>'
+      :'<div class="good">五格五行未觸及忌神,與八字不相衝。</div>';
+    h+='<div class="hint" style="margin-top:8px">喜用神以扶抑法推算,地支藏干只取本氣。從格、化格、專旺格須人工複核。八字為本、姓名為輔,兩者相合方為上選。</div></div>';
+  }
   var bad=[];
   [['人格',g.人格],['總格',g.總格],['地格',g.地格],['外格',g.外格]].forEach(function(p){
     var d=B.N81[((p[1]-1)%81)+1]; if(d&&d[0]==='凶')bad.push(p[0]+' '+p[1]+'('+d[1]+')'); });
