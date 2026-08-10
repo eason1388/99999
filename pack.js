@@ -107,20 +107,35 @@
      資料包還沒解開時一律回空，不會拋錯。 */
   function proxy(path, isArr){
     var base = isArr ? [] : {};
-    function src(){ return tbl(path); }
+    function pick(){ return tbl(path); }
     try {
       return new Proxy(base, {
-        get: function(t,k){ var s=src(); if(s && (k in Object(s))) return Object(s)[k]; return t[k]; },
-        has: function(t,k){ var s=src(); return (s && (k in Object(s))) || (k in t); },
-        ownKeys: function(t){ var s=src(); return s ? Reflect.ownKeys(Object(s)) : Reflect.ownKeys(t); },
+        get: function(t,k){ var s=pick(); if(s && (k in Object(s))) return Object(s)[k]; return t[k]; },
+        has: function(t,k){ var s=pick(); return (s && (k in Object(s))) || (k in t); },
+        ownKeys: function(t){ var s=pick(); return s ? Reflect.ownKeys(Object(s)) : Reflect.ownKeys(t); },
         getOwnPropertyDescriptor: function(t,k){
-          var s=src();
+          var s=pick();
           if (s && Object.prototype.hasOwnProperty.call(Object(s),k))
             return {value:Object(s)[k], enumerable:true, configurable:true, writable:true};
           return Reflect.getOwnPropertyDescriptor(t,k);
         }
       });
     } catch(e){ return base; }
+  }
+
+
+  /* 取一張判語表：資料包裡存的是原本的字面原文，用到才計算一次。
+     這樣搬遷只是把文字搬家，不動到任何算法。 */
+  var memo = {};
+  function src(path, isArr){
+    if (Object.prototype.hasOwnProperty.call(memo, path)) return memo[path];
+    var s = tbl(path), v = null;
+    if (typeof s === "string" && s){
+      try { v = (new Function("return (" + s + ")"))(); } catch(e){ v = null; }
+    }
+    if (v == null) return isArr ? [] : {};
+    memo[path] = v;
+    return v;
   }
 
   g.BPPACK = {
