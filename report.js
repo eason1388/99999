@@ -81,6 +81,17 @@ function today(){
 /** 主函式:組出報告書並叫起列印 */
 function print_(o){
   o = o || {};
+  /* ── 報告輸出為付費功能 ──
+     可交付的文件是師傅拿去跟客戶收費的東西,列印前先驗授權。 */
+  if (!(window.BPSY && BPSY.ok())) {
+    if (window.BPSY && BPSY.open) {
+      alert('報告輸出為深解功能。\n\nNT$699 一次付清,全站深解與所有報告輸出永久開啟,不限裝置。');
+      BPSY.open();
+    } else {
+      alert('報告輸出需先解碼(NT$699 永久,全站通用)。');
+    }
+    return;
+  }
   css();
   var old = document.getElementById('bp-print');
   if (old) old.remove();
@@ -144,6 +155,21 @@ function button(sel, o){
   t.innerHTML = '列印視窗選「另存為 PDF」即可存檔<br>' +
                 '<span style="opacity:.85">iPhone:分享 → 列印 → 兩指放大 → 存到檔案</span>';
   host.appendChild(t);
+  /* 未解碼時,按鈕明示這是付費功能,避免按了才發現 */
+  try{
+    if(!(window.BPSY && BPSY.ok())){
+      var lockBtn=host.querySelector('[data-bprpt]');
+      if(lockBtn && lockBtn.textContent.indexOf('深解')<0){
+        lockBtn.textContent='🔒 '+lockBtn.textContent.replace(/^🖨\s*/,'')+'(深解功能)';
+        lockBtn.style.opacity='.82';
+      }
+      var tip=document.createElement('div');
+      tip.style.cssText='font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.7;text-align:center';
+      tip.innerHTML='報告輸出需解碼。NT$699 一次付清,<b style="color:#E0C285">全站深解與所有報告永久開啟</b>。';
+      host.appendChild(tip);
+    }
+  }catch(e){}
+
 }
 
 g.BPRPT = { print: print_, button: button, SHOP: SHOP, LINE: LINE };
