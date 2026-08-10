@@ -318,6 +318,29 @@ function makeDoc(id,y){
      '本批書依玄空飛星流年盤疊本宅盤推算,並參太歲、歲破、三煞方位。所載為傳統堪輿學說之推演,'+
      '僅供參考,不構成醫療、財務或法律建議,亦不保證特定結果。</div>';
 
+  /* ── 批書為付費內容 ──
+     回訪名單免費(那是給師傅自己看的工作清單),
+     批書本體是交給客戶的文件,需解碼。 */
+  if(!(window.BPSY && BPSY.ok())){
+    var cut=h.indexOf('<h4>貳');
+    if(cut>0){
+      h=h.slice(0,cut)+
+      '<div style="background:#1A1613;border:1px solid rgba(201,169,106,.45);border-radius:14px;'+
+      'padding:22px 20px;margin-top:14px;text-align:center">'+
+      '<div style="font-family:\'Noto Serif TC\',serif;font-size:17px;color:#E0C285;letter-spacing:.1em;margin-bottom:6px">'+
+      '流年批書・尚未解碼</div>'+
+      '<div style="font-size:13.5px;opacity:.82;line-height:1.95;max-width:440px;margin:0 auto 14px;text-align:left">'+
+      '以下需解碼後開啟:<br>'+
+      '<b style="color:#F0D9A0">貳</b>　流年星疊本宅盤逐宮表<br>'+
+      '<b style="color:#F0D9A0">參</b>　本年須避之方與逐宮化解<br>'+
+      '<b style="color:#F0D9A0">肆</b>　本年可用之方(文昌、旺氣、財位)<br>'+
+      '<b style="color:#F0D9A0">伍</b>　後續應期<br>'+
+      '<span style="opacity:.7">以及 A4 列印輸出</span></div>'+
+      '<div style="font-size:11.5px;opacity:.72;margin-bottom:10px;line-height:1.7">'+
+      'NT$699 一次付清,<b style="color:#E0C285">全站深解與所有報告永久開啟</b></div>'+
+      '<button class="bpsy-btn" data-bpsy-open>🔑 解碼 NT$699 永久</button></div>';
+    }
+  }
   var d=document.getElementById('doc');
   d.innerHTML=h; d.style.display='block';
   d.scrollIntoView({behavior:'smooth',block:'start'});
