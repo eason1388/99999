@@ -317,4 +317,19 @@ window.addEventListener('storage',function(e){if(e.key===AKEY||e.key===CKEY)pain
   document.addEventListener('click',function(){ setTimeout(gate,120) });
 })();
 </script>
+
+<script>
+/* ---- BPGATE-JINSUO-SUM 總斷斷語欄為深解內容 ---- */
+(function(){
+  function run(){
+    if(!(window.BPSY && BPSY.gateSections)) return;
+    BPSY.gateCols('#sum',['\u65b7\u8a9e'],'\u4e8c\u5341\u56db\u5c71\u9010\u5c71\u65b7\u8a9e');
+  }
+  function boot(){
+    if(!(window.BPSY && BPSY.autoGate)) return setTimeout(boot,300);
+    BPSY.autoGate(document.body, run);
+  }
+  boot();
+})();
+</script>
 </body></html>
