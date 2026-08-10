@@ -271,4 +271,50 @@ paint();
   if(n<40)setTimeout(function(){sub(n+1)},100); })(0);
 window.addEventListener('storage',function(e){if(e.key===AKEY||e.key===CKEY)paint()});
 </script>
+
+<script>
+/* ── 逐山斷語與兩派互參為付費內容 ──
+   合訣/違訣判定與總評分數免費(證明工具算得準),
+   斷語、化解、互參為收費部分。 */
+(function(){
+  function card(title,desc){
+    return '<div style="background:#1A1613;border:1px solid rgba(201,169,106,.45);border-radius:12px;'+
+      'padding:16px 15px;margin:8px 0;text-align:center">'+
+      '<div style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:#E0C285;margin-bottom:5px">'+title+'</div>'+
+      '<div style="font-size:12.5px;opacity:.8;line-height:1.85;max-width:420px;margin:0 auto 10px">'+desc+'</div>'+
+      '<div style="font-size:11.5px;opacity:.72;margin-bottom:9px">NT$699 一次付清,'+
+      '<b style="color:#E0C285">全站深解永久開啟</b></div>'+
+      '<button class="bpsy-btn" data-bpsy-open>🔑 解碼 NT$699 永久</button></div>';
+  }
+  function gate(){
+    if(window.BPSY && BPSY.ok())return;
+    /* 逐山斷語:保留合訣/違訣標籤,移除斷語文字 */
+    var txts=document.querySelectorAll('#list .txt');
+    if(txts.length){
+      for(var i=0;i<txts.length;i++)txts[i].parentNode.removeChild(txts[i]);
+      var L=document.getElementById('list');
+      if(L && !L.getAttribute('data-bp-gated')){
+        L.setAttribute('data-bp-gated','1');
+        var d=document.createElement('div');
+        d.innerHTML=card('逐山斷語與化解・尚未解碼',
+          '二十四山各自的應人、應病、應事斷語,以及違訣之方的補砂／見水化解次第。'+
+          '上方合訣違訣判定與總評分數為免費功能。');
+        L.parentNode.insertBefore(d,L);
+      }
+    }
+    /* 兩派互參 */
+    var cc=document.getElementById('cc');
+    if(cc && cc.innerHTML.indexOf('尚未解碼')<0 && cc.querySelector('.cr')){
+      cc.innerHTML='<div class="cc"><h3>與飛星八宅互參</h3>'+
+        card('互參合斷・尚未解碼',
+          '同一宮位並排比對金鎖玉關與玄空飛星八宅的結論,標出雙重凶、雙重吉與需現場複核之處。')+'</div>';
+    }
+    if(window.BPSY && BPSY.bind)BPSY.bind();
+  }
+  var L=document.getElementById('list');
+  try{ if(L)new MutationObserver(gate).observe(L,{childList:true}); }catch(e){}
+  setTimeout(gate,400); setTimeout(gate,1400);
+  document.addEventListener('click',function(){ setTimeout(gate,120) });
+})();
+</script>
 </body></html>
