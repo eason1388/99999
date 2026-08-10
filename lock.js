@@ -300,3 +300,95 @@ theme(); scrollFix();
 document.addEventListener('DOMContentLoaded',function(){ theme(); scrollFix(); bind(); loadCase(); });
 if(document.readyState!=='loading')loadCase();
 })(window);
+
+/* ==============================================================
+   通用付費區塊引擎 v1 —— 抱朴隨緣堂
+   ⚠ 這裡只做「畫面遮蔽」，文字仍在原始碼中。
+     真要防抄，須把內文搬到 GAS 的 PAID 由伺服器配送。
+   ============================================================== */
+(function(){
+  if(!window.BPSY) return;
+  var B = window.BPSY;
+  if(B.gateSections) return;
+
+  (function(){
+    if(document.getElementById('bpsy-gcss')) return;
+    var s = document.createElement('style'); s.id = 'bpsy-gcss';
+    s.textContent = '.bpsy-lockcell{color:#c9a24a;opacity:.75;font-size:15px}';
+    (document.head||document.documentElement).appendChild(s);
+  })();
+
+  function card(t,d){ try{ return B.gatePage(t,d); }catch(e){ return ''; } }
+
+  /* 依標題文字鎖整節：h 之後的兄弟節點，直到遇到同級或更高級標題 */
+  B.gateSections = function(root, rules){
+    if(B.ok()) return;
+    root = (typeof root === 'string') ? document.querySelector(root) : root;
+    if(!root) return;
+    var heads = [].slice.call(root.querySelectorAll('h1,h2,h3,h4'));
+    rules.forEach(function(r){
+      var h = heads.filter(function(x){
+        if(x.getAttribute('data-bp-gated')) return false;
+        return (r.h instanceof RegExp) ? r.h.test(x.textContent) : x.textContent.indexOf(r.h) >= 0;
+      })[0];
+      if(!h) return;
+      h.setAttribute('data-bp-gated','1');
+      var lv = h.tagName, n = h.nextElementSibling, kill = [];
+      while(n){
+        if(/^H[1-6]$/.test(n.tagName) && n.tagName <= lv) break;
+        kill.push(n); n = n.nextElementSibling;
+      }
+      if(!kill.length) return;
+      var d = document.createElement('div');
+      d.innerHTML = card(r.title || h.textContent.replace(/^[\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+\u3001/,'').trim(), r.desc || '');
+      h.parentNode.insertBefore(d, kill[0]);
+      kill.forEach(function(e){ if(e.parentNode) e.parentNode.removeChild(e); });
+    });
+    if(B.bind) B.bind(root);
+  };
+
+  /* 鎖表格的某幾欄：欄位保留，內文換成鎖頭 */
+  B.gateCols = function(root, colNames, note){
+    if(B.ok()) return;
+    root = (typeof root === 'string') ? document.querySelector(root) : root;
+    if(!root) return;
+    var hit = false;
+    [].slice.call(root.querySelectorAll('table')).forEach(function(tb){
+      if(tb.getAttribute('data-bp-gated')) return;
+      var r0 = tb.rows[0]; if(!r0) return;
+      var idx = [];
+      [].slice.call(r0.cells).forEach(function(th,i){
+        if(colNames.some(function(c){ return th.textContent.indexOf(c) >= 0; })) idx.push(i);
+      });
+      if(!idx.length) return;
+      tb.setAttribute('data-bp-gated','1'); hit = true;
+      [].slice.call(tb.rows).slice(1).forEach(function(tr){
+        idx.forEach(function(i){
+          if(tr.cells[i]) tr.cells[i].innerHTML = '<span class="bpsy-lockcell">\ud83d\udd12</span>';
+        });
+      });
+    });
+    if(hit && note !== false){
+      var d = document.createElement('div');
+      d.innerHTML = card(note || '\u9010\u9805\u65b7\u8a9e', '\u8868\u4e2d\u7684\u5224\u65b7\u6587\u5b57\u70ba\u6df1\u89e3\u5167\u5bb9\uff0c\u89e3\u78bc\u5f8c\u5168\u90e8\u986f\u793a\u3002');
+      root.appendChild(d);
+      if(B.bind) B.bind(root);
+    }
+  };
+
+  /* 容器變動後自動重鎖（有次數上限，避免迴圈） */
+  B.autoGate = function(root, fn){
+    root = (typeof root === 'string') ? document.querySelector(root) : root;
+    if(!root) return;
+    var busy = false, runs = 0;
+    function run(){
+      if(busy || runs > 80) return;
+      busy = true; runs++;
+      try{ fn(); }catch(e){}
+      busy = false;
+    }
+    try{ new MutationObserver(run).observe(root, {childList:true, subtree:true}); }catch(e){}
+    setTimeout(run, 300); setTimeout(run, 1200);
+    document.addEventListener('click', function(){ runs = 0; setTimeout(run, 150); });
+  };
+})();
