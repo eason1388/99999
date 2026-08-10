@@ -729,4 +729,44 @@ function render(){
   window.fscP&&window.fscP('ziwei','chart',z.yGZ+'/'+JU_NAME[z.ju]);
 }
 render();
-</script></body></html>
+</script>
+<script>
+/* ── 十二宮深論為付費內容 ──
+   一(格局)、二(四化)免費呈現,讓客戶看得出盤是真的;
+   四(十二宮深論)為逐宮論斷,是拿去跟客戶收費的部分。
+   用 DOM 攔截而非改字串,只鎖第四段,不影響其後章節。 */
+(function(){
+  var D=document.getElementById('detail');
+  if(!D)return;
+  function card(){
+    var c=document.createElement('div');
+    c.style.cssText='background:#1A1613;border:1px solid rgba(201,169,106,.45);border-radius:14px;'+
+      'padding:20px 18px;margin:10px 0;text-align:center';
+    c.innerHTML='<div style="font-family:\'Noto Serif TC\',serif;font-size:16px;color:#E0C285;'+
+      'letter-spacing:.1em;margin-bottom:6px">十二宮深論・尚未解碼</div>'+
+      '<div style="font-size:13px;opacity:.82;line-height:1.9;max-width:430px;margin:0 auto 12px">'+
+      '命宮、兄弟、夫妻、子女、財帛、疾厄、遷移、僕役、官祿、田宅、福德、父母'+
+      '——十二宮逐宮主星廟陷、四化交涉與人事論斷。</div>'+
+      '<div style="font-size:11.5px;opacity:.72;margin-bottom:10px;line-height:1.7">'+
+      'NT$699 一次付清,<b style="color:#E0C285">全站深解永久開啟</b>,非單篇購買</div>'+
+      '<button class="bpsy-btn" data-bpsy-open>🔑 解碼 NT$699 永久</button>';
+    return c;
+  }
+  function gate(){
+    if(window.BPSY && BPSY.ok())return;
+    var hs=Array.prototype.slice.call(D.querySelectorAll('h2'));
+    var h=null;
+    for(var i=0;i<hs.length;i++){ if(hs[i].textContent.indexOf('十二宮深論')>=0){h=hs[i];break} }
+    if(!h || h.getAttribute('data-bp-gated'))return;
+    h.setAttribute('data-bp-gated','1');
+    var rm=[], n=h.nextElementSibling;
+    while(n && n.tagName!=='H2'){ rm.push(n); n=n.nextElementSibling; }
+    rm.forEach(function(x){ x.parentNode && x.parentNode.removeChild(x) });
+    h.parentNode.insertBefore(card(), h.nextSibling);
+    if(window.BPSY && BPSY.bind)BPSY.bind();
+  }
+  try{ new MutationObserver(gate).observe(D,{childList:true}); }catch(e){}
+  setTimeout(gate,300); setTimeout(gate,1200);
+})();
+</script>
+</body></html>
