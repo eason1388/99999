@@ -318,7 +318,7 @@ if(document.readyState!=='loading')loadCase();
     (document.head||document.documentElement).appendChild(s);
   })();
 
-  function card(t,d){ try{ return B.gatePage(t,d); }catch(e){ return ''; } }
+  function card(t,d){ try{ return B.gate('', t, d); }catch(e){ return ''; } }
 
   /* 依標題文字鎖整節：h 之後的兄弟節點，直到遇到同級或更高級標題 */
   B.gateSections = function(root, rules){
@@ -408,7 +408,7 @@ if(document.readyState!=='loading')loadCase();
     root.setAttribute('data-bp-gated','1');
     var kill = kids.slice(keepN);
     var d = document.createElement('div');
-    try{ d.innerHTML = B.gatePage(title || '\u5b8c\u6574\u4f48\u5c40\u5efa\u8b70', desc || ''); }catch(e){}
+    try{ d.innerHTML = B.gate('', title || '\u5b8c\u6574\u4f48\u5c40\u5efa\u8b70', desc || ''); }catch(e){}
     root.insertBefore(d, kill[0]);
     kill.forEach(function(e){ if(e.parentNode) e.parentNode.removeChild(e); });
     if(B.bind) B.bind(root);
