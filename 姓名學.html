@@ -187,4 +187,48 @@ document.getElementById('prt').onclick=function(){
     return; }
   if(n<40)setTimeout(function(){sub(n+1)},100); })(0);
 </script>
+
+<script>
+/* ── 判語與八字喜用為付費內容 ──
+   五格數字、五行、吉凶標記免費(客戶看得到算得出來);
+   數理判語、三才論述、八字喜用與選字建議為收費部分。 */
+(function(){
+  function card(title,desc){
+    return '<div style="background:#221C16;border:1px solid rgba(201,169,106,.4);border-radius:12px;'+
+      'padding:16px 15px;margin:8px 0;text-align:center">'+
+      '<div style="font-family:\'Noto Serif TC\',serif;font-size:15px;color:#E0C285;margin-bottom:5px">'+title+'</div>'+
+      '<div style="font-size:12.5px;opacity:.8;line-height:1.85;max-width:420px;margin:0 auto 10px">'+desc+'</div>'+
+      '<div style="font-size:11.5px;opacity:.72;margin-bottom:9px">NT$699 一次付清,'+
+      '<b style="color:#E0C285">全站深解永久開啟</b></div>'+
+      '<button class="bpsy-btn" data-bpsy-open>🔑 解碼 NT$699 永久</button></div>';
+  }
+  function gate(){
+    if(window.BPSY && BPSY.ok())return;
+    var O=document.getElementById('out');
+    if(!O || !O.innerHTML || O.getAttribute('data-bp-gated'))return;
+    O.setAttribute('data-bp-gated','1');
+    var boxes=O.querySelectorAll('.box');
+    for(var i=0;i<boxes.length;i++){
+      var b=boxes[i], h=b.querySelector('h3'), title=h?h.textContent:'';
+      if(title.indexOf('五格與數理')>=0){
+        /* 保留五格卡片,移除判語表 */
+        var tb=b.querySelector('table'); if(tb)tb.parentNode.removeChild(tb);
+        var d=document.createElement('div');
+        d.innerHTML=card('數理判語・尚未解碼','八十一數理逐格判語、數名與所主。上方五格數字、五行與吉凶標記為免費功能。');
+        b.appendChild(d);
+      } else if(title.indexOf('三才配置')>=0 || title.indexOf('八字喜用')>=0 || title.indexOf('綜合斷語')>=0){
+        var keep=h?h.outerHTML:'';
+        b.innerHTML=keep+card(title.replace(/　.*$/,'')+'・尚未解碼',
+          title.indexOf('八字')>=0
+            ? '四柱排盤、日主強弱、喜用五行,以及名字該補什麼五行、用哪些部首選字。'
+            : (title.indexOf('三才')>=0 ? '天人地三格生剋論述與一生際遇之判。' : '五格與八字是否相衝、該如何調整用字。'));
+      }
+    }
+    if(window.BPSY && BPSY.bind)BPSY.bind();
+  }
+  var g=document.getElementById('go');
+  if(g)g.addEventListener('click',function(){ setTimeout(gate,250); setTimeout(gate,800); });
+  setTimeout(gate,600);
+})();
+</script>
 </body></html>
