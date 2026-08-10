@@ -107,7 +107,7 @@
      資料包還沒解開時一律回空，不會拋錯。 */
   function proxy(path, isArr){
     var base = isArr ? [] : {};
-    function pick(){ return tbl(path); }
+    function pick(){ return src(path, isArr); }   /* 每次存取都重新問，資料包晚點到也不怕 */
     try {
       return new Proxy(base, {
         get: function(t,k){ var s=pick(); if(s && (k in Object(s))) return Object(s)[k]; return t[k]; },
