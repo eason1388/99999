@@ -769,4 +769,22 @@ render();
   setTimeout(gate,300); setTimeout(gate,1200);
 })();
 </script>
+
+<script>
+/* ---- BPGATE-ZIWEI-DAXIAN 大限與流年為深解內容 ---- */
+(function(){
+  function run(){
+    if(!(window.BPSY && BPSY.gateSections)) return;
+    BPSY.gateSections('#detail',[
+      {h:/\u73fe\u884c\u5927\u9650/, title:'\u73fe\u884c\u5927\u9650\u5341\u5e74\u904b', desc:'\u9650\u5bae\u4e3b\u661f\u5ee9\u9677\u3001\u714e\u5fcc\u4ea4\u6d89\u3001\u5341\u5e74\u5409\u51f6\u95dc\u9375\u8207\u8da8\u907f\u6b21\u7b2c\u3002'},
+      {h:/\u6d41\u5e74\u904b\u7a0b/, title:'\u6d41\u5e74\u904b\u7a0b', desc:'\u6d41\u5e74\u547d\u5bae\u5bae\u6027\u3001\u6d41\u5e74\u56db\u5316\u843d\u5bae\u3001\u5e74\u5185\u5409\u51f6\u8207\u61c9\u671f\u3002'}
+    ]);
+  }
+  function boot(){
+    if(!(window.BPSY && BPSY.autoGate)) return setTimeout(boot,300);
+    BPSY.autoGate(document.body, run);
+  }
+  boot();
+})();
+</script>
 </body></html>
