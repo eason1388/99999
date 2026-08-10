@@ -198,12 +198,11 @@ render();
   function run(){
     if(!window.BPSY || !BPSY.gatePage || BPSY.ok()) return;
     var root=document.getElementById('out');
-    if(!root || root.getAttribute('data-bp-gated')) return;
+    if(!root || root.querySelector('.bpsy-wrap')) return;
     var kids=[].slice.call(root.children).filter(function(e){
       return !/^(SCRIPT|STYLE)$/.test(e.tagName) && !e.classList.contains('bpsy-wrap');
     });
     if(kids.length<=3) return;
-    root.setAttribute('data-bp-gated','1');
     var kill=kids.slice(3);
     var d=document.createElement('div');
     d.innerHTML=BPSY.gate('','完整場所佈局','爐灶、主用餐區、包廂、倉儲、庶所、負責人座位等逐項定位與宜忌。');
