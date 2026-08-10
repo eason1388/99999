@@ -414,3 +414,19 @@ if(document.readyState!=='loading')loadCase();
     if(B.bind) B.bind(root);
   };
 })();
+
+/* 判語資料包的金鑰：驗證通過時由 GAS 發下來，存在本機。
+   沒金鑰就解不開 pack.bin，判語一律回空。 */
+(function(){
+  if(!window.BPSY) return;
+  var KK = "bpsy_packkey";
+  window.BPSY.packKey = function(){
+    try { return localStorage.getItem(KK) || null; } catch(e){ return null; }
+  };
+  window.BPSY.setPackKey = function(k){
+    try { if(k) localStorage.setItem(KK, String(k)); } catch(e){}
+    try { if(window.BPPACK) BPPACK.load(String(k||"")); } catch(e){}
+  };
+  /* 頁面一載入就先把資料包叫醒（已快取者幾毫秒就好） */
+  try { if(window.BPPACK) BPPACK.ready(); } catch(e){}
+})();
