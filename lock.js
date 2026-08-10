@@ -45,6 +45,12 @@ function ok(){ try{ return valid(localStorage.getItem(KEY)); }catch(e){ return f
 function save(code){
   if(!valid(code)) return false;
   try{ localStorage.setItem(KEY,'BPSY-'+norm(code).slice(4,10)+'-'+norm(code).slice(10)); }catch(e){}
+  /* 通知伺服器登錄此裝置;失敗不影響解碼(離線也能用)*/
+  try{ verifyRemote(code).then(function(j){
+    if(j&&j.ok===false){ try{localStorage.removeItem(KEY)}catch(e){}
+      alert('此授權碼未通過伺服器驗證,已取消解碼。若確有購買請聯繫 LINE:'+LINE_ID); }
+    else if(j&&j.warn){ console.warn(j.warn); }
+  }); }catch(e){}
   return true;
 }
 function clear(){ try{ localStorage.removeItem(KEY) }catch(e){} }
@@ -227,8 +233,59 @@ function bind(root){
   });
 }
 
+
+/* ══════ 伺服器端驗證與內容配送 ══════
+   深解內容不再放在網頁原始碼裡,改由伺服器驗過授權碼才送。
+   驗過一次即快取於本機,之後離線可讀。                        */
+var API='https://script.google.com/macros/s/AKfycbwKFd6QDy5KL0ql8ImnQS5cbmIV-jzm1vdX3RysbZOTUdbQDY9PHIhLgVVN32Gz8QEZMw/exec';
+var CKEY='bpsy_paid_v1';
+
+function devId(){
+  try{
+    var d=localStorage.getItem('bpsy_dev');
+    if(!d){ d=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+      localStorage.setItem('bpsy_dev',d); }
+    return d;
+  }catch(e){ return 'nodev' }
+}
+function cacheGet(id){
+  try{ return (JSON.parse(localStorage.getItem(CKEY)||'{}'))[id]||null }catch(e){ return null }
+}
+function cachePut(id,html){
+  try{ var o=JSON.parse(localStorage.getItem(CKEY)||'{}'); o[id]=html;
+    localStorage.setItem(CKEY,JSON.stringify(o)); }catch(e){}
+}
+/* 伺服器驗證。回 {ok, devices, warn} */
+function verifyRemote(code){
+  return fetch(API+'?p=verify&code='+encodeURIComponent(code)+'&dev='+encodeURIComponent(devId()))
+    .then(function(r){return r.json()})
+    .catch(function(){ return {ok:null, msg:'連線失敗'} });   // null = 無法判定,不誤殺
+}
+/* 取深解內容。先看本機快取,沒有才連伺服器 */
+function fetchPaid(id){
+  var c=cacheGet(id);
+  if(c)return Promise.resolve({ok:true,html:c,cached:true});
+  var code=null; try{ code=localStorage.getItem(KEY) }catch(e){}
+  if(!code)return Promise.resolve({ok:false,msg:'尚未解碼'});
+  return fetch(API+'?p=content&code='+encodeURIComponent(code)+'&id='+encodeURIComponent(id))
+    .then(function(r){return r.json()})
+    .then(function(j){ if(j.ok)cachePut(id,j.html); return j; })
+    .catch(function(){ return {ok:false,msg:'內容需連網取得,請連上網路後再試'} });
+}
+/* 把深解內容掛進指定容器 */
+function mount(sel,id){
+  var el=(typeof sel==='string')?document.querySelector(sel):sel;
+  if(!el)return;
+  if(!ok()){ el.innerHTML=gate('',''); bind(); return; }
+  el.innerHTML='<div style="opacity:.6;font-size:13px;padding:10px 0">深解內容載入中…</div>';
+  fetchPaid(id).then(function(j){
+    el.innerHTML = j.ok ? j.html
+      : '<div style="opacity:.75;font-size:13px;padding:10px 0">'+(j.msg||'無法取得內容')+'</div>';
+  });
+}
+
 g.BPSY={ok:ok,gate:gate,gatePage:gatePage,bind:bind,open:open_,close:close,
-         valid:valid,gen:gen,save:save,clear:clear,LINE:LINE_ID,PRICE:PRICE,KEY:KEY};
+         valid:valid,gen:gen,save:save,clear:clear,LINE:LINE_ID,PRICE:PRICE,KEY:KEY,verifyRemote:verifyRemote,fetchPaid:fetchPaid,mount:mount,devId:devId,API:API};
 
 /* ── 案件狀態層:模組頁自動載入(外殼不需要)── */
 function loadCase(){
