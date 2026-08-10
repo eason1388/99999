@@ -108,7 +108,7 @@ function css(){
   '.bpsy-mask .bi{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(201,169,106,.16);border:1.5px solid rgba(201,169,106,.5)}'+
   '.bpsy-mask .bt{font-family:"Noto Serif TC",serif;color:#e6c886;font-size:16px;letter-spacing:.08em;font-weight:700}'+
   '.bpsy-mask .bs{font-size:12.5px;color:rgba(237,231,218,.72);line-height:1.75}'+
-  '.bpsy-btn{margin-top:6px;background:linear-gradient(135deg,#e0bd78,#b8923f);color:#1a1410;border:0;border-radius:999px;padding:12px 30px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(201,169,106,.42);animation:bpsyPulse 2.6s ease-in-out infinite}'+
+  '#bpsy-modal .chans,.bpsy-chans{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 4px}.bpsy-chan{font-size:12px;border:1px solid rgba(201,169,106,.45);border-radius:8px;padding:5px 10px;background:rgba(201,169,106,.10);color:#EDE7DA;white-space:nowrap}.bpsy-safe{font-size:11.5px;opacity:.75;line-height:1.75;margin-top:6px}.bpsy-safe b{color:#E0C285}.bpsy-allin{background:linear-gradient(135deg,rgba(224,189,120,.18),rgba(184,146,63,.12));border:1px solid rgba(201,169,106,.45);border-radius:12px;padding:10px 12px;margin:8px 0 10px;font-size:13px;line-height:1.8;text-align:left}.bpsy-allin b{color:#F0D9A0}.bpsy-btn{margin-top:6px;background:linear-gradient(135deg,#e0bd78,#b8923f);color:#1a1410;border:0;border-radius:999px;padding:12px 30px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(201,169,106,.42);animation:bpsyPulse 2.6s ease-in-out infinite}'+
   '@keyframes bpsyPulse{0%,100%{box-shadow:0 4px 16px rgba(201,169,106,.42)}50%{box-shadow:0 4px 24px rgba(201,169,106,.72)}}'+
   '.bpsy-btn:active{transform:scale(.96)}'+
   '.bpsy-hint{font-size:11.5px;color:rgba(237,231,218,.5);margin-top:2px}'+
@@ -136,7 +136,7 @@ function modal(){
   m.innerHTML=
    '<div id="bpsy-card">'+
    '<h3>抱朴隨緣堂・深解解碼</h3>'+
-   '<div class="p">'+PRICE+'</div>'+
+   '<div class="p">'+PRICE+'</div>'+'<div class="bpsy-allin"><b>一次付清,全站深解永久開啟</b><br>不是只解開你現在看的這一段。付款後<b>所有module</b>的深解論斷、化解方案、報告輸出全部一起解鎖,永久有效、不限裝置、無月租。</div>'+
    '<div style="font-size:12px;opacity:.7">一次付清・不限次數・不需連網・換手機可重輸</div>'+
    '<div class="d">解碼後可永久開啟:<br>'+
      '・紫微斗數〈抱朴心法・醫命合參〉全章<br>'+
@@ -146,7 +146,7 @@ function modal(){
      '・金錢卦深層卦解</div>'+
    (BUY_URL
      ? '<button class="bpsy-btn" id="bpsy-buy" style="width:100%;padding:14px">💳 線上刷卡購買・立即取得授權碼</button>'+
-       '<div style="font-size:11.5px;opacity:.6;margin-top:6px">信用卡・ATM・超商・TWQR<br>付款完成畫面直接出碼,並寄一份到你的 Email</div>'+
+       '<div class="bpsy-chans">'+'<span class="bpsy-chan">💳 信用卡</span>'+'<span class="bpsy-chan">🏧 ATM 轉帳</span>'+'<span class="bpsy-chan">🏪 超商代碼</span>'+'<span class="bpsy-chan">📱 TWQR 行動支付</span>'+'</div>'+'<div class="bpsy-safe">金流由 <b>綠界科技 ECPay</b> 提供,通過金管會核備之第三方支付服務。<br>刷卡資料直接輸入綠界頁面,<b>本站不接觸、不留存你的卡號</b>。<br>付款完成畫面直接顯示授權碼,並同時寄一份到你的 Email。</div>'+
        '<div style="display:flex;align-items:center;gap:8px;margin:16px 0 6px;opacity:.4;font-size:11px">'+
          '<span style="flex:1;height:1px;background:currentColor"></span>或<span style="flex:1;height:1px;background:currentColor"></span></div>'+
        '<div style="font-size:12.5px;opacity:.8">加 LINE 由專人處理</div>'
@@ -207,7 +207,7 @@ function gate(html, title, teaser){
     '<div class="bpsy-mask"><div class="bi">🔒</div>'+
     '<div class="bt">'+(title||'深解內容')+'</div>'+
     '<div class="bs">'+(teaser?'完整論斷與化解次第<br>解碼後永久開啟':'此段為抱朴隨緣堂心法深解<br>一次解碼・永久開啟・不需連網')+'</div>'+
-    '<button class="bpsy-btn" data-bpsy-open>🔑 點此解碼</button>'+
+    '<div style="font-size:11.5px;opacity:.72;margin:6px 0 8px;line-height:1.7">NT$699 一次付清,<b style="color:#E0C285">全站深解一起開</b>,非單篇購買</div>'+'<button class="bpsy-btn" data-bpsy-open>🔑 點此解碼</button>'+
     '<div class="bpsy-hint">已有授權碼?也是點這裡輸入</div></div></div></div>';
 }
 
@@ -220,7 +220,7 @@ function gatePage(title, desc){
   d.innerHTML='<div style="font-size:40px">🔒</div>'+
     '<div style="font-family:\'Noto Serif TC\',serif;color:#c9a96a;font-size:19px;letter-spacing:.1em;margin:10px 0">'+(title||'本頁為深解內容')+'</div>'+
     '<div style="font-size:13px;opacity:.8;line-height:1.9;max-width:420px;margin:0 auto 16px">'+(desc||'解碼後永久開啟,不需連網、不限次數。')+'</div>'+
-    '<button class="bpsy-btn" data-bpsy-open>🔑 解碼 '+PRICE+'</button>';
+    '<div style="font-size:11.5px;opacity:.72;margin-bottom:8px;line-height:1.7">一次付清,<b style="color:#E0C285">全站深解永久開啟</b>,不限裝置</div>'+'<button class="bpsy-btn" data-bpsy-open>🔑 解碼 '+PRICE+'</button>';
   var b=document.body;
   b.innerHTML=''; b.appendChild(d); bind();
   return true;
