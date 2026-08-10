@@ -485,4 +485,32 @@ paintAll();
 })(0);
 window.addEventListener('storage',function(e){ if(e.key===AKEY||e.key===CKEY)paintAll(); });
 </script>
+
+<script>
+/* ── 自動判語為付費內容 ──
+   十項紀錄、方位選取、拍照、備註、總表結構全部免費(現場工作流不受影響);
+   系統依本宅盤自動算出的吉凶判語為收費部分。 */
+(function(){
+  function gate(){
+    if(window.BPSY && BPSY.ok())return;
+    var vds=document.querySelectorAll('.item .vd');
+    for(var i=0;i<vds.length;i++){
+      var v=vds[i];
+      if(v.getAttribute('data-bp-gated'))continue;
+      v.setAttribute('data-bp-gated','1');
+      v.className='vd';
+      v.innerHTML='<b>自動判語・尚未解碼</b>'+
+        '依本宅飛星與八宅算出此處吉凶、所主人事與化解方向。'+
+        '<div style="font-size:11.5px;opacity:.72;margin:7px 0 8px;line-height:1.7">'+
+        'NT$699 一次付清,<b style="color:#E0C285">全站深解永久開啟</b></div>'+
+        '<button class="bpsy-btn" data-bpsy-open style="font-size:13px;padding:8px 16px">🔑 解碼</button>';
+    }
+    if(window.BPSY && BPSY.bind)BPSY.bind();
+  }
+  var L=document.getElementById('list');
+  try{ if(L)new MutationObserver(gate).observe(L,{childList:true}); }catch(e){}
+  setTimeout(gate,400); setTimeout(gate,1400);
+  document.addEventListener('click',function(){ setTimeout(gate,140) });
+})();
+</script>
 </body></html>
