@@ -392,3 +392,25 @@ if(document.readyState!=='loading')loadCase();
     document.addEventListener('click', function(){ runs = 0; setTimeout(run, 150); });
   };
 })();
+
+/* 保留前 N 個區塊，其餘鎖起來（給沒有標題結構的清單型輸出用） */
+(function(){
+  if(!window.BPSY || window.BPSY.gateRest) return;
+  var B = window.BPSY;
+  B.gateRest = function(root, keepN, title, desc){
+    if(B.ok()) return;
+    root = (typeof root === 'string') ? document.querySelector(root) : root;
+    if(!root || root.getAttribute('data-bp-gated')) return;
+    var kids = [].slice.call(root.children).filter(function(e){
+      return !/^(SCRIPT|STYLE)$/.test(e.tagName) && !e.classList.contains('bpsy-wrap');
+    });
+    if(kids.length <= keepN) return;
+    root.setAttribute('data-bp-gated','1');
+    var kill = kids.slice(keepN);
+    var d = document.createElement('div');
+    try{ d.innerHTML = B.gatePage(title || '\u5b8c\u6574\u4f48\u5c40\u5efa\u8b70', desc || ''); }catch(e){}
+    root.insertBefore(d, kill[0]);
+    kill.forEach(function(e){ if(e.parentNode) e.parentNode.removeChild(e); });
+    if(B.bind) B.bind(root);
+  };
+})();
