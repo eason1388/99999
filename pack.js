@@ -101,8 +101,31 @@
     return (cur == null) ? null : cur;
   }
 
+
+  /* 替身表：頂替原本寫在原始碼裡的判語表。
+     讀寫行為跟普通物件/陣列一模一樣（Object.keys、map、in 都正常），
+     資料包還沒解開時一律回空，不會拋錯。 */
+  function proxy(path, isArr){
+    var base = isArr ? [] : {};
+    function src(){ return tbl(path); }
+    try {
+      return new Proxy(base, {
+        get: function(t,k){ var s=src(); if(s && (k in Object(s))) return Object(s)[k]; return t[k]; },
+        has: function(t,k){ var s=src(); return (s && (k in Object(s))) || (k in t); },
+        ownKeys: function(t){ var s=src(); return s ? Reflect.ownKeys(Object(s)) : Reflect.ownKeys(t); },
+        getOwnPropertyDescriptor: function(t,k){
+          var s=src();
+          if (s && Object.prototype.hasOwnProperty.call(Object(s),k))
+            return {value:Object(s)[k], enumerable:true, configurable:true, writable:true};
+          return Reflect.getOwnPropertyDescriptor(t,k);
+        }
+      });
+    } catch(e){ return base; }
+  }
+
   g.BPPACK = {
     load:  load,
+    proxy: proxy,
     tbl:   tbl,
     have:  function(){ return !!mem; },
     clear: function(){ mem = null; return idbPut(CACHE_KEY, null); },
