@@ -151,6 +151,15 @@ document.getElementById('save').onclick=()=>{
     sex:+document.getElementById('cSex').value,
     sp:+document.getElementById('cSp').value||0,
     note:document.getElementById('cNote').value.trim()});
+  /* ── 免費版最多 3 筆案件 ──
+     編輯既有案件不受限,只擋「新增第 4 筆」。
+     這樣免費使用者仍能完整體驗一案到底的流程。 */
+  if(!editId && !(window.BPSY && BPSY.ok()) && cases.length>=3){
+    alert('免費版最多建立 3 筆案件。\n\n目前已有 '+cases.length+' 筆。\n'+
+          'NT$699 一次付清,案件數不限,全站深解與所有報告也一起永久開啟。');
+    if(window.BPSY && BPSY.open)BPSY.open();
+    return;
+  }
   if(editId){cases=cases.map(c=>c.id===editId?o:c)}else{cases.push(o)}
   if(save(cases)){editId=null;document.getElementById('editing').textContent='';
     ['cName','cPhone','cAddr','cBy','cNote'].forEach(i=>document.getElementById(i).value='');
@@ -328,7 +337,7 @@ function render(){
   const yr=+document.getElementById('scanY').value||today.getFullYear();
   const rows=cases.map(c=>({c,s:scan(c,yr)}));
   const need=rows.filter(r=>r.s.alerts.some(a=>a[0]>=2));
-  document.getElementById('stat').innerHTML='共 <b>'+cases.length+'</b> 件・需回訪 <b style="color:var(--red)">'+need.length+'</b> 件';
+  document.getElementById('stat').innerHTML=((!(window.BPSY&&BPSY.ok()))?'<span style="font-size:12px;opacity:.75">免費版額度 '+cases.length+'/3　</span>':'')+'共 <b>'+cases.length+'</b> 件・需回訪 <b style="color:var(--red)">'+need.length+'</b> 件';
   const show=filt==='alert'?need:rows;
   show.sort((a,b)=>(Math.max(0,...b.s.alerts.map(x=>x[0])))-(Math.max(0,...a.s.alerts.map(x=>x[0]))));
   document.getElementById('list').innerHTML=show.length?show.map(({c,s})=>{
