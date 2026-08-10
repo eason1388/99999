@@ -110,8 +110,8 @@
     function pick(){ return src(path, isArr); }   /* 每次存取都重新問，資料包晚點到也不怕 */
     try {
       return new Proxy(base, {
-        get: function(t,k){ var s=pick(); if(s && (k in Object(s))) return Object(s)[k]; return t[k]; },
-        has: function(t,k){ var s=pick(); return (s && (k in Object(s))) || (k in t); },
+        get: function(t,k){ var s=pick(); if(s != null){ var v = Object(s)[k]; if(v !== undefined) return v; } return t[k]; },
+        has: function(t,k){ var s=pick(); return (s != null && Object(s)[k] !== undefined) || (k in t); },
         ownKeys: function(t){ var s=pick(); return s ? Reflect.ownKeys(Object(s)) : Reflect.ownKeys(t); },
         getOwnPropertyDescriptor: function(t,k){
           var s=pick();
