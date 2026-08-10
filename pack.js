@@ -126,6 +126,30 @@
 
   /* 取一張判語表：資料包裡存的是原本的字面原文，用到才計算一次。
      這樣搬遷只是把文字搬家，不動到任何算法。 */
+
+  /* 未解碼時的替代物：怎麼取都不會爆，且一律當空字串。
+     原本的渲染程式常寫成 TXT[k][0] 這種形式，
+     若只回 {} 會在第二層就拋錯，整頁白掉。 */
+  function blank(){
+    var f = function(){ return blank(); };
+    try {
+      return new Proxy(f, {
+        get: function(t,k){
+          if (k === Symbol.toPrimitive) return function(){ return ""; };
+          if (k === Symbol.iterator)   return function(){ return [][Symbol.iterator](); };
+          if (k === "toString" || k === "valueOf") return function(){ return ""; };
+          if (k === "length") return 0;
+          if (k === "join")   return function(){ return ""; };
+          if (k === "map" || k === "filter" || k === "slice" || k === "concat") return function(){ return []; };
+          if (k === "forEach") return function(){};
+          return blank();
+        },
+        has: function(){ return false; },
+        apply: function(){ return blank(); }
+      });
+    } catch(e){ return {}; }
+  }
+
   var memo = {};
   function src(path, isArr){
     if (Object.prototype.hasOwnProperty.call(memo, path)) return memo[path];
@@ -133,7 +157,7 @@
     if (typeof s === "string" && s){
       try { v = (new Function("return (" + s + ")"))(); } catch(e){ v = null; }
     }
-    if (v == null) return isArr ? [] : {};
+    if (v == null) return blank();
     memo[path] = v;
     return v;
   }
