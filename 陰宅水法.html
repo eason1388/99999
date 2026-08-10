@@ -266,4 +266,19 @@ function render(){
 }
 render();
 window.fscP&&window.fscP('water','open','init');
-</script></body></html>
+</script>
+<script>
+/* ---- BPGATE-YINZHAI-SHUI 水法斷語欄為深解內容 ---- */
+(function(){
+  function run(){
+    if(!(window.BPSY && BPSY.gateSections)) return;
+    BPSY.gateCols('#out',['\u4f86\u6c34\u65b7','\u53bb\u6c34\u65b7','\u6c34\u6cd5\u8981\u8a23'],'\u6c34\u6cd5\u9010\u65b9\u65b7\u8a9e');
+  }
+  function boot(){
+    if(!(window.BPSY && BPSY.autoGate)) return setTimeout(boot,300);
+    BPSY.autoGate(document.body, run);
+  }
+  boot();
+})();
+</script>
+</body></html>
