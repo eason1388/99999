@@ -70,4 +70,19 @@ section>h2{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--gold);bo
 <div class="warn"><b>提醒:</b>尋龍為巒頭之學,App 的剖面與評分是「量化輔助」,取代不了登山履勘與明師目力。購地前另須查核:土地分區、產權、水土保持與開發法規。</div>
 </section>
 <script src="lock.js"></script>
+
+<script>
+/* ---- BPGATE-LIUCHENG 陰宅與尋龍流程為深解內容 ---- */
+(function(){
+  function run(){
+    if(!(window.BPSY && BPSY.gateSections)) return;
+    BPSY.gateSections(document.body,[
+      {h:/陰宅勘察流程/, title:'陰宅勘察流程', desc:'察來龍、觀四神砂、觀水局、點穴、立向分金、消砂納水與擇日破土的完整步驟。'},
+      {h:/尋龍點穴/, title:'尋龍點穴（擇地）流程', desc:'圖上作業、畫脈驗勢、行龍踏勘、星峰定格、察砂觀水、點穴驗土、立向試盤。'}
+    ]);
+  }
+  function boot(){ if(!(window.BPSY && BPSY.autoGate)) return setTimeout(boot,300); BPSY.autoGate(document.body, run); }
+  boot();
+})();
+</script>
 </body></html>
