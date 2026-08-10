@@ -126,6 +126,7 @@
   g.BPPACK = {
     load:  load,
     proxy: proxy,
+    src:   src,
     tbl:   tbl,
     have:  function(){ return !!mem; },
     clear: function(){ mem = null; return idbPut(CACHE_KEY, null); },
