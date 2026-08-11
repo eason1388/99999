@@ -498,7 +498,7 @@ function render(){
     return '<div style="padding:7px 0;border-bottom:1px dashed rgba(160,140,90,.25)">'
     +'<b style="color:'+({'祿':'#1d6b3f','權':'#c9944a','科':'#3E5C76','忌':'#c0392b'})[t]+';font-size:15px">'+r[0]+'化'+t+' → 入'+r[1]+'宮('+r[2]+')</b>'
     +'<div style="font-size:13.5px;line-height:1.85;margin-top:2px">'+(HG[t]||[])[gi]+'</div>'
-    +((HUA_DEEP[t]||"")?('<div style="font-size:12.5px;opacity:.72;margin-top:2px">【樞機】'+HUA_DEEP[t]+'。'
+    +((''+(HUA_DEEP[t]||''))?('<div style="font-size:12.5px;opacity:.72;margin-top:2px">【樞機】'+HUA_DEEP[t]+'。'
     +(t==='忌'?'忌之對宮亦受牽動('+z.gname[(r[3]+6)%12]+'宮),此謂「忌沖」——凡忌所沖之宮,其事亦難順遂,論命不可只看忌落何宮而忽略其所沖。':'')+'</div></div>'):"")}).join('');
   // 四化互涉
   const jiP=huaPos('忌'),luP=huaPos('祿');
