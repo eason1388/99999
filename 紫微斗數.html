@@ -146,7 +146,7 @@ function toLunar(Y,M,D){
     yearGZ:null};
 }
 // ── 四柱年干支(立春為界)──
-window.__ZW={toLunar:toLunar,SIHUA:SIHUA,yearGZ:yearGZ};
+setTimeout(function(){ try{ window.__ZW={toLunar:toLunar,SIHUA:SIHUA,yearGZ:yearGZ}; }catch(e){} },0);
 function yearGZ(Y,M,D,h){
   const J=jdn(Y,M,D)+(h-12)/24-8/24;
   const lc=termJD(Y,315);
