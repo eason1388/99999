@@ -85,10 +85,10 @@ function print_(o){
      可交付的文件是師傅拿去跟客戶收費的東西,列印前先驗授權。 */
   if (!(window.BPSY && BPSY.ok())) {
     if (window.BPSY && BPSY.open) {
-      alert('報告輸出為深解功能。\n\nNT$699 一次付清,全站深解與所有報告輸出永久開啟,不限裝置。');
+      alert('報告輸出為深解功能。\n\nNT$1,280 一次付清,全站深解與所有報告輸出永久開啟,不限裝置。');
       BPSY.open();
     } else {
-      alert('報告輸出需先解碼(NT$699 永久,全站通用)。');
+      alert('報告輸出需先解碼(NT$1,280 永久,全站通用)。');
     }
     return;
   }
@@ -165,7 +165,7 @@ function button(sel, o){
       }
       var tip=document.createElement('div');
       tip.style.cssText='font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.7;text-align:center';
-      tip.innerHTML='報告輸出需解碼。NT$699 一次付清,<b style="color:#E0C285">全站深解與所有報告永久開啟</b>。';
+      tip.innerHTML='報告輸出需解碼。NT$1,280 一次付清,<b style="color:#E0C285">全站深解與所有報告永久開啟</b>。';
       host.appendChild(tip);
     }
   }catch(e){}
