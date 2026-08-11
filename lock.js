@@ -259,6 +259,7 @@ function cachePut(id,html){
 function verifyRemote(code){
   return fetch(API+'?p=verify&code='+encodeURIComponent(code)+'&dev='+encodeURIComponent(devId()))
     .then(function(r){return r.json()})
+      .then(function(j){ try{ if(j && j.packKey && window.BPSY && window.BPSY.setPackKey) window.BPSY.setPackKey(j.packKey); }catch(e){} return j; })
     .catch(function(){ return {ok:null, msg:'連線失敗'} });   // null = 無法判定,不誤殺
 }
 /* 取深解內容。先看本機快取,沒有才連伺服器 */
