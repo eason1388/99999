@@ -13,7 +13,7 @@
    ───────────────────────────────────────────── */
 (function(g){
   'use strict';
-  var CACHE_KEY = 'bpsy_pack_v1';
+  var CACHE_KEY = 'bpsy_pack_v2';
   var BIN_URL   = 'pack.bin';
   var mem = null;      // 解開後的判語物件
   var pending = null;  // 進行中的載入 Promise
