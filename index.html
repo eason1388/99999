@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;display:flex;flex-direction:column}
-/* iOS Safari:用 svh(最小視口)固定高度——dvh 會在捲動時隨網址列伸縮而重排,導致捲動卡住 */
+/* iOS Safari:用 svh(最小視口)固定高度——dvh 會在捲動時隨網址列伸縮而重排，導致捲動卡住 */
 @supports(height:100svh){html,body{height:100svh}}
 #stage,iframe{overscroll-behavior:contain}
 /* 導航分組分隔線 */
@@ -107,7 +107,7 @@ footer.note{color:rgba(237,231,218,.58);opacity:1}
 .mcard:hover::before{opacity:1}
 .grid{gap:13px}
 
-/* ── 印章式圖徽:金圈內單字/卦符,取代 emoji ── */
+/* ── 印章式圖徽:金圈內單字/卦符，取代 emoji ── */
 .mic{font-family:'Noto Serif TC',serif;font-weight:900;font-size:20px;
   border-radius:50%;border:1.5px solid rgba(201,169,106,.45);
   background:radial-gradient(circle at 32% 28%,rgba(201,169,106,.26),rgba(201,169,106,.07));
@@ -149,13 +149,13 @@ nav.bottom .bi{font-size:16px;border:0;background:none;width:auto;height:auto}
 .tfoot .p{background:linear-gradient(135deg,#E0BD78,#B8923F);color:#1A1410}
 .tfoot .s{background:transparent;border:1px solid rgba(201,169,106,.45);color:var(--gold2);font-weight:400}
 
-/* 外殼底色改深,任何殘留間距都不會露出白邊 */
+/* 外殼底色改深，任何殘留間距都不會露出白邊 */
 html,body{background:var(--dark)}
 #stage{background:var(--dark)}
 /* 外殼自管版面:擋掉 lock.js 給模組頁用的底部留白 */
 body{padding-bottom:0!important;min-height:0!important}
 nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgba(0,0,0,.35);
-  /* 往下收回一部分安全區,但保留 8px 不壓到 Home 手勢條 */
+  /* 往下收回一部分安全區，但保留 8px 不壓到 Home 手勢條 */
   padding:4px 4px max(8px,calc(env(safe-area-inset-bottom) - 14px))!important}
 .bnav,.bmore{padding:3px 10px}
 .bnav.on{background:rgba(201,169,106,.13)}
@@ -177,12 +177,17 @@ nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgb
 #dim{background:rgba(0,0,0,.55)}
 .tang{font-size:12px;font-family:'Noto Serif TC',serif;font-weight:900;letter-spacing:.28em;background:linear-gradient(180deg,#F6E3A6 0%,#C9A96A 55%,#9C7B45 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 14px rgba(201,169,106,.35);vertical-align:2px;margin-left:4px}
 .tangHero{position:relative;margin-top:8px;font-family:'Noto Serif TC',serif;font-weight:900;font-size:15px;letter-spacing:.6em;text-indent:.6em;background:linear-gradient(180deg,#F6E3A6,#C9A96A 60%,#9C7B45);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* 導覽四大類 */
+nav.top{overflow:visible !important}
+nav.top .ngrp{display:inline-block;position:relative}
+nav.top .ngrp>summary{list-style:none;cursor:pointer}
+nav.top .ngrp>summary::-webkit-details-marker{display:none}
+nav.top .ngrp>summary::after{content:"\25BE";margin-left:4px;opacity:.65}
+nav.top .ngbody{position:absolute;z-index:80;top:calc(100% + 6px);left:0;min-width:170px;background:#141110;border:1px solid rgba(201,169,106,.45);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 10px 26px rgba(0,0,0,.55)}
+nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowrap}
 </style></head><body>
-<header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button
-><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="ask">主訴反查</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><span class="navsep"></span
-><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button><span class="navsep"></span
-><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button><span class="navsep"></span
-><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
+<header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button><details class="ngrp"><summary class="tnav ngs">陽宅</summary><div class="ngbody"><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="ask">主訴反查</button></div></details><details class="ngrp"><summary class="tnav ngs">陰宅</summary><div class="ngbody"><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button></div></details><details class="ngrp"><summary class="tnav ngs">命理</summary><div class="ngbody"><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button></div></details><details class="ngrp"><summary class="tnav ngs">案件</summary><div class="ngbody"><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button></div></details><span class="navsep"></span><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
 <div id="stage">
 <div id="home">
  <div class="hero">
@@ -190,21 +195,21 @@ nav.bottom{border-top:1px solid rgba(201,169,106,.18);box-shadow:0 -3px 18px rgb
  <div class="heroSeal">羅</div>
  <h2>羅經在手・盤理合一</h2>
  <div class="en">Master Feng Shui Compass</div><div class="tangHero">抱 朴 隨 緣 堂</div>
- <p>專業級電子羅盤與智慧風水分析平台——二十四山即時判讀、玄空飛星、八宅、擇日、奇門、八字宅命整合。<br>完全不需要學過風水,到現場開啟,吉凶立斷。</p>
- <div class="stats"><span class="stat"><b>9</b> 大排盤引擎</span><span class="stat"><b>600+</b> 局演算法驗證</span><span class="stat"><b>免安裝</b> 加入主畫面即 App</span></div>
+ <p>不必學過風水。到現場開啟，吉凶立斷。<br>二十四山即時判讀・玄空飛星・八宅・金鎖玉關・擇日・奇門・八字宅命整合</p>
+ <div class="stats"><span class="stat"><b>9</b> 派排盤・逐局核驗</span><span class="stat">抱朴隨緣堂・臨場心法</span><span class="stat"><b>免安裝</b> 加入主畫面即 App</span></div>
  <div class="ctaRow"><button class="cta" data-k="luopan">🧭 開始量測</button><button class="cta2" data-k="guide">使用說明</button></div>
  </div>
  <!-- ── 今日盤 ── -->
  <div id="todayWrap"><div id="today" class="tpanel"></div></div>
  <div class="secttl">陽宅勘察</div>
- <div class="grid"><div class="mcard" data-k="luopan"><div class="mic">羅</div><div><b>三合羅盤・即時判讀</b><p>山向、兼向、騎縫、分金自動判定,AR 實景八方浮標,點任一格即有詳解</p></div><span class="go">→</span></div><div class="mcard" data-k="survey"><div class="mic">勘</div><div><b>現場勘查模式</b><p>大門、爐灶、床位、神位、廁所、樓梯、水路十項逐點紀錄,拍照存證,依本宅飛星八宅即時判吉凶</p></div><span class="go">→</span></div><div class="mcard" data-k="xk"><div class="mic">星</div><div><b>玄空飛星・八宅</b><p>九運×二十四山,下卦替卦、格局城門、八宅遊星、擇向建議</p></div><span class="go">→</span></div><div class="mcard" data-k="jinsuo"><div class="mic">鎖</div><div><b>金鎖玉關・過路陰陽</b><p>二十四山逐山點砂水,依經旨直斷合訣違訣、應人應病,附化解優先順序</p></div><span class="go">→</span></div><div class="mcard" data-k="venue"><div class="mic">舖</div><div><b>場所佈局模式</b><p>餐廳、辦公室、工廠、店面、住家五種模式,收銀台、爐灶、老闆位一鍵排定</p></div><span class="go">→</span></div><div class="mcard" data-k="plan"><div class="mic">圖</div><div><b>平面圖疊盤</b><p>上傳平面圖,九宮飛星八宅吉凶直接疊在圖上,點格標房間即時檢核</p></div><span class="go">→</span></div><div class="mcard" data-k="check"><div class="mic">檢</div><div><b>全宅健檢總報告</b><p>一鍵跑完評分、飛星、八宅、流年、開運佈局,列印即 A4 交付報告</p></div><span class="go">→</span></div></div>
+ <div class="grid"><div class="mcard" data-k="luopan"><div class="mic">羅</div><div><b>三合羅盤・即時判讀</b><p>山向、兼向、騎縫、分金自動判定,AR 實景八方浮標，點任一格即有詳解</p></div><span class="go">→</span></div><div class="mcard" data-k="survey"><div class="mic">勘</div><div><b>現場勘查模式</b><p>大門、爐灶、床位、神位、廁所、樓梯、水路十項逐點紀錄，拍照存證，依本宅飛星八宅即時判吉凶</p></div><span class="go">→</span></div><div class="mcard" data-k="xk"><div class="mic">星</div><div><b>玄空飛星・八宅</b><p>九運×二十四山，下卦替卦、格局城門、八宅遊星、擇向建議</p></div><span class="go">→</span></div><div class="mcard" data-k="jinsuo"><div class="mic">鎖</div><div><b>金鎖玉關・過路陰陽</b><p>二十四山逐山點砂水，依經旨直斷合訣違訣、應人應病，附化解優先順序</p></div><span class="go">→</span></div><div class="mcard" data-k="venue"><div class="mic">舖</div><div><b>場所佈局模式</b><p>餐廳、辦公室、工廠、店面、住家五種模式，收銀台、爐灶、老闆位一鍵排定</p></div><span class="go">→</span></div><div class="mcard" data-k="plan"><div class="mic">圖</div><div><b>平面圖疊盤</b><p>上傳平面圖，九宮飛星八宅吉凶直接疊在圖上，點格標房間即時檢核</p></div><span class="go">→</span></div><div class="mcard" data-k="check"><div class="mic">檢</div><div><b>全宅健檢總報告</b><p>一鍵跑完評分、飛星、八宅、流年、開運佈局，列印即 A4 交付報告</p></div><span class="go">→</span></div></div>
  <div class="secttl">陰宅・巒頭</div>
- <div class="grid"><div class="mcard" data-k="water"><div class="mic">水</div><div><b>陰宅水法</b><p>三合十二長生水法、龍門八局、八路黃泉,來去水吉凶即點即斷</p></div><span class="go">→</span></div><div class="mcard" data-k="dragon"><div class="mic">龍</div><div><b>地理尋龍</b><p>龍脈剖面、過峽偵測、穴場方位</p></div><span class="go">→</span></div><div class="mcard" data-k="map"><div class="mic">向</div><div><b>地圖測向・立極</b><p>兩點測向、畫房自動立極、24山扇形疊加</p></div><span class="go">→</span></div></div>
+ <div class="grid"><div class="mcard" data-k="water"><div class="mic">水</div><div><b>陰宅水法</b><p>三合十二長生水法、龍門八局、八路黃泉，來去水吉凶即點即斷</p></div><span class="go">→</span></div><div class="mcard" data-k="dragon"><div class="mic">龍</div><div><b>地理尋龍</b><p>龍脈剖面、過峽偵測、穴場方位</p></div><span class="go">→</span></div><div class="mcard" data-k="map"><div class="mic">向</div><div><b>地圖測向・立極</b><p>兩點測向、畫房自動立極、24山扇形疊加</p></div><span class="go">→</span></div></div>
  <div class="secttl">命理・擇日</div>
- <div class="grid"><div class="mcard" data-k="time"><div class="mic">時</div><div><b>擇時・農民曆</b><p>今日宜忌、建除彭祖、流年月日飛星、神煞、奇門遁甲時盤</p></div><span class="go">→</span></div><div class="mcard" data-k="bazi"><div class="mic">命</div><div><b>八字・宅命整合</b><p>四柱十神、格局調候、神煞刑沖、大運流年、合婚、真太陽時校正</p></div><span class="go">→</span></div><div class="mcard" data-k="ziwei"><div class="mic">紫</div><div><b>紫微斗數</b><p>十二宮全盤、四化飛星、大限流年,附抱朴心法・醫命合參</p></div><span class="go">→</span></div><div class="mcard" data-k="yijing"><div class="mic">易</div><div><b>易經推命(四柱命卦)</b><p>古傳易卦推命:洛書起卦、先後天卦、大運流年流月、互卦</p></div><span class="go">→</span></div><div class="mcard" data-k="coin"><div class="mic">卦</div><div><b>金錢卦占卜</b><p>手機擲卦或真銅錢記錄,周易原文斷卦,附抱朴心法解讀</p></div><span class="go">→</span></div><div class="mcard" data-k="zeri"><div class="mic">曆</div><div><b>擇日</b><p>嫁娶・開市・入宅・安床,依建除黃道神煞排出可用吉日與吉時,並避開當事人生肖沖剋</p></div><span class="go">→</span></div></div>
+ <div class="grid"><div class="mcard" data-k="time"><div class="mic">時</div><div><b>擇時・農民曆</b><p>今日宜忌、建除彭祖、流年月日飛星、神煞、奇門遁甲時盤</p></div><span class="go">→</span></div><div class="mcard" data-k="bazi"><div class="mic">命</div><div><b>八字・宅命整合</b><p>四柱十神、格局調候、神煞刑沖、大運流年、合婚、真太陽時校正</p></div><span class="go">→</span></div><div class="mcard" data-k="ziwei"><div class="mic">紫</div><div><b>紫微斗數</b><p>十二宮全盤、四化飛星、大限流年，附抱朴心法・醫命合參</p></div><span class="go">→</span></div><div class="mcard" data-k="yijing"><div class="mic">易</div><div><b>易經推命(四柱命卦)</b><p>古傳易卦推命:洛書起卦、先後天卦、大運流年流月、互卦</p></div><span class="go">→</span></div><div class="mcard" data-k="coin"><div class="mic">卦</div><div><b>金錢卦占卜</b><p>手機擲卦或真銅錢記錄，周易原文斷卦，附抱朴心法解讀</p></div><span class="go">→</span></div><div class="mcard" data-k="zeri"><div class="mic">曆</div><div><b>擇日</b><p>嫁娶・開市・入宅・安床，依建除黃道神煞排出可用吉日與吉時，並避開當事人生肖沖剋</p></div><span class="go">→</span></div></div>
  <div class="secttl">客戶資料・工具</div>
- <div class="grid"><div class="mcard" data-k="cases"><div class="mic">簿</div><div><b>客戶案件簿</b><p>存客戶宅向,每年自動掃描五黃歲破,給你一張該回訪的名單</p></div><span class="go">→</span></div><div class="mcard" data-k="report"><div class="mic">報</div><div><b>專業報告</b><p>飛星盤、評分、化解建議,列印即 A4 PDF</p></div><span class="go">→</span></div><div class="mcard" data-k="flow"><div class="mic">序</div><div><b>勘察流程</b><p>陽宅、陰宅、尋龍點穴三大實戰流程,step by step</p></div><span class="go">→</span></div><div class="mcard" data-k="learn"><div class="mic">學</div><div><b>風水學堂</b><p>名詞庫與學習路徑,任何名詞即搜即答</p></div><span class="go">→</span></div><div class="mcard" data-k="guide"><div class="mic">問</div><div><b>使用說明</b><p>每個分頁在做什麼、怎麼用,三分鐘快速上手</p></div><span class="go">→</span></div></div>
- <footer class="note">本工具之分析結果僅供參考,不構成醫療、財務或法律建議。<br>「地圖測向」「尋龍」需網路載入圖資,其餘功能離線可用。<br><span style="font-size:11px;opacity:.62">查詢內容與概略地區會傳送至站方,用於改善服務</span><br><span style="font-size:11px;opacity:.6">深解內容需授權解碼(NT$699 永久)・LINE:fengshui1388</span><br><a href="購買說明.html" style="display:inline-block;margin-top:10px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:underline">服務說明與購買(NT$699・含交付與退費規定)</a><br><span style="font-size:11px;opacity:.6">客服信箱 jackkok1388@gmail.com</span></footer>
+ <div class="grid"><div class="mcard" data-k="cases"><div class="mic">簿</div><div><b>客戶案件簿</b><p>存客戶宅向，每年自動掃描五黃歲破，給你一張該回訪的名單</p></div><span class="go">→</span></div><div class="mcard" data-k="report"><div class="mic">報</div><div><b>專業報告</b><p>飛星盤、評分、化解建議，列印即 A4 PDF</p></div><span class="go">→</span></div><div class="mcard" data-k="flow"><div class="mic">序</div><div><b>勘察流程</b><p>陽宅、陰宅、尋龍點穴三大實戰流程,step by step</p></div><span class="go">→</span></div><div class="mcard" data-k="learn"><div class="mic">學</div><div><b>風水學堂</b><p>名詞庫與學習路徑，任何名詞即搜即答</p></div><span class="go">→</span></div><div class="mcard" data-k="guide"><div class="mic">問</div><div><b>使用說明</b><p>每個分頁在做什麼、怎麼用，三分鐘快速上手</p></div><span class="go">→</span></div></div>
+ <footer class="note">本工具之分析結果僅供參考，不構成醫療、財務或法律建議。<br>「地圖測向」「尋龍」需網路載入圖資，其餘功能離線可用。<br><span style="font-size:11px;opacity:.62">查詢內容與概略地區會傳送至站方，用於改善服務</span><br><span style="font-size:11px;opacity:.6">深解內容需授權解碼(NT$699 永久)・LINE:fengshui1388</span><br><a href="購買說明.html" style="display:inline-block;margin-top:10px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:underline">服務說明與購買(NT$699・含交付與退費規定)</a><br><span style="font-size:11px;opacity:.6">客服信箱 jackkok1388@gmail.com</span></footer>
 </div>
 </div>
 <nav class="bottom"><button class="bnav on" data-k="home"><span class="bi">堂</span>首頁</button><button class="bnav" data-k="luopan"><span class="bi">羅</span>羅盤</button><button class="bnav" data-k="xk"><span class="bi">星</span>飛星</button><button class="bnav" data-k="time"><span class="bi">時</span>擇時</button><button class="bnav" data-k="bazi"><span class="bi">命</span>八字</button><button class="bmore" id="moreBtn"><span class="bi">⋯</span>全部</button></nav>
@@ -359,7 +364,7 @@ try{render()}catch(e){var t=document.getElementById('todayWrap');if(t)t.style.di
   sync();
   b.onclick=function(e){
     e.stopPropagation();
-    if(BPSY.ok()){ alert('本裝置已完成解碼,所有心法深解皆已開啟。\n\n如需在其他裝置使用,請於該裝置重新輸入同一組授權碼(不限裝置數)。'); return; }
+    if(BPSY.ok()){ alert('本裝置已完成解碼，所有心法深解皆已開啟。\n\n如需在其他裝置使用，請於該裝置重新輸入同一組授權碼(不限裝置數)。'); return; }
     BPSY.open();
   };
 })();
@@ -454,4 +459,4 @@ window.addEventListener('message',async e=>{
     document.body.appendChild(bar);
   }else fscStartListen();
 });
-</script></body></html>
+</script><script>(function(){var n=document.querySelector("nav.top");if(!n)return;function shut(except){[].slice.call(n.querySelectorAll("details.ngrp")).forEach(function(x){if(x!==except)x.open=false;});}n.addEventListener("click",function(e){var d=e.target.closest?e.target.closest("details.ngrp"):null;shut(d);if(e.target.classList&&e.target.classList.contains("tnav")&&e.target.tagName!=="SUMMARY"){setTimeout(function(){shut(null)},0);}});document.addEventListener("click",function(e){if(!n.contains(e.target))shut(null);});})();</script></body></html>
