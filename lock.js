@@ -8,7 +8,7 @@
 */
 (function(g){
 'use strict';
-var KEY='bpsy_lic_v1', LINE_ID='fengshui1388', PRICE='NT$699 永久解碼';
+var KEY='bpsy_lic_v1', LINE_ID='fengshui1388', PRICE='NT$1,280 永久解碼';
 // 線上刷卡購買頁(Google Apps Script 部署後把網址貼進來,留空則只顯示 LINE)
 var BUY_URL='https://script.google.com/macros/s/AKfycbyPQKpwFDieQBgJsS3Y_N7sL4opTW5gfAWNwwfsjK550dLYhf6P5Eyo8ZgisytPr3Q6/exec';
 var ABC='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';           // 去掉 0O1I,避免抄錯
@@ -207,7 +207,7 @@ function gate(html, title, teaser){
     '<div class="bpsy-mask"><div class="bi">🔒</div>'+
     '<div class="bt">'+(title||'深解內容')+'</div>'+
     '<div class="bs">'+(teaser?'完整論斷與化解次第<br>解碼後永久開啟':'此段為抱朴隨緣堂心法深解<br>一次解碼・永久開啟・不需連網')+'</div>'+
-    '<div style="font-size:11.5px;opacity:.72;margin:6px 0 8px;line-height:1.7">NT$699 一次付清,<b style="color:#E0C285">全站深解一起開</b>,非單篇購買</div>'+'<button class="bpsy-btn" data-bpsy-open>🔑 點此解碼</button>'+
+    '<div style="font-size:11.5px;opacity:.72;margin:6px 0 8px;line-height:1.7">NT$1,280 一次付清,<b style="color:#E0C285">全站深解一起開</b>,非單篇購買</div>'+'<button class="bpsy-btn" data-bpsy-open>🔑 點此解碼</button>'+
     '<div class="bpsy-hint">已有授權碼?也是點這裡輸入</div></div></div></div>';
 }
 
