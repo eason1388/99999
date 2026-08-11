@@ -43,11 +43,20 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 @media(max-width:560px){#chart{grid-template-rows:repeat(4,minmax(86px,auto))}.pal{font-size:9.5px}.pal .zhu{font-size:11px}}
 </style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=5">
 <style id="bp-readfix">
-/* ---- BPFIXREAD 命盤可讀性修正 ----
-   ⧈ 只改一件事：十四主星原本是深色字（給淺色底用的），
-      在目前的深色底上對比度近乎零，完全看不見。
-      字級、欄寬、版面一律不動——改了反而會把四×四盤撠亂。 */
+/* ---- BPFIXREAD 命盤可讀性 ----
+   1. 十四主星原本是深色字（給淺色底用的），在深色底上對比度近乎零。
+   2. 手機上只拿掉流年/小限歲數那兩行（原本 7.5px，讀不了又吃掉半個宮格）。
+
+   ⚠ 實測過、不能碰的三個地方：
+     • .star 欄寬 —— 寬一點星名就換行溢出
+     • .gz 字級 —— 大一點宮干支就斷成兩行
+     • .gname 字級 —— 會把同行的干支擠換行
+     這三個都真的改過、看過畫面，確認會壞。 */
 .pal .star.zhu .nm{ color:#F5E7C6 !important; }
+@media (max-width:560px){
+  #chart .pal .nums{ display:none; }
+  #chart .pal .star .br{ opacity:.82; }
+}
 </style>
 </head><body>
 <h1>✴ 紫微斗數</h1>
