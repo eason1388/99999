@@ -145,7 +145,7 @@ function modal(){
      '・易經推命(四柱命卦)全頁<br>'+
      '・金錢卦深層卦解</div>'+
    (BUY_URL
-     ? '<button class="bpsy-btn" id="bpsy-buy" style="width:100%;padding:14px">💳 線上刷卡購買・立即取得授權碼</button>'+
+     ? '<div id="bpsy-agree" style="text-align:left;font-size:12.5px;line-height:1.7;margin:12px 0;padding:10px 12px;border:1px solid rgba(201,169,106,.35);border-radius:10px;background:rgba(255,255,255,.03)"><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;margin-bottom:6px"><input type="checkbox" class="bpsy-ck" style="margin-top:3px;flex:0 0 auto"><span>我已閱讀並同意 <a href="terms.html" target="_blank" style="color:#E8C77A">使用條款</a></span></label><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;margin-bottom:6px"><input type="checkbox" class="bpsy-ck" style="margin-top:3px;flex:0 0 auto"><span>我已閱讀並同意 <a href="terms.html#disclaimer" target="_blank" style="color:#E8C77A">免責聲明</a></span></label><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" class="bpsy-ck" style="margin-top:3px;flex:0 0 auto"><span>我同意於付款完成後立即取得數位內容／使用權限，並知悉依相關規定，數位內容開始提供後，7日解除權可能不適用。</span></label><div id="bpsy-agmsg" style="display:none;color:#E8A08A;margin-top:8px">請先勾選上列三項，再進行付款。</div></div><button class="bpsy-btn" id="bpsy-buy" style="width:100%;padding:14px">💳 線上刷卡購買・立即取得授權碼</button>'+
        '<div class="bpsy-chans">'+'<span class="bpsy-chan">💳 信用卡</span>'+'<span class="bpsy-chan">🏧 ATM 轉帳</span>'+'<span class="bpsy-chan">🏪 超商代碼</span>'+'<span class="bpsy-chan">📱 TWQR 行動支付</span>'+'</div>'+'<div class="bpsy-safe">金流由 <b>綠界科技 ECPay</b> 提供,通過金管會核備之第三方支付服務。<br>刷卡資料直接輸入綠界頁面,<b>本站不接觸、不留存你的卡號</b>。<br>付款完成畫面直接顯示授權碼,並同時寄一份到你的 Email。</div>'+
        '<div style="display:flex;align-items:center;gap:8px;margin:16px 0 6px;opacity:.4;font-size:11px">'+
          '<span style="flex:1;height:1px;background:currentColor"></span>或<span style="flex:1;height:1px;background:currentColor"></span></div>'+
@@ -169,7 +169,7 @@ function modal(){
     try{ window.open('https://line.me/R/ti/p/~'+LINE_ID,'_blank'); }catch(e){}
   };
   var buy=m.querySelector('#bpsy-buy');
-  if(buy)buy.onclick=function(){
+  if(buy)buy.onclick=function(){var _ck=[].slice.call(m.querySelectorAll('.bpsy-ck'));if(_ck.length && !_ck.every(function(c){return c.checked})){var _mm=m.querySelector('#bpsy-agmsg');if(_mm)_mm.style.display='block';return false;}try{localStorage.setItem('bpsy_agree',new Date().toISOString());}catch(e){}
     // iframe 內要開到最上層視窗,否則會被夾在小框裡
     try{ (window.top||window).open(BUY_URL,'_blank'); }catch(e){ window.open(BUY_URL,'_blank'); }
   };
