@@ -45,17 +45,20 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 <style id="bp-readfix">
 /* ---- BPFIXREAD 命盤可讀性 ----
    1. 十四主星原本是深色字（給淺色底用的），在深色底上對比度近乎零。
-   2. 手機上只拿掉流年/小限歲數那兩行（原本 7.5px，讀不了又吃掉半個宮格）。
+   2. 手機版做法同專業軟體：宮格加高、星曜欄放寬、字放大，
+      星名自然換到第二排——用高度換清晰。
 
-   ⚠ 實測過、不能碰的三個地方：
-     • .star 欄寬 —— 寬一點星名就換行溢出
-     • .gz 字級 —— 大一點宮干支就斷成兩行
-     • .gname 字級 —— 會把同行的干支擠換行
-     這三個都真的改過、看過畫面，確認會壞。 */
+   ⚠ 高度與欄寬必須一起改。只放寬不加高，星名會被切掉，
+     畫面會變成一團亂（實際發生過）。另外 .gz 與 .gname 字級不能動，
+     一大宮干支就斷成兩行。 */
 .pal .star.zhu .nm{ color:#F5E7C6 !important; }
 @media (max-width:560px){
+  #chart{ grid-template-rows:repeat(4,minmax(165px,auto)); }
   #chart .pal .nums{ display:none; }
-  #chart .pal .star .br{ opacity:.82; }
+  #chart .pal .stars{ min-height:80px; }
+  #chart .pal .star{ width:16px; }
+  #chart .pal .star .nm{ font-size:14px; letter-spacing:0; }
+  #chart .pal .star .br{ font-size:9.5px; opacity:.85; }
 }
 </style>
 </head><body>
