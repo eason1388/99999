@@ -186,6 +186,21 @@ nav.top .ngrp>summary::-webkit-details-marker{display:none}
 nav.top .ngrp>summary::after{content:"\25BE";margin-left:4px;opacity:.65}
 nav.top .ngbody{position:absolute;z-index:80;top:calc(100% + 6px);left:0;min-width:170px;background:#141110;border:1px solid rgba(201,169,106,.45);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 10px 26px rgba(0,0,0,.55)}
 nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowrap}
+
+/* 手機:今日主角卡 */
+@media(max-width:560px){
+#today.tpanel{border:1px solid rgba(201,169,106,.55);border-radius:16px;background:linear-gradient(180deg,rgba(201,169,106,.10),rgba(201,169,106,.02));padding:16px 13px 14px;box-shadow:0 8px 26px rgba(0,0,0,.45)}
+#today .tp1 .gz{font-size:23px;letter-spacing:2px;line-height:1.4}
+#today .tp1 .d2{font-size:12.5px;opacity:.7;margin-top:5px}
+#today .tp1 .jq{font-size:12.5px;margin-top:7px}
+#today .tgrid{grid-template-columns:repeat(3,1fr) !important;gap:8px;margin-top:13px}
+#today .tcell{padding:9px 4px;border-radius:10px;background:rgba(255,255,255,.04)}
+#today .tcell .k{font-size:11px;opacity:.6;letter-spacing:.5px}
+#today .tcell .v{font-size:17px;margin-top:3px}
+#today .twarn{font-size:12px;line-height:1.8;margin-top:13px;padding:10px 12px;border-radius:10px;border:1px solid rgba(232,160,138,.32);background:rgba(232,160,138,.06)}
+#today .tfoot{margin-top:13px;display:flex;gap:8px;flex-wrap:wrap}
+#today .tfoot button{flex:1 1 30%}
+}
 </style></head><body>
 <header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button><details class="ngrp"><summary class="tnav ngs">陽宅</summary><div class="ngbody"><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="ask">主訴反查</button></div></details><details class="ngrp"><summary class="tnav ngs">陰宅</summary><div class="ngbody"><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button></div></details><details class="ngrp"><summary class="tnav ngs">命理</summary><div class="ngbody"><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button></div></details><details class="ngrp"><summary class="tnav ngs">案件</summary><div class="ngbody"><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button></div></details><span class="navsep"></span><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
 <div id="stage">
