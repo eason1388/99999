@@ -113,7 +113,7 @@ function monthTrend(p, fav, y, m, d){
   var mo = monthOf(y,m,d);
   var best = [], worst = [], days = [];
   var base = new Date(y, m-1, d);
-  for (var k=-15; k<=15; k++){
+  for (var k=-35; k<=35; k++){            /* 節氣月最長 31 天，兩邊都要掃到 */
     var t = new Date(base.getTime() + k*86400000);
     var mm = monthOf(t.getFullYear(), t.getMonth()+1, t.getDate());
     if (mm.mi !== mo.mi) continue;                        /* 只取同一個節氣月 */
