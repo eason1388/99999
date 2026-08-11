@@ -75,6 +75,9 @@ button{font-family:inherit}
     <div id="items"></div>
     <div class="note">評分=基準50+逐項加減(每項附出處;v1 基準模型,權重屬門派包可覆寫)。喜用神取自五行強弱(身弱喜印比、身強喜食傷財官)。</div></div>
 </div>
+<script src="bazi.js"></script>
+<script src="luck.js"></script>
+<script src="pack.js"></script>
 <script src="lock.js"></script>
 <script src="case.js?v=7"></script>
 <script src="report.js"></script>
@@ -855,4 +858,63 @@ for(let i=1;i<=9;i++)perSel.add(new Option(i,i));perSel.value=9;
 for(const m of M24)sitSel.add(new Option(m,m));sitSel.value='壬';
 ['bd','bt','sex','period','sit'].forEach(id=>document.getElementById(id).onchange=render);
 render();
-</script></body></html>
+</script>
+<script>
+/* ---- BPDAILY 八字・當月與當日運勢 ----
+   取法：以扶抑法的喜用神為主軸，十神為輔。
+   免費看到干支與吉凶等級（每天回訪的鉤子），詳解為付費。 */
+(function(){
+  var ID="bp-daily";
+  function el(x){ return document.getElementById(x); }
+  function build(){
+    if(!(window.BPBAZI && window.BPLUCK)) return;
+    var bd=el("bd"), bt=el("bt");
+    if(!bd || !bd.value) return;
+    var y=+bd.value.slice(0,4), m=+bd.value.slice(5,7), d=+bd.value.slice(8,10);
+    var hh=(bt && bt.value)? +bt.value.slice(0,2) : 0;
+    var p, fav;
+    try{ p=BPBAZI.pillars(y,m,d,hh); fav=BPBAZI.favor(p); }catch(e){ return; }
+    var n=new Date(), Y=n.getFullYear(), M=n.getMonth()+1, D=n.getDate();
+    var L=BPLUCK.dayLuck(p,fav,Y,M,D), mo=BPLUCK.monthOf(Y,M,D), yr=BPLUCK.yearOf(Y,M,D);
+    var hrs=BPLUCK.goodHours(fav,L.gan), tr=BPLUCK.monthTrend(p,fav,Y,M,D);
+    var col={"大吉":"#7CFC9B","吉":"#B6E7A0","平":"#D8D2C4","小凶":"#E8B06A","凶":"#E88A8A"}[L.level]||"#D8D2C4";
+    var S='style="margin-top:10px;padding:9px 11px;background:rgba(255,255,255,.04);border-radius:8px;line-height:1.75"';
+    var head='<div style="margin:14px 0;padding:14px;border:1px solid rgba(201,169,106,.35);border-radius:12px">'+
+      '<h2 style="margin:0 0 8px;font-size:17px">📅 今日運勢　'+Y+"/"+M+"/"+D+'</h2>'+
+      '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'+
+        '<span style="font-size:26px;font-weight:700;letter-spacing:2px">'+L.gz+'日</span>'+
+        '<span style="font-size:20px;font-weight:700;color:'+col+'">'+L.level+'</span>'+
+        '<span style="opacity:.75">日主'+p.day.gan+'　今日'+L.gan+'為<b>'+L.ten+'</b></span>'+
+      '</div>'+
+      '<div style="opacity:.72;font-size:12.5px">流年 '+BPLUCK.gz(yr.idx)+'　流月 '+mo.gan+mo.zhi+'　（流月以節分界，非農曆初一）</div>';
+    var deep='<div '+S+'><b>何以如此</b><br>'+
+      (L.why.length? L.why.map(function(x){return "・"+x}).join("<br>") : "・今日干支與喜忌無涉，平常心即可")+'</div>';
+    if(L.tenTxt){ deep+='<div '+S+'><b>今日主題：'+L.ten+'</b>（'+L.tenTxt.s+'）<br>'+
+      '<span style="color:#9BD8A6">宜：'+L.tenTxt.y+'</span><br>'+
+      '<span style="color:#E8A08A">忌：'+L.tenTxt.j+'</span></div>'; }
+    deep+='<div '+S+'><b>今日吉時</b><br>'+
+      hrs.slice(0,3).map(function(h){return "・"+h.label+"　"+h.gz}).join("<br>")+
+      '<br><span style="opacity:.7">避開：'+hrs.slice(-2).map(function(h){return h.label}).join("、")+'</span></div>';
+    deep+='<div '+S+'><b>本月走勢　'+tr.month+'月</b><br>'+tr.monthText+
+      '<br><span style="color:#9BD8A6">最佳：'+tr.best.map(function(x){return x.md+"("+x.gz+")"}).join("、")+'</span>'+
+      '<br><span style="color:#E8A08A">避開：'+tr.worst.map(function(x){return x.md+"("+x.gz+")"}).join("、")+'</span></div>';
+    var teaser="今日何以吉凶、宜做什麼忌做什麼、幾點最順，以及本月最好與最該避開的日子。";
+    var html=head+(window.BPSY? BPSY.gate(deep,"今日與本月・詳細運勢",teaser) : deep)+"</div>";
+    var w=el(ID);
+    if(!w){ w=document.createElement("div"); w.id=ID;
+      var a=el("liunian"), host=a? a.parentNode : null;
+      if(host && host.parentNode) host.parentNode.insertBefore(w, host.nextSibling);
+      else document.body.appendChild(w); }
+    w.innerHTML=html;
+    if(window.BPSY && BPSY.bind) BPSY.bind(w);
+  }
+  function boot(){
+    if(!(window.BPBAZI && window.BPLUCK && window.BPSY)) return setTimeout(boot,300);
+    build();
+    ["bd","bt","sex"].forEach(function(id){ var e=el(id); if(e) e.addEventListener("change",function(){ setTimeout(build,150) }); });
+    setTimeout(build,1500);
+  }
+  boot();
+})();
+</script>
+</body></html>
