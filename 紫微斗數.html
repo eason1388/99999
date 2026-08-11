@@ -41,7 +41,30 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
 .note{font-size:11.5px;opacity:.65;margin-top:6px}
 .row2{display:flex;justify-content:space-between;gap:8px;padding:3px 2px;border-bottom:1px dashed rgba(160,140,90,.25);font-size:13px}
 @media(max-width:560px){#chart{grid-template-rows:repeat(4,minmax(86px,auto))}.pal{font-size:9.5px}.pal .zhu{font-size:11px}}
-</style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=5"></head><body>
+</style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=5">
+<style id="bp-readfix">
+/* ---- BPFIXREAD 命盤可讀性修正 ----
+   ⧈ 十四主星原本是深色字（為淺色底所寫），
+      在現在的深色底上對比度近乎零，等於看不見。
+      主星是紫微盤最重要的東西，改成最亮。 */
+.pal .star.zhu .nm{ color:#F5E7C6 !important; font-size:12px; font-weight:800; }
+.pal .star.zhu{ width:13px; }
+.pal .star .br{ font-size:8.5px; opacity:.8; }
+
+@media (max-width:560px){
+  #chart{ grid-template-rows:repeat(4,minmax(104px,auto)); gap:3px; }
+  .pal{ font-size:11px; padding:3px 4px; }
+  .pal .star{ width:13.5px; }
+  .pal .star .nm{ font-size:12.5px; letter-spacing:0; }
+  .pal .star.za .nm{ font-size:11px; }
+  .pal .nums{ display:none; }        /* 流年小限歲數在手機上只有 7.5px，看不清也撠掉版面 */
+  .pal .gname{ font-size:13px; }
+  .pal .gz{ font-size:11px; }
+  .pal .dx{ font-size:11px; }
+  .pal .shen12,.pal .palft{ font-size:9.5px; }
+}
+</style>
+</head><body>
 <h1>✴ 紫微斗數</h1>
 <div class="box">
 <div class="row">
