@@ -52,7 +52,6 @@ h2{font-family:'Noto Serif TC',serif;font-size:16px;color:var(--gold);border-bot
      畫面會變成一團亂（實際發生過）。另外 .gz 與 .gname 字級不能動，
      一大宮干支就斷成兩行。 */
 .pal .star.zhu .nm{ color:#F5E7C6 !important; }
-.pal{ border-color:rgba(201,169,106,.62) !important; }   /* 原本 .28 太淡，宮位分不出來 */
 @media (max-width:560px){
   #chart{ grid-template-rows:repeat(4,minmax(165px,auto)); }
   #chart .pal .nums{ display:none; }
@@ -780,91 +779,132 @@ render();
 </script>
 
 <script>
-/* ---- BPZWDAILY 紫微・當月與當日運勢 ----
-   取法：斗君法（主流）。
-     斗君 = 流年支宮起正月「逆數」到生月，再起子時「順數」到生時。
-     斗君即流月正月命宮，順行得各月；流月命宮起初一順行得流日。
-   ⚠ 生月生日一律用農曆，不是國曆，也不是節氣月。 */
+/* ---- BPZWDAILY 紫微・當月與當日運勢（飛星四化論法）----
+   宮位：斗君法。斗君 = 流年支宮起正月「逆數」到生月，再起子時「順數」到生時；
+         斗君即流月正月命宮，順行得各月；流月命宮起初一順行得流日。
+   論斷：以四化交涉為主軸 —— 三方四正、忌沖、疊祿疊忌、祿隨忌走、四層疊宮。
+   ⚠ 只看命宮不看三方四正，等於只看一半；忌之所沖才是出事的地方。 */
 (function(){
-  var ID="bp-zwdaily", ZHI="子丑寅卯辰巳午未申酉戌亥";
+  var ID="bp-zwdaily", ZHI="子丑寅卯辰巳午未申酉戌亥", GAN="甲乙丙丁戊己庚辛壬癸";
+  var HUA=["祿","權","科","忌"];
+  var SHA=["擎羊","陀羅","火星","鈴星","地空","地劫"];
   function el(x){ return document.getElementById(x); }
+
   function build(){
     if(!(window.__ZW && window.BPLUCK && window.BPBAZI)) return;
-    var li=el("lunarInfo"); if(!li || !li.textContent) return;
-    var txt=li.textContent;
-    var bm=(txt.match(/農曆\s*(\d+)月/)||[])[1];
-    var bh=(txt.match(/([子丑寅卯辰巳午未申酉戌亥])時/)||[])[1];
-    if(!bm || !bh) return;
+    var li=el("lunarInfo"); if(!li||!li.textContent) return;
+    var bm=(li.textContent.match(/農曆\s*(\d+)月/)||[])[1];
+    var bh=(li.textContent.match(/([子丑寅卯辰巳午未申酉戌亥])時/)||[])[1];
+    if(!bm||!bh) return;
     var pals=[].slice.call(document.querySelectorAll(".pal"));
     if(pals.length!==12) return;
 
+    function pal(i){
+      var e=pals[((i%12)+12)%12], s=e.textContent.replace(/\s+/g," ");
+      return { i:((i%12)+12)%12, zhi:ZHI[((i%12)+12)%12],
+        name:(s.match(/命宮|兄弟|夫妻|子女|財帛|疾厄|遷移|僕役|官祿|田宅|福德|父母/)||[""])[0],
+        stars:(s.match(/紫微|天機|太陽|武曲|天同|廉貞|天府|太陰|貪狼|巨門|天相|天梁|七殺|破軍/g)||[]),
+        sha:SHA.filter(function(x){ return s.indexOf(x)>=0; }),
+        gz:(s.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/)||[""])[0] };
+    }
+    function starPal(nm){ for(var k=0;k<12;k++){ if(pals[k].textContent.indexOf(nm)>=0) return pal(k); } return null; }
+    function hua(gan){ return (__ZW.SIHUA && __ZW.SIHUA[gan]) ? __ZW.SIHUA[gan] : null; }
+    function huaPals(gan){ var h=hua(gan); if(!h) return null;
+      return h.map(function(st,q){ return { star:st, hua:HUA[q], p:starPal(st) }; }); }
+
     var n=new Date(), Y=n.getFullYear(), M=n.getMonth()+1, D=n.getDate();
-    var lun=__ZW.toLunar(Y,M,D);
-    var lm=parseInt(lun.month,10) || (lun.month|0);
-    var ld=lun.day|0;
-    if(!lm || !ld) return;
+    var lun=__ZW.toLunar(Y,M,D), lm=parseInt(lun.month,10)||0, ld=lun.day|0;
+    if(!lm||!ld) return;
+    var yg=__ZW.yearGZ?__ZW.yearGZ(Y,M,D):null;
+    var yzhi=(yg&&yg.zhi)?yg.zhi:ZHI[((Y-4)%12+12)%12];
+    var ygan=(yg&&yg.gan)?yg.gan:GAN[((Y-4)%10+10)%10];
+    var dj=((ZHI.indexOf(yzhi)-(parseInt(bm,10)-1)+ZHI.indexOf(bh))%12+12)%12;
+    var mp=(dj+(lm-1))%12, dp=(mp+(ld-1))%12;
 
-    var yg=__ZW.yearGZ ? __ZW.yearGZ(Y,M,D) : null;
-    var yzhi=(yg && yg.zhi) ? yg.zhi : ZHI[((Y-4)%12+12)%12];
-    var yi=ZHI.indexOf(yzhi);
-
-    /* 斗君：流年支宮起正月逆數到生月，再起子時順數到生時 */
-    var dj=((yi-(parseInt(bm,10)-1)+ZHI.indexOf(bh))%12+12)%12;
-    var mp=(dj+(lm-1))%12;              /* 流月命宮 */
-    var dp=(mp+(ld-1))%12;              /* 流日命宮 */
-
-    function palInfo(idx){
-      var e=pals[idx]; if(!e) return {name:"",stars:""};
-      var s=e.textContent.replace(/\s+/g," ");
-      var nm=(s.match(/命宮|兄弟|夫妻|子女|財帛|疾厄|遷移|僕役|官祿|田宅|福德|父母/)||[""])[0];
-      var st=(s.match(/紫微|天機|太陽|武曲|天同|廉貞|天府|太陰|貪狼|巨門|天相|天梁|七殺|破軍/g)||[]).slice(0,3).join("、");
-      return { name:nm, stars:st||"（空宮）", zhi:ZHI[idx] };
-    }
-    var mi=palInfo(mp), di=palInfo(dp);
-
-    /* 流日干支與流日四化 */
     var idx=BPLUCK.dayIdx(Y,M,D), dgz=BPLUCK.gz(idx), dgan=dgz.charAt(0);
-    var sh=(__ZW.SIHUA && __ZW.SIHUA[dgan]) ? __ZW.SIHUA[dgan] : null;
-    var HUA=["祿","權","科","忌"];
-    function whereStar(star){
-      for(var k=0;k<12;k++){ if(pals[k].textContent.indexOf(star)>=0) return palInfo(k); }
-      return null;
-    }
+    var P0=pal(dp), OPP=pal(dp+6), S1=pal(dp+4), S2=pal(dp+8);
+    var MP=pal(mp);
+    var mingIdx=-1, dxIdx=-1;
+    pals.forEach(function(e,i){ if(/\bming\b/.test(e.className)) mingIdx=i; if(/daxian/.test(e.className)) dxIdx=i; });
+    var lyIdx=ZHI.indexOf(yzhi);
 
-    var S='style="margin-top:10px;padding:9px 11px;background:rgba(255,255,255,.04);border-radius:8px;line-height:1.75"';
-    var head='<div style="margin:14px 0;padding:14px;border:1px solid rgba(201,169,106,.35);border-radius:12px">'+
+    var dH=huaPals(dgan), yH=huaPals(ygan);
+    var natal=(function(){ var m=document.body.textContent.match(/四化:([甲乙丙丁戊己庚辛壬癸])干/); return m?huaPals(m[1]):null; })();
+
+    function fmt(p){ return p? p.zhi+"宮（本命"+p.name+"）" : "不在盤中"; }
+
+    /* ── 免費：干支與落宮 ── */
+    var S='style="margin-top:10px;padding:9px 11px;background:rgba(255,255,255,.04);border-radius:8px;line-height:1.8"';
+    var head='<div style="margin:14px 0;padding:14px;border:1px solid rgba(201,169,106,.5);border-radius:12px">'+
       '<h2 style="margin:0 0 8px;font-size:17px">🌙 今日運勢　'+Y+"/"+M+"/"+D+'</h2>'+
       '<div style="margin-bottom:6px">農曆 '+lm+'月'+ld+'日　流日 <b>'+dgz+'</b></div>'+
-      '<div style="font-size:15px">流日命宮落 <b>'+di.zhi+'宮</b>（本命<b>'+di.name+'</b>）　主星：'+di.stars+'</div>'+
-      '<div style="opacity:.72;font-size:12.5px;margin-top:4px">斗君在 '+ZHI[dj]+'宮　流月命宮 '+mi.zhi+'宮</div>';
+      '<div style="font-size:15px">流日命宮 <b>'+P0.zhi+'宮</b>（本命<b>'+P0.name+'</b>）　'+(P0.stars.join("、")||"空宮")+'</div>'+
+      '<div style="opacity:.72;font-size:12.5px;margin-top:4px">斗君 '+ZHI[dj]+'宮　流月命宮 '+MP.zhi+'宮</div>';
 
-    var deep='<div '+S+'><b>本月：流月命宮 '+mi.zhi+'宮（本命'+mi.name+'）</b><br>主星：'+mi.stars+
-      '<br>本月人事以「'+mi.name+'」之事為主軸，成敗多繫於此宮所主。</div>';
-    deep+='<div '+S+'><b>今日：流日命宮 '+di.zhi+'宮（本命'+di.name+'）</b><br>主星：'+di.stars+
-      '<br>今日心力所在、事情發生的場域，看此宮。</div>';
-    if(sh){
-      var rows=[];
-      for(var q=0;q<4;q++){
-        var w=whereStar(sh[q]);
-        rows.push("・"+sh[q]+"化"+HUA[q]+(w? "　→ 入"+w.zhi+"宮（本命"+w.name+"）" : "　→ 不在盤中"));
+    /* ── 付費：高階論斷 ── */
+    var d="";
+    d+='<div '+S+'><b>一、流日三方四正</b><br>'+
+      '命宮：'+fmt(P0)+'　'+(P0.stars.join("、")||"空宮")+'<br>'+
+      '對宮：'+fmt(OPP)+'　'+(OPP.stars.join("、")||"空宮")+'<br>'+
+      '三合：'+fmt(S1)+'、'+fmt(S2)+'<br>'+
+      '<span style="opacity:.8">空宮者借對宮之星論之；論事必看三方四正，只看命宮會失準。</span>';
+    var allSha=[].concat(P0.sha,OPP.sha,S1.sha,S2.sha);
+    if(allSha.length) d+='<br><span style="color:#E8A08A">三方四正見煞：'+[].concat(P0.sha.map(function(x){return x+"(命)"}),OPP.sha.map(function(x){return x+"(對)"}),S1.sha.map(function(x){return x+"(合)"}),S2.sha.map(function(x){return x+"(合)"})).join("、")+'　煞聚則事有阻，宜緩不宜急。</span>';
+    else d+='<br><span style="color:#9BD8A6">三方四正不見六煞，今日行事阻力小。</span>';
+    d+="</div>";
+
+    if(dH){
+      var rows=dH.map(function(x){
+        var line="・"+x.star+"化"+x.hua+"　→ "+fmt(x.p);
+        if(x.hua==="忌" && x.p) line+='<br>　　<span style="color:#E8A08A">忌沖 '+fmt(pal(x.p.i+6))+'　—— 今日真正的破口在此宮</span>';
+        return line;
+      });
+      d+='<div '+S+'><b>二、流日四化（'+dgan+'干）</b><br>'+rows.join("<br>")+"</div>";
+
+      /* 三、四化交涉 */
+      var cross=[];
+      var dJi=dH[3]&&dH[3].p, dLu=dH[0]&&dH[0].p;
+      if(natal){
+        var nJi=natal[3]&&natal[3].p, nLu=natal[0]&&natal[0].p;
+        if(dJi&&nJi&&dJi.i===nJi.i) cross.push('<b style="color:#E88A8A">疊忌</b>：流日忌與本命忌同落 '+fmt(dJi)+'　—— 此宮之事今日必見波折，且是老問題翻出來。');
+        if(dLu&&nLu&&dLu.i===nLu.i) cross.push('<b style="color:#9BD8A6">疊祿</b>：流日祿與本命祿同落 '+fmt(dLu)+'　—— 今日此宮之事最順，該推的就在今天推。');
+        if(dLu&&nJi&&dLu.i===nJi.i) cross.push('<b style="color:#E8B06A">祿隨忌走</b>：流日祿入本命忌位 '+fmt(dLu)+'　—— 看似有利，實則先成後敗，得利莫貪。');
       }
-      deep+='<div '+S+'><b>流日四化（依 '+dgan+' 干）</b><br>'+rows.join("<br>")+
-        '<br><span style="opacity:.75">化祿所入之宮是今日的順處，化忌所入之宮是今日最該留意之處。</span></div>';
+      if(dJi&&dJi.i===dp) cross.push('<b style="color:#E88A8A">忌入本命（流日）</b>：化忌落自身命宮　—— 今日自作自受之象，少主動出擊。');
+      if(dJi&&((dJi.i+6)%12)===dp) cross.push('<b style="color:#E88A8A">忌沖流日命宮</b>：今日自身受制，宜守。');
+      if(dJi&&dJi.i===lyIdx) cross.push('流日忌入流年命宮　—— 今日之事撞上全年課題，格外留意。');
+      if(dJi&&dxIdx>=0&&dJi.i===dxIdx) cross.push('流日忌入大限命宮　—— 觸動十年主軸，影響不只今天。');
+      if(yH&&dJi&&yH[3]&&yH[3].p&&dJi.i===yH[3].p.i) cross.push('<b style="color:#E88A8A">流日忌與流年忌同宮</b>　—— 雙忌交攻，今日最該避的就是此宮之事。');
+      d+='<div '+S+'><b>三、四化交涉</b><br>'+(cross.length? cross.map(function(x){return "・"+x}).join("<br>") : "・今日四化與本命、流年無直接交涉，屬平常之日。")+"</div>";
     }
-    var teaser="流月與流日命宮落在本命何宮、宮內主星、流日四化各入何宮，以及今日該把力氣放在哪裡。";
-    var html=head+(window.BPSY? BPSY.gate(deep,"今日與本月・紫微詳解",teaser) : deep)+"</div>";
 
-    var w2=el(ID);
-    if(!w2){ w2=document.createElement("div"); w2.id=ID;
+    var lay=[];
+    if(mingIdx===dp) lay.push("流日命宮＝本命命宮　—— 今日之事關乎自身根本。");
+    if(dxIdx>=0&&dxIdx===dp) lay.push("流日命宮＝大限命宮　—— 力量加倍，今日之事帶十年格局。");
+    if(lyIdx===dp) lay.push("流日命宮＝流年命宮　—— 今日是全年主軸的縮影。");
+    if(mp===dp) lay.push("流日命宮＝流月命宮　—— 本月重點壓在今天。");
+    d+='<div '+S+'><b>四、四層疊宮</b><br>'+(lay.length? lay.map(function(x){return "・"+x}).join("<br>") : "・本命、大限、流年、流月與流日命宮各自分立，今日力量單純。")+"</div>";
+
+    d+='<div '+S+'><b>五、今日用力處</b><br>'+
+      '今日心力落在<b>'+P0.name+'</b>之事；'+
+      (dLu? '順處在 '+fmt(dLu)+'，該辦的事往這個方向去。' : '')+
+      (dJi? '<br>忌在 '+fmt(dJi)+'，沖 '+fmt(pal(dJi.i+6))+'　—— 這兩宮之事今日不宜決斷。' : '')+
+      '</div>';
+
+    var teaser="三方四正、流日四化落宮與忌之所沖、疊祿疊忌與祿隨忌走、四層疊宮，以及今日該把力氣放在哪一宮。";
+    var html=head+(window.BPSY? BPSY.gate(d,"今日與本月・紫微飛星論斷",teaser) : d)+"</div>";
+
+    var w=el(ID);
+    if(!w){ w=document.createElement("div"); w.id=ID;
       var host=el("chart");
-      if(host && host.parentNode) host.parentNode.insertBefore(w2, host.nextSibling);
-      else document.body.appendChild(w2); }
-    w2.innerHTML=html;
-    if(window.BPSY && BPSY.bind) BPSY.bind(w2);
+      if(host&&host.parentNode) host.parentNode.insertBefore(w,host.nextSibling);
+      else document.body.appendChild(w); }
+    w.innerHTML=html;
+    if(window.BPSY&&BPSY.bind) BPSY.bind(w);
   }
   function boot(){
-    if(!(window.__ZW && window.BPLUCK && window.BPSY)) return setTimeout(boot,300);
-    var g=el("go"); if(g) g.addEventListener("click", function(){ setTimeout(build,900) });
+    if(!(window.__ZW&&window.BPLUCK&&window.BPSY)) return setTimeout(boot,300);
+    var g=el("go"); if(g) g.addEventListener("click",function(){ setTimeout(build,900) });
     setTimeout(build,1200); setTimeout(build,2600);
   }
   boot();
