@@ -27,12 +27,28 @@ ol,ul{padding-left:22px;margin:4px 0}
 .t em::before{content:'【怎麼辦】';color:var(--gold);font-weight:700}
 .t .x{color:var(--red)}
 kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
+
+.sec{border:1px solid rgba(201,169,106,.28);border-radius:12px;margin:10px 0;background:rgba(255,255,255,.02);overflow:hidden}
+.sec>summary{list-style:none;cursor:pointer;padding:13px 44px 13px 15px;font-size:16px;color:#E8C77A;position:relative;font-weight:600}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary::after{content:"+";position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;color:#C9A96A;line-height:1}
+.sec[open]>summary::after{content:"\2212"}
+.sec[open]>summary{border-bottom:1px solid rgba(201,169,106,.22)}
+.secbody{padding:4px 15px 14px}
+.secbody h3{font-size:15px;color:#D9C79E;margin:14px 0 6px}
+.sec summary:hover{background:rgba(201,169,106,.06)}
+#exp{display:flex;gap:8px;margin:14px 0 4px}
+#exp button{flex:1;background:rgba(201,169,106,.14);color:#E8C77A;border:1px solid rgba(201,169,106,.4);border-radius:9px;padding:9px;font-size:13.5px;cursor:pointer}
+
+.gtl{margin:22px 0 8px;padding-left:10px;border-left:3px solid #C9A96A;color:#C9A96A;font-size:14px;letter-spacing:2px}
+.gtl:first-of-type{margin-top:10px}
 </style><link id="bpsy-theme" rel="stylesheet" href="theme.css?v=5"></head><body>
 <h1>使用說明</h1>
 <div class="sub">每個分頁在做什麼、怎麼用——照著步驟操作即可,不需任何風水基礎</div>
-<nav><a href="#g0">快速上手</a><a href="#g1">羅盤</a><a href="#g2">飛星八宅</a><a href="#g3">擇時</a><a href="#g4">八字</a><a href="#g5">地圖</a><a href="#g6">尋龍</a><a href="#g7">學堂</a><a href="#g8">報告</a><a href="#d1">判讀名詞</a><a href="#d2">飛星</a><a href="#d3">八宅</a><a href="#d4">神煞</a><a href="#d5">擇時奇門</a><a href="#d6">八字</a><a href="#d7">疑難排解</a><a href="#g9">常見問題</a></nav>
 
-<section id="g0"><h2>三分鐘快速上手</h2>
+
+<section id="g0"><div id="exp"><button id="expAll">全部展開</button><button id="colAll">全部收合</button></div><div class="gtl">開始使用</div>
+<details class="sec"><summary>三分鐘快速上手</summary><div class="secbody">
 <ol>
 <li>開「<b>羅盤</b>」分頁,按<kbd>🧭 現場即斷</kbd>——手機轉一圈,八個方位的吉凶立刻用顏色告訴你(綠=吉、紅=凶)。</li>
 <li>想看這間房子的完整分析:人站屋內、面向大門外,按<kbd>📡 即時量測</kbd>(或把手機內建指南針顯示的度數輸入)。</li>
@@ -41,7 +57,11 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 </ol>
 <div class="tip"><b>建議:</b>用手機瀏覽器開啟後「加入主畫面」,就是一個獨立 App,離線也能用(地圖/尋龍除外)。</div></section>
 
-<section id="g1"><h2>◎ 羅盤</h2>
+<section id="g1"></div></details>
+<details class="sec"><summary>📱 裝到手機・離線使用</summary><div class="secbody"><p>不用下載 App。用手機瀏覽器開啟網站，選「加入主畫面」，桌面就會多一個圖示，開起來跟 App 一樣、沒有網址列。</p><p>加完之後主要功能離線也能用。<b>但這三項需要網路</b>：地圖測向、地理尋龍、購買與授權碼驗證。</p><p>解碼過一次之後，判語會存在手機裡，之後沒網路也看得到。</p></div></details>
+<details class="sec"><summary>💳 免費與付費</summary><div class="secbody"><p><b>免費、不計次、不用註冊的部分：</b></p><ul><li>所有排盤運算：飛星、八宅、八字、紫微、擇日、擇時、水法</li><li>羅盤測向、平面圖疊盤、今日曆法盤</li><li>房屋吉凶評分（分數）</li><li>客戶案件簿</li></ul><p><b>需要解碼才看得到的部分：</b>逐句判語與化解次第——房屋評分的逐項詳解、飛星宮位深度論斷、八字與紫微命盤深解、金鎖玉關砂水斷語、陰宅水法斷語、每日流日完整推演、開運佈局與化解建議、專業報告輸出。</p><p><b>價格：</b>NT$1,280 一次付清，永久使用，全站深解一起開，不是單篇購買。</p><p><b>裝置：</b>一組授權碼最多在 5 台裝置啟用。要換裝置請聯絡客服。</p><p><b>怎麼解碼：</b>任一付費區塊按「🔑 點此解碼」→ 勾選三項同意 → 選付款方式，或在同一個視窗下方「已有授權碼?」欄位輸入你的授權碼再按「解碼」。</p></div></details>
+<div class="gtl">陽宅</div>
+<details class="sec"><summary>◎ 羅盤</summary><div class="secbody">
 <h3>這是什麼</h3><p>專業電子羅盤:二十四山即時判讀、玄空飛星、八宅吉凶、進階圈層,一頁完成陽宅分析。</p>
 <h3>怎麼量坐向(最重要的一步)</h3>
 <ol><li>人站屋內、背對屋內、<b>面向大門外</b>。</li>
@@ -63,42 +83,71 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <li><b>智慧問答</b>:直接問「財位在哪」「今年哪裡不能動土」「什麼是騎縫線」。</li></ul>
 <div class="tip"><b>注意:</b>量測時遠離金屬(汽車、鐵門、鋼筋柱)與電器;出現「騎縫線」警告時,人移動半步再量。</div></section>
 
-<section id="g2"><h2>▦ 飛星八宅</h2>
+<section id="g2"></div></details>
+<details class="sec"><summary>▣ 現場勘查模式</summary><div class="secbody"><p>到了現場逐點記錄用的。大門、爐灶、床位、神位、廁所、樓梯、水路等十項，一項一項填方位與狀態，可以拍照存證。</p><p>填完會依這間房子的飛星與八宅當場判吉凶，結果可以歸檔到客戶案件簿，之後直接帶進報告。</p><p><b>用法</b>：先在羅盤量好坐向 → 開現場勘查 → 逐項點選方位 → 拍照 → 存檔。</p></div></details>
+<details class="sec"><summary>▦ 飛星八宅</summary><div class="secbody">
 <p>研究用盤面:任選 <b>1–9 運 × 24 山</b>,立刻出九宮飛星盤與格局(旺山旺向/上山下水…)、城門、三般卦。</p>
 <ul><li><kbd>下卦/替卦</kbd>:兼向超過約 4.5° 時看替卦。</li>
 <li><kbd>下卦↔替卦對照</kbd>:兩盤並排,金色虛線框=相異之宮,擇向時一眼比較。</li>
 <li><kbd>顯示八宅遊星</kbd>:同一盤疊上八宅吉凶。</li></ul></section>
 
-<section id="g3"><h2>☰ 擇時</h2>
+<section id="g3"></div></details>
+<details class="sec"><summary>🔒 金鎖玉關・過路陰陽</summary><div class="secbody"><p>二十四山逐山點砂水的派別。每一山填「有砂」或「有水」，依經旨直斷合訣或違訣、應在哪一房人、應什麼病症，並附化解的優先順序。</p><p><b>提醒</b>：砂水要照實填。看得見的高物、大樓、山丘算砂；水池、馬路、空曠低處算水。填錯結果就整個反了。</p></div></details>
+<details class="sec"><summary>🏮 場所佈局模式</summary><div class="secbody"><p>餐廳、辦公室、工廠、店面、住家五種模式。選好模式與坐向，收銀台、爐灶、老闆位這些關鍵位置會一鍵排定建議位置。</p></div></details>
+<details class="sec"><summary>🗺 平面圖疊盤</summary><div class="secbody"><p>上傳自家或客戶的平面圖，九宮飛星與八宅吉凶直接疊在圖上。可以點格子標註這一格是哪個房間，標完就能逐間檢核。</p><p>適合做成給屋主看的圖說。</p></div></details>
+<details class="sec"><summary>📋 全宅健檢總報告</summary><div class="secbody"><p>一鍵跑完六段：綜合評分、玄空飛星盤、重點宮位詳斷、八宅遊星八方應用、當年流年神煞、開運佈局建議。</p><p>版面是照 A4 排的，直接列印或存 PDF 就能交給屋主。</p></div></details>
+<details class="sec"><summary>⚠ 形煞圖鑑</summary><div class="secbody"><p>常見形煞的圖解對照。看到現場有疑似形煞，可以來這裡比對是哪一種、通常主什麼、往哪個方向化解。</p></div></details>
+<details class="sec"><summary>🔍 主訴反查</summary><div class="secbody"><p>反過來用的工具。客戶先說出他遇到的狀況，由這個問題往回查可能相關的方位與宮位，指出該優先檢查哪裡。</p><p>適合客戶講不出「哪裡怪」、只說「最近一直不順」的時候。</p></div></details>
+<div class="gtl">陰宅</div>
+<details class="sec"><summary>💧 陰宅水法</summary><div class="secbody"><p>三合十二長生水法、龍門八局、八路黃泉。來水去水點下去即斷吉凶。</p><p><b>提醒</b>：陰宅事關重大，這裡的判斷是輔助，實地仍須合巒頭、合師承定奪。</p></div></details>
+<details class="sec"><summary>⛰ 地理尋龍(需網路)</summary><div class="secbody">
+<ol><li>在等高線地圖沿山脊逐點畫「龍脈線」,雙擊結束。</li>
+<li>自動取高程畫剖面,標出<b>峰</b>與<b>過峽</b>,給龍脈品質評分。</li>
+<li>切「點穴」在地圖點穴位,自動顯示穴場坐向與來龍方位。</li></ol></section>
+
+<section id="g7"></div></details>
+<details class="sec"><summary>⚑ 地圖測向(需網路)</summary><div class="secbody">
+<ol><li><b>兩點測向</b>:地圖上點兩點(如屋後→大門),得方位角與山向。</li>
+<li><b>畫房輪廓</b>:沿建物外緣逐點點擊、雙擊收尾→自動算出<b>立極點</b>(可拖曳微調)→疊上 24 山扇形。</li>
+<li>再點一點設「向」,坐藍向紅。適合看不在現場的房子(配衛星圖)。</li></ol></section>
+
+<section id="g6"></div></details>
+<div class="gtl">命理</div>
+<details class="sec"><summary>☯ 八字</summary><div class="secbody">
+<ol><li>輸入出生年月日、時間、性別(台灣時間;時辰不確定可先粗估)。</li>
+<li>自動排四柱、十神、藏干、五行強弱長條圖、喜用神、大運。</li>
+<li>右欄選「幾運+坐山」,得 0–100 <b>宅命適配評分</b>,逐項附加減分依據。</li></ol>
+<div class="tip"><b>提示:</b>把喜用神記下來——羅盤頁與住家顏色、材質、方位的建議都以它為準。</div></section>
+
+<section id="g5"></div></details>
+<details class="sec"><summary>★ 紫微斗數</summary><div class="secbody"><p>十二宮全盤、四化飛星、大限流年，並附抱朴心法・醫命合參與每日流日論斷。</p><p><b>用法</b>：填出生年月日與時辰，按排盤。流年欄位可改年份，改完再按一次排盤。</p></div></details>
+<details class="sec"><summary>☯ 易經推命（四柱命卦）</summary><div class="secbody"><p>古傳易卦推命：天干佈洛書、地支佈河圖、洛書起卦、八卦相盪、元堂變後天，排出先天卦與後天卦，再推大運、流年、流月與互卦。</p></div></details>
+<details class="sec"><summary>✍ 姓名學</summary><div class="secbody"><p>三才五格：五格數理、三才配置，並與八字喜用合參，看名字補的五行對不對。</p></div></details>
+<details class="sec"><summary>🪙 金錢卦</summary><div class="secbody"><p>手機擲卦，或用真銅錢擲完再把結果記錄進來。依周易原文斷卦，附抱朴心法解讀。</p></div></details>
+<details class="sec"><summary>📅 擇日</summary><div class="secbody"><p>嫁娶、開市、入宅、安床四種事由。依建除、黃道、神煞排出可用吉日與吉時，並避開當事人生肖沖剋。</p><p>下面還有「不用之日與原因」逐日列出，可以直接告訴客戶為什麼那天不行。</p></div></details>
+<details class="sec"><summary>☰ 擇時</summary><div class="secbody">
 <ul><li><b>流年/流月/流日盤</b>:改年份、點月份、選日期即得;流日盤下方直接列「今日吉方/慎用方」。</li>
 <li><b>年神煞</b>:太歲、歲破、三煞、五黃方位,紅字警示。</li>
 <li><b>個人吉位</b>:輸入出生年,得文昌、桃花、驛馬、貴人四方位。</li>
 <li><b>智慧擇日</b>:選事項(動土/搬家/開市/嫁娶/簽約),掃描未來 30 天,自動排除沖你、沖宅的日子,列出吉日排行。</li>
 <li><b>奇門時盤(Beta)</b>:選時辰按起局,綠框=開休生三吉門方位,出行辦事朝該方。</li></ul></section>
 
-<section id="g4"><h2>☯ 八字</h2>
-<ol><li>輸入出生年月日、時間、性別(台灣時間;時辰不確定可先粗估)。</li>
-<li>自動排四柱、十神、藏干、五行強弱長條圖、喜用神、大運。</li>
-<li>右欄選「幾運+坐山」,得 0–100 <b>宅命適配評分</b>,逐項附加減分依據。</li></ol>
-<div class="tip"><b>提示:</b>把喜用神記下來——羅盤頁與住家顏色、材質、方位的建議都以它為準。</div></section>
-
-<section id="g5"><h2>⚑ 地圖測向(需網路)</h2>
-<ol><li><b>兩點測向</b>:地圖上點兩點(如屋後→大門),得方位角與山向。</li>
-<li><b>畫房輪廓</b>:沿建物外緣逐點點擊、雙擊收尾→自動算出<b>立極點</b>(可拖曳微調)→疊上 24 山扇形。</li>
-<li>再點一點設「向」,坐藍向紅。適合看不在現場的房子(配衛星圖)。</li></ol></section>
-
-<section id="g6"><h2>⛰ 地理尋龍(需網路)</h2>
-<ol><li>在等高線地圖沿山脊逐點畫「龍脈線」,雙擊結束。</li>
-<li>自動取高程畫剖面,標出<b>峰</b>與<b>過峽</b>,給龍脈品質評分。</li>
-<li>切「點穴」在地圖點穴位,自動顯示穴場坐向與來龍方位。</li></ol></section>
-
-<section id="g7"><h2>✎ 風水學堂</h2>
-<p>34 個名詞詞條(皆附典籍出處)+24 課學習路徑。上方搜尋框任何名詞即搜即答;課文中金色底線的名詞點一下就彈出解釋。</p></section>
-
-<section id="g8"><h2>▤ 報告</h2>
+<section id="g4"></div></details>
+<div class="gtl">案件與報告</div>
+<details class="sec"><summary>📒 客戶案件簿</summary><div class="secbody"><p>存客戶的宅向與基本資料。存進去以後，各模組會自動帶入，不用每次重打。</p><p>還有「流年回訪掃描」：每年自動掃一次所有案件，把犯五黃、犯歲破的房子挑出來，給你一張該回訪的名單。</p></div></details>
+<details class="sec"><summary>📜 流年批書・回訪引擎</summary><div class="secbody"><p>依存好的案件排出該年度的流年批書，指出當年要注意的宮位與時機。可搭配案件簿的回訪名單一起用。</p></div></details>
+<details class="sec"><summary>📗 整合勘輿報告書</summary><div class="secbody"><p>把玄空飛星與金鎖玉關兩派的判斷放在一起交叉印證，兩派都說凶的地方就是真正要處理的。輸出成一份完整報告書。</p></div></details>
+<details class="sec"><summary>▤ 報告</summary><div class="secbody">
 <p>完整專業報告範例(飛星盤、評分、化解建議)。瀏覽器選「列印」即輸出 A4 PDF。你自己的宅斷報告請在羅盤頁按<kbd>🖨 報告</kbd>生成。</p></section>
 
-<section id="d1"><h2>📖 判讀名詞白話對照(羅盤讀數區)</h2>
+<section id="d1"></div></details>
+<details class="sec"><summary>🧭 勘察流程</summary><div class="secbody"><p>三套 step by step 的實戰流程：陽宅勘察、陰宅勘察、尋龍點穴（擇地）。到現場不知道下一步先做什麼的時候照著走。</p></div></details>
+<div class="gtl">名詞對照</div>
+<details class="sec"><summary>✎ 風水學堂</summary><div class="secbody">
+<p>34 個名詞詞條(皆附典籍出處)+24 課學習路徑。上方搜尋框任何名詞即搜即答;課文中金色底線的名詞點一下就彈出解釋。</p></section>
+
+<section id="g8"></div></details>
+<details class="sec"><summary>📖 判讀名詞白話對照(羅盤讀數區)</summary><div class="secbody">
 <div class="t"><b>坐/向</b>坐=房屋背靠的方向,向=面朝的方向,兩者相差180°。<em>量測前用「我面向屋外(向)/我背對大門(坐)」切換,指明你量的是哪一個,就不會弄反。</em></div>
 <div class="t"><b>二十四山</b>把360°分成24格、每格15°,是風水定向的基本單位,如「乾山巽向」=坐西北向東南。<em>看大字讀數即可,系統已自動換算。</em></div>
 <div class="t"><b>✓ 正向</b>讀數落在該山正中±3°內,氣最純。<em>最理想,不需處理。</em></div>
@@ -112,7 +161,8 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b>人盤中針/天盤縫針</b>比正針各偏7.5°的兩個盤:中針用來「消砂」(論山峰)、縫針用來「納水」(論水路),多用於陰宅。<em>陽宅一般看正針即可;陰宅立向時三針互參。</em></div>
 <div class="t"><b>穿山七十二龍/透地六十龍</b>更細的圈層,以六十甲子納音察來龍入首之氣;七十二龍中的「空亡格」主氣雜。<em>陰宅專用:入首落空亡格則移標再點;納音與坐山生剋詳見學堂。</em></div>
 </section>
-<section id="d2"><h2>📖 玄空飛星名詞(九宮盤)</h2>
+<section id="d2"></div></details>
+<details class="sec"><summary>📖 玄空飛星名詞(九宮盤)</summary><div class="secbody">
 <div class="t"><b>山星/向星/運星</b>每宮三個數字:左=山星(管人丁健康)、右=向星(管財祿)、下方小字=運星(底盤)。<em>看坐宮的山星、向宮的向星是否為當運星(金色)。</em></div>
 <div class="t"><b>當運星(金色數字)</b>現值九運(2024–2043),數字9即當運最旺之星。<em>旺星到的宮位優先安排重要功能(門、房、收銀)。</em></div>
 <div class="t"><b>旺山旺向</b>山星到坐、向星到向,丁財兩旺第一等格局。<em>維持「後實前空」(坐後有靠、向前開闊)即全其美。</em></div>
@@ -126,7 +176,8 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b class="x">二五交加</b>2病符+5災星同宮,主重病損主,是最需要注意的組合。<em>此宮切忌作臥室、大門;以金洩土:六帝錢、銅鈴、金屬圓器。</em></div>
 <div class="t"><b>通關化解原則</b>兩星五行相剋時,取中間五行「通關」:土剋水→用金;木剋土→用火;水剋火→用木;火剋金→用土;金剋木→用水。<em>用對應顏色材質的擺設即可(金=金屬白、木=綠植、水=藍黑、火=紅、土=黃陶),不需昂貴法器。</em></div>
 </section>
-<section id="d3"><h2>📖 八宅遊星(四吉四凶)</h2>
+<section id="d3"></div></details>
+<details class="sec"><summary>📖 八宅遊星(四吉四凶)</summary><div class="secbody">
 <div class="t"><b>生氣(貪狼木)</b>第一吉星,主活力、財運、發展。<em>大門、主臥、辦公桌首選方位。</em></div>
 <div class="t"><b>天醫(巨門土)</b>主健康、貴人。<em>久病者移臥此方;安床、藥櫃皆宜。</em></div>
 <div class="t"><b>延年(武曲金)</b>主感情和睦、壽元。<em>夫妻房、長輩房、餐桌。</em></div>
@@ -137,7 +188,8 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b class="x">六煞(文曲水)</b>主桃花糾紛、情緒。<em>浴廁可;夫妻房不宜。</em></div>
 <div class="t"><b>宅卦/命卦、東四西四</b>宅卦由坐山定,命卦由出生年+性別定;坎離震巽=東四、乾坤艮兌=西四,同組相配。<em>顯示「不同組 ⚠」不用慌:以你命卦的吉方安床頭、書桌朝向即可補救,不必換屋。</em></div>
 </section>
-<section id="d4"><h2>📖 流年神煞(現場即斷/年盤)</h2>
+<section id="d4"></div></details>
+<details class="sec"><summary>📖 流年神煞(現場即斷/年盤)</summary><div class="secbody">
 <div class="t"><b class="x">五黃</b>年度最凶之星,所到之方忌動土、修造、釘打。<em>今年此方不施工、不久坐;掛金屬風鈴/銅鈴洩之。</em></div>
 <div class="t"><b class="x">二黑(病符)</b>主疾病。<em>老人病人房避開;同以金洩。</em></div>
 <div class="t"><b class="x">太歲</b>年支所在方位,「太歲頭上不動土」。<em>此方宜靜:不動工、不正沖而坐。</em></div>
@@ -146,7 +198,8 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b>流年八白/九紫/一白/四綠</b>財星/喜慶/貴氣/文昌所到之方。<em>保持明亮整潔;考試簽約用四綠方,催財用八白方。</em></div>
 <div class="t"><b>大吉/吉/平/慎/凶(即斷等級)</b>綜合計分:流年星±、太歲歲破三煞減分、你的命卦遊星±2,加總分級。<em>「慎」=今年留意,非永久凶;每年立春後重看。</em></div>
 </section>
-<section id="d5"><h2>📖 擇時・奇門名詞</h2>
+<section id="d5"></div></details>
+<details class="sec"><summary>📖 擇時・奇門名詞</summary><div class="secbody">
 <div class="t"><b class="x">沖你的年支</b>該日地支正沖你的生年支(如你屬馬逢子日),諸事不宜。<em>重要事項換一天。</em></div>
 <div class="t"><b class="x">沖宅坐山</b>日支沖房屋坐山之支。<em>該日不動土、不搬家入宅。</em></div>
 <div class="t"><b>紫白吉星日</b>當日一白/六白/八白/九紫入中,吉氣主事。<em>擇日排行分數高者優先。</em></div>
@@ -155,7 +208,8 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b>開・休・生(三吉門)</b>奇門三大吉門。<em>出行、談事、求財朝三吉門方位出發(綠框標示)。</em></div>
 <div class="t"><b class="x">白虎/玄武</b>凶神:白虎主傷害爭鬥、玄武主暗昧盜失。<em>簽約談判避開其方位。</em></div>
 </section>
-<section id="d6"><h2>📖 八字名詞</h2>
+<section id="d6"></div></details>
+<details class="sec"><summary>📖 八字名詞</summary><div class="secbody">
 <div class="t"><b>四柱</b>年、月、日、時四組干支,即「八字」。日柱天干=日主,代表你自己。</div>
 <div class="t"><b>十神</b>其他干支與日主的關係:比肩(同輩自我)、劫財(競爭耗財)、食神(才藝口福)、傷官(聰明不羈)、偏財(流動之財)、正財(穩定之財)、七殺(壓力魄力)、正官(名譽紀律)、偏印(靈感偏門)、正印(學問庇蔭)。<em>不用背,點命盤上的十神即有說明。</em></div>
 <div class="t"><b>藏干</b>每個地支裡暗藏的天干(如寅藏甲丙戊),計算強弱時一併採計。</div>
@@ -163,7 +217,10 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b>喜用神</b>你的命最需要的五行,全 App 個人化建議的核心。<em>方位、顏色、材質往喜用靠:木=綠色/東方,火=紅/南,土=黃/四隅,金=白/西,水=藍黑/北。</em></div>
 <div class="t"><b>大運(順排/逆排)</b>十年一步的運程;陽年生男/陰年生女順排,反之逆排;起運歲數=出生距節氣日數÷3。</div>
 </section>
-<section id="d7"><h2>🔧 疑難排解</h2>
+<section id="d7"></div></details>
+<div class="gtl">其他</div>
+<details class="sec"><summary>💾 資料存在哪・備份與換手機</summary><div class="secbody"><p><b>你輸入的資料全部只存在你自己的裝置上</b>，包括客戶姓名、出生資料、地址、房屋資料、勘查照片。不會上傳到本站或任何第三方伺服器，我也看不到。</p><p>代價是：<b>清除瀏覽器資料、換手機、解除安裝，資料就沒了，而且無法代為復原。</b></p><p>所以請定期用客戶案件簿的備份功能匯出封存檔（含照片），換手機時再匯入。</p></div></details>
+<details class="sec"><summary>🔧 疑難排解</summary><div class="secbody">
 <div class="t"><b>方位不會動?</b><em>①按「開始現場即斷/即時量測」後允許「動作與方向」權限;②iOS 若跳出金色「📡 點此啟用方向感測」列,務必點一下;③電腦沒有羅盤,請用滑桿或輸入度數;④仍不動就手動輸入 iPhone 指南針的讀數,結果完全相同。</em></div>
 <div class="t"><b>讀數一直跳?</b><em>遠離汽車、鐵門、電箱一步以上;手機保持水平;拿著手機畫兩圈8字校正後再量。</em></div>
 <div class="t"><b>和其他羅盤App差4~5度?</b><em>那是磁偏角:本App顯示「真北」,多數App顯示磁北。手動輸入其他App讀數時直接輸入即可,系統已自動換算。</em></div>
@@ -171,9 +228,15 @@ kbd{background:var(--card);border-radius:6px;padding:1px 8px;font-size:13px}
 <div class="t"><b>想離線使用?</b><em>用瀏覽器開啟一次並「加入主畫面」,之後無網路也能用(地圖/尋龍除外)。</em></div>
 <div class="t"><b>看到「pending/Beta」字樣?</b><em>代表該處排列或口徑各門派有差異,已標示待師承審定;不影響主要功能的正確性。</em></div>
 </section>
+<section id="g9"></div></details>
+<details class="sec"><summary>常見問題</summary><div class="secbody"></div></details>
+<details class="sec"><summary>📄 使用條款與免責聲明</summary><div class="secbody"><p>購買前請先看過：<a href="terms.html" style="color:#E8C77A">使用條款與免責聲明</a></p><p>重點一句：本站所有分析結果<b>僅供參考，不代表必然結果</b>。購屋、投資、醫療、法律、婚姻這類重大決策，請勿僅依本站結果決定。</p></div></details>
+
+</div>
+</section>
 <section id="g9"><h2>常見問題</h2>
 <h3>讀數和 iPhone 指南針差幾度?</h3><p>本 App 顯示「真北」;iPhone 指南針若設定為磁北會差約磁偏角(台灣 4.5°)。手動輸入時直接輸入指南針顯示的度數即可,系統已自動換算。</p>
 <h3>資料存在哪?</h3><p>分析計算在你的裝置上完成;量測紀錄與照片僅儲存在你的手機(清除瀏覽資料會消失,請用「⬇ 備份」保存)。查詢內容會傳送至站方,用於改善服務。</p>
 <h3>分析結果可以全信嗎?</h3><p>本工具處理「理氣」計算並全數經演算法驗證;但完整風水還需現場巒頭(環境形勢)判斷,重大決策建議配合專業老師。所有結果僅供參考。</p></section>
 <script src="lock.js"></script>
-</body></html>
+<script>(function(){function all(){return [].slice.call(document.querySelectorAll("details.sec"))}var a=document.getElementById("expAll"),b=document.getElementById("colAll");if(a)a.onclick=function(){all().forEach(function(d){d.open=true})};if(b)b.onclick=function(){all().forEach(function(d){d.open=false})};}());</script></body></html>
