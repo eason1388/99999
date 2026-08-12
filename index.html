@@ -407,10 +407,17 @@ function fscLog(page,action,data){
     if(LOGQ.length>=10)flushLog();else{clearTimeout(logT);logT=setTimeout(flushLog,30000);}
   }catch(e){}
 }
+
+var FSC_VID=(function(){try{var v=localStorage.getItem('fsc_vid');if(!v){v='v'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem('fsc_vid',v);}return v;}catch(e){return 'na';}})();
+var _fscCur='home',_fscT0=Date.now();
+function fscStay(){try{if(!_fscCur||!_fscT0)return;var s=Math.round((Date.now()-_fscT0)/1000);_fscT0=Date.now();if(s>0&&s<7200)fscLog(_fscCur,'停留',s);}catch(e){}}
+function fscEnter(k){try{fscStay();_fscCur=k||'home';_fscT0=Date.now();}catch(e){}}
+window.addEventListener('pagehide',function(){fscStay();try{flushLog();}catch(e){}});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){fscStay();try{flushLog();}catch(e){}}else{_fscT0=Date.now();}});
 function flushLog(){
   if(!LOGQ.length)return;
   const rows=LOGQ.splice(0);
-  const body=JSON.stringify({rows:rows,ua:navigator.userAgent.slice(0,70)+(GEO?(' | '+GEO):'')});
+  const body=JSON.stringify({rows:rows,vid:FSC_VID,vid:FSC_VID,ua:navigator.userAgent.slice(0,70)+(GEO?(' | '+GEO):'')});
   try{fetch(LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:body}).catch(()=>{});}catch(e){}
 }
 addEventListener('pagehide',()=>{try{if(LOGQ.length){
@@ -431,7 +438,7 @@ const SRC={};
 const frames={};
 const SRCF={yijing:'易經推命.html',ziwei:'紫微斗數.html',cases:'客戶案件簿.html',water:'陰宅水法.html',check:'全宅健檢.html',coin:'金錢卦.html',zeri:'擇日.html',venue:'場所佈局.html',luopan:'羅盤互動原型.html',xk:'飛星八宅互動原型.html',time:'擇時飛星互動原型.html',bazi:'八字整合互動原型.html',map:'地圖測向互動原型.html',dragon:'尋龍模式互動原型.html',learn:'教學中心互動原型.html',report:'風水分析報告原型.html',plan:'平面圖疊盤.html',flow:'勘察流程.html',guide:'使用說明.html',buy:'購買說明.html',survey:'現場勘查.html',jinsuo:'金鎖玉關.html',full:'整合報告.html',liunian:'流年批書.html',xingsha:'形煞圖鑑.html',name:'姓名學.html',ask:'主訴反查.html'};
 function go(k){
-  fscLog('shell','分頁',k);
+  fscLog('shell','分頁',k);fscEnter(k);
   document.getElementById('dim').classList.remove('show');
   document.getElementById('sheet').classList.remove('show');
   document.querySelectorAll('.tnav,.bnav').forEach(t=>t.classList.toggle('on',t.dataset.k===k));
