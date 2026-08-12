@@ -171,6 +171,7 @@ function modal(){
   };
   var buy=m.querySelector('#bpsy-buy');
 [].slice.call(m.querySelectorAll('a[data-terms]')).forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();_bpTerms(a.getAttribute('data-terms')||'');});});
+setTimeout(function(){try{var _lb=document.querySelector('#bpsy-line');if(_lb){var _k=[_lb],_p=_lb.previousElementSibling,_i=0;while(_p&&_i<3){_k.push(_p);_p=_p.previousElementSibling;_i++;}_k.forEach(function(x){if(x&&x.parentNode)x.parentNode.removeChild(x);});}}catch(e){}},0);
   if(buy)buy.onclick=function(){var _ck=[].slice.call(m.querySelectorAll('.bpsy-ck'));if(_ck.length && !_ck.every(function(c){return c.checked})){var _mm=m.querySelector('#bpsy-agmsg');if(_mm)_mm.style.display='block';return false;}try{localStorage.setItem('bpsy_agree',new Date().toISOString());}catch(e){}
     // iframe 內要開到最上層視窗,否則會被夾在小框裡
     try{ (window.top||window).open(BUY_URL,'_blank'); }catch(e){ window.open(BUY_URL,'_blank'); }
