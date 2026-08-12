@@ -201,6 +201,18 @@ nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowra
 #today .tfoot{margin-top:13px;display:flex;gap:8px;flex-wrap:wrap}
 #today .tfoot button{flex:1 1 30%}
 }
+
+/* 徽章改成純文字，避免被誤認為按鈕 */
+.stats{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0 4px}
+.stats .stat{border:0 !important;border-radius:0 !important;background:transparent !important;padding:2px 0 !important;color:rgba(237,231,218,.66);font-size:12.5px;cursor:default}
+.stats .stat b{color:#C9A96A}
+.stats .stat + .stat::before{content:"・";color:rgba(201,169,106,.5);margin:0 6px}
+/* 今日卡標籤提亮 */
+#today .tcell .k{color:rgba(237,231,218,.78)}
+@media(max-width:560px){
+#today .tcell .k{color:#CFC2AA !important;opacity:1 !important;font-size:12px !important;letter-spacing:.5px}
+.stats .stat{font-size:12px}
+}
 </style></head><body>
 <header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button><details class="ngrp"><summary class="tnav ngs">陽宅</summary><div class="ngbody"><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="ask">主訴反查</button></div></details><details class="ngrp"><summary class="tnav ngs">陰宅</summary><div class="ngbody"><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button></div></details><details class="ngrp"><summary class="tnav ngs">命理</summary><div class="ngbody"><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button></div></details><details class="ngrp"><summary class="tnav ngs">案件</summary><div class="ngbody"><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button></div></details><span class="navsep"></span><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
 <div id="stage">
