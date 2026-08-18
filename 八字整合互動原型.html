@@ -887,4 +887,17 @@ render();
   boot();
 })();
 </script>
+
+<script>
+(function(){
+  var f=null; try{ f=sessionStorage.getItem("bpsy_goto_daily"); }catch(e){ return; }
+  if(f!=="1") return;
+  try{ sessionStorage.removeItem("bpsy_goto_daily"); }catch(e){}
+  var n=0, t=setInterval(function(){ n++;
+    var el=document.getElementById("bp-daily");
+    if(el && el.offsetHeight>30){ clearInterval(t); try{ el.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){ try{el.scrollIntoView();}catch(e2){} } }
+    else if(n>120){ clearInterval(t); }
+  },250);
+})();
+</script>
 </body></html>
