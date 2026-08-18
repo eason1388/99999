@@ -213,6 +213,8 @@ nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowra
 #today .tcell .k{color:#CFC2AA !important;opacity:1 !important;font-size:12px !important;letter-spacing:.5px}
 .stats .stat{font-size:12px}
 }
+
+#todayWrap #today{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:0;padding-bottom:10px;box-shadow:none}#myluck{margin:0;padding:12px 13px 14px;border:1px solid rgba(201,169,106,.55);border-top:1px solid rgba(201,169,106,.22);border-radius:0 0 16px 16px;background:linear-gradient(180deg,rgba(201,169,106,.06),rgba(201,169,106,.02));box-shadow:0 8px 26px rgba(0,0,0,.45)}#myluck .ml-cta{display:block;width:100%;padding:10px 12px;border:1px solid rgba(201,169,106,.55);border-radius:10px;background:rgba(201,169,106,.12);color:#E8C77A;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}#myluck .ml-cta:active{background:rgba(201,169,106,.22)}#myluck .ml-lnk{background:none;border:0;color:#9B8C74;font-size:13px;cursor:pointer;padding:8px 4px;font-family:inherit}#ml-form{display:none;margin-top:8px}#myluck .ml-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}#myluck .ml-lb{flex:0 0 68px;color:#C9A96A;font-size:13px}#myluck input,#myluck select{flex:1 1 auto;min-width:0;padding:8px;border:1px solid rgba(201,169,106,.35);border-radius:8px;background:#1B1713;color:#EDE3D2;font-size:14px;font-family:inherit}#myluck .ml-act{display:flex;gap:8px;align-items:center}#myluck .ml-act .ml-cta{flex:1 1 auto}#myluck .ml-note{margin:8px 0 0;color:#9B8C74;font-size:11.5px;line-height:1.5}#ml-out{display:none;margin-top:8px}#myluck .ml-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px}#myluck .ml-gz{font-size:22px;color:#E8C77A;letter-spacing:2px}#myluck .ml-lv{font-size:13px;padding:2px 8px;border-radius:999px;border:1px solid rgba(201,169,106,.45);color:#E8C77A}#myluck .ml-ten{color:#CFC2AA;font-size:13px}#myluck .ml-hr{margin:4px 0 0;color:#CFC2AA;font-size:13px;line-height:1.7}#myluck .ml-hr b{color:#E8C77A;font-weight:600}#myluck .ml-more{display:flex;gap:12px;align-items:center;margin-top:8px}#myluck .ml-more a{color:#E8C77A;font-size:13px;text-decoration:none;border-bottom:1px solid rgba(201,169,106,.4);cursor:pointer}
 </style></head><body>
 <header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button><details class="ngrp"><summary class="tnav ngs">陽宅</summary><div class="ngbody"><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="ask">主訴反查</button></div></details><details class="ngrp"><summary class="tnav ngs">陰宅</summary><div class="ngbody"><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button></div></details><details class="ngrp"><summary class="tnav ngs">命理</summary><div class="ngbody"><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button></div></details><details class="ngrp"><summary class="tnav ngs">案件</summary><div class="ngbody"><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button></div></details><span class="navsep"></span><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
 <div id="stage">
@@ -227,7 +229,8 @@ nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowra
  <div class="ctaRow"><button class="cta" data-k="luopan">🧭 開始量測</button><button class="cta2" data-k="guide">使用說明</button></div>
  </div>
  <!-- ── 今日盤 ── -->
- <div id="todayWrap"><div id="today" class="tpanel"></div></div>
+ <div id="todayWrap"><div id="today" class="tpanel"></div>
+<div id="myluck"><button type="button" id="ml-open" class="ml-cta">看我的今日運勢</button><div id="ml-form"><div class="ml-row"><span class="ml-lb">出生日期</span><input type="date" id="ml-date"></div><div class="ml-row"><span class="ml-lb">出生時辰</span><select id="ml-hour"></select></div><div class="ml-act"><button type="button" id="ml-save" class="ml-cta">記住並查看</button><button type="button" id="ml-cancel" class="ml-lnk">取消</button></div><p class="ml-note">生日只存在這台裝置，不會上傳，也不會離開你的手機。</p></div><div id="ml-out"></div></div></div>
  <div class="secttl">陽宅勘察</div>
  <div class="grid"><div class="mcard" data-k="luopan"><div class="mic">羅</div><div><b>三合羅盤・即時判讀</b><p>山向、兼向、騎縫、分金自動判定,AR 實景八方浮標，點任一格即有詳解</p></div><span class="go">→</span></div><div class="mcard" data-k="survey"><div class="mic">勘</div><div><b>現場勘查模式</b><p>大門、爐灶、床位、神位、廁所、樓梯、水路十項逐點紀錄，拍照存證，依本宅飛星八宅即時判吉凶</p></div><span class="go">→</span></div><div class="mcard" data-k="xk"><div class="mic">星</div><div><b>玄空飛星・八宅</b><p>九運×二十四山，下卦替卦、格局城門、八宅遊星、擇向建議</p></div><span class="go">→</span></div><div class="mcard" data-k="jinsuo"><div class="mic">鎖</div><div><b>金鎖玉關・過路陰陽</b><p>二十四山逐山點砂水，依經旨直斷合訣違訣、應人應病，附化解優先順序</p></div><span class="go">→</span></div><div class="mcard" data-k="venue"><div class="mic">舖</div><div><b>場所佈局模式</b><p>餐廳、辦公室、工廠、店面、住家五種模式，收銀台、爐灶、老闆位一鍵排定</p></div><span class="go">→</span></div><div class="mcard" data-k="plan"><div class="mic">圖</div><div><b>平面圖疊盤</b><p>上傳平面圖，九宮飛星八宅吉凶直接疊在圖上，點格標房間即時檢核</p></div><span class="go">→</span></div><div class="mcard" data-k="check"><div class="mic">檢</div><div><b>全宅健檢總報告</b><p>一鍵跑完評分、飛星、八宅、流年、開運佈局，列印即 A4 交付報告</p></div><span class="go">→</span></div></div>
  <div class="secttl">陰宅・巒頭</div>
@@ -493,4 +496,48 @@ window.addEventListener('message',async e=>{
     document.body.appendChild(bar);
   }else fscStartListen();
 });
-</script><script>(function(){var n=document.querySelector("nav.top");if(!n)return;function shut(except){[].slice.call(n.querySelectorAll("details.ngrp")).forEach(function(x){if(x!==except)x.open=false;});}n.addEventListener("click",function(e){var d=e.target.closest?e.target.closest("details.ngrp"):null;shut(d);if(e.target.classList&&e.target.classList.contains("tnav")&&e.target.tagName!=="SUMMARY"){setTimeout(function(){shut(null)},0);}});document.addEventListener("click",function(e){if(!n.contains(e.target))shut(null);});})();</script></body></html>
+</script><script>(function(){var n=document.querySelector("nav.top");if(!n)return;function shut(except){[].slice.call(n.querySelectorAll("details.ngrp")).forEach(function(x){if(x!==except)x.open=false;});}n.addEventListener("click",function(e){var d=e.target.closest?e.target.closest("details.ngrp"):null;shut(d);if(e.target.classList&&e.target.classList.contains("tnav")&&e.target.tagName!=="SUMMARY"){setTimeout(function(){shut(null)},0);}});document.addEventListener("click",function(e){if(!n.contains(e.target))shut(null);});})();</script>
+<script>
+(function(){
+var KEY="bpsy_my_bazi", LOADING=false;
+var SHI=[["子","23-01",0],["丑","01-03",2],["寅","03-05",4],["卯","05-07",6],["辰","07-09",8],["巳","09-11",10],["午","11-13",12],["未","13-15",14],["申","15-17",16],["酉","17-19",18],["戌","19-21",20],["亥","21-23",22]];
+function $(i){return document.getElementById(i);}
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;}}
+function ready(){return !!(window.BPBAZI&&window.BPBAZI.pillars&&window.BPLUCK&&window.BPLUCK.dayLuck);}
+function eng(cb){ if(ready()){cb(true);return;} if(LOADING){setTimeout(function(){eng(cb);},300);return;} LOADING=true;
+  var n=0; function done(){ if(++n===2){ LOADING=false; cb(ready()); } }
+  ["bazi.js","luck.js"].forEach(function(f){ var s=document.createElement("script"); s.src=f; s.onload=done; s.onerror=done; document.head.appendChild(s); });
+}
+function fillHour(){ var s=$("ml-hour"); if(!s||s.options.length) return; var h=""; for(var i=0;i<SHI.length;i++){h+="<option value=\""+SHI[i][2]+"\">"+SHI[i][0]+"時 "+SHI[i][1]+"</option>";} h+="<option value=\"-1\">不確定時辰</option>"; s.innerHTML=h; s.value="-1"; }
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+function render(o){ var out=$("ml-out"); if(!out) return; out.style.display="block"; out.innerHTML="<p class=\"ml-note\">推算中…</p>";
+  eng(function(ok){ if(!ok){ out.innerHTML="<p class=\"ml-note\">運勢引擎載入失敗，請重新整理再試。</p>"; return; }
+    try{
+      var n=new Date(), Y=n.getFullYear(), M=n.getMonth()+1, D=n.getDate();
+      var p=BPBAZI.pillars(o.y,o.m,o.d,(o.h<0?12:o.h)); var fav=BPBAZI.favor(p);
+      var L=BPLUCK.dayLuck(p,fav,Y,M,D); var gh=BPLUCK.goodHours(fav,L.gan)||[];
+      var top=gh.slice(0,3).map(function(x){return esc(x.label);}).join("、");
+      var h="<div class=\"ml-hd\"><span class=\"ml-gz\">"+esc(L.gz)+"</span><span class=\"ml-lv\">"+esc(L.level)+"</span>";
+      if(L.ten) h+="<span class=\"ml-ten\">日主逢 "+esc(L.ten)+"</span>";
+      h+="</div>";
+      if(top) h+="<p class=\"ml-hr\">今日吉時　<b>"+top+"</b></p>";
+      if(o.h<0) h+="<p class=\"ml-note\">未填時辰，以午時暫代；補上時辰會更準。</p>";
+      h+="<div class=\"ml-more\"><a data-go=\"bazi\">看完整八字論斷 →</a><button type=\"button\" class=\"ml-lnk\" id=\"ml-reset\">改生日</button></div>";
+      out.innerHTML=h;
+      var g=out.querySelector("[data-go]"); if(g) g.addEventListener("click",function(){ try{ if(typeof go==="function") go("bazi"); else location.hash="#bazi"; }catch(e){} });
+      var r=$("ml-reset"); if(r) r.addEventListener("click",function(){ var f=$("ml-form"); if(f) f.style.display="block"; out.style.display="none"; });
+    }catch(e){ out.innerHTML="<p class=\"ml-note\">推算失敗，請確認生日是否正確。</p>"; }
+  });
+}
+function init(){ fillHour(); var saved=load();
+  var open=$("ml-open"), form=$("ml-form"), out=$("ml-out");
+  if(!open||!form||!out) return;
+  if(saved){ open.style.display="none"; var d=$("ml-date"); if(d) d.value=saved.y+"-"+("0"+saved.m).slice(-2)+"-"+("0"+saved.d).slice(-2); var s=$("ml-hour"); if(s) s.value=String(saved.h); render(saved); }
+  open.addEventListener("click",function(){ open.style.display="none"; form.style.display="block"; });
+  var c=$("ml-cancel"); if(c) c.addEventListener("click",function(){ form.style.display="none"; if(load()){ out.style.display="block"; } else { open.style.display="block"; } });
+  var sv=$("ml-save"); if(sv) sv.addEventListener("click",function(){ var d=$("ml-date"); var s=$("ml-hour"); if(!d||!d.value){ alert("請先選出生日期"); return; } var t=d.value.split("-"); var o={y:+t[0],m:+t[1],d:+t[2],h:+(s?s.value:-1)}; if(!(o.y>1900&&o.y<2100)){ alert("出生年份看起來不對，請重選"); return; } try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){} form.style.display="none"; render(o); try{ if(typeof fscLog==="function") fscLog("home","今日運勢","查詢"); }catch(e){} });
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();
+</script>
+</body></html>
