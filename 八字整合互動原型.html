@@ -894,10 +894,15 @@ render();
   if(f!=="1") return;
   try{ sessionStorage.removeItem("bpsy_goto_daily"); }catch(e){}
   var n=0, t=setInterval(function(){ n++;
-    var el=document.getElementById("bp-daily");
-    if(el && el.offsetHeight>30){ clearInterval(t); try{ el.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){ try{el.scrollIntoView();}catch(e2){} } }
-    else if(n>120){ clearInterval(t); }
-  },250);
+    var el=document.getElementById("bd");
+    if(el && el.offsetHeight>0){ clearInterval(t);
+      try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){ try{el.scrollIntoView();}catch(e2){} }
+      try{ el.style.transition="box-shadow .3s"; el.style.boxShadow="0 0 0 3px rgba(232,199,122,.85)";
+        setTimeout(function(){ el.style.boxShadow=""; },2400); }catch(e){}
+      try{ el.focus({preventScroll:true}); }catch(e){}
+    }
+    else if(n>60){ clearInterval(t); }
+  },200);
 })();
 </script>
 </body></html>
