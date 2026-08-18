@@ -869,7 +869,7 @@ render();
       '<br><span style="color:#9BD8A6">最佳：'+tr.best.map(function(x){return x.md+"("+x.gz+")"}).join("、")+'</span>'+
       '<br><span style="color:#E8A08A">避開：'+tr.worst.map(function(x){return x.md+"("+x.gz+")"}).join("、")+'</span></div>';
     var teaser="今日何以吉凶、宜做什麼忌做什麼、幾點最順，以及本月最好與最該避開的日子。";
-    var html=head+(window.BPSY? BPSY.deep : deep)+"</div>";
+    var html=head+(window.BPSY? deep : deep)+"</div>";
     var w=el(ID);
     if(!w){ w=document.createElement("div"); w.id=ID;
       var a=el("liunian"), host=a? a.parentNode : null;
