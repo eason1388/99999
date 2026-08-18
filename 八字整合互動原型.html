@@ -905,4 +905,32 @@ render();
   },200);
 })();
 </script>
+
+<script>
+(function(){
+  var SEC=[["geju","格局・用神","用神何以取此、喜忌如何配，行運逢之當如何取捨。"],
+           ["shensha","神煞","各神煞所主吉凶、應在何人何事、如何趨避化解。"],
+           ["xingge","性格與六親","日主性情厚薄、父母子女配偶之應，六親緣分深淺。"],
+           ["liunian","流年","流年吉凶所主、應期落在何月，宜做什麼忌做什麼。"]];
+  function paid(){ try{ return !!(window.BPSY && BPSY.ok && BPSY.ok()); }catch(e){ return false; } }
+  function card(t,s){ try{ if(window.BPSY && BPSY.gate) return BPSY.gate("",t,s); }catch(e){} return ""; }
+  var busy=false, tm=null;
+  function run(){
+    if(busy) return; if(paid()) return;
+    busy=true;
+    try{ SEC.forEach(function(x){
+      var el=document.getElementById(x[0]);
+      if(!el || !el.innerHTML) return;
+      if(el.querySelector("[data-bpcta]")) return;
+      var h=card(x[1],x[2]); if(!h) return;
+      var w=document.createElement("div"); w.setAttribute("data-bpcta","1"); w.innerHTML=h;
+      el.appendChild(w);
+    }); }catch(e){}
+    busy=false;
+  }
+  var mo=new MutationObserver(function(){ clearTimeout(tm); tm=setTimeout(run,150); });
+  function start(){ SEC.forEach(function(x){ var el=document.getElementById(x[0]); if(el) mo.observe(el,{childList:true}); }); setTimeout(run,600); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
+})();
+</script>
 </body></html>
