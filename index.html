@@ -223,6 +223,12 @@ nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowra
 @keyframes tlPulse{0%,100%{box-shadow:0 7px 20px rgba(0,0,0,.5),0 0 20px rgba(240,200,110,.32),inset 0 -7px 13px rgba(120,80,18,.42),inset 0 7px 11px rgba(255,255,255,.6)}50%{box-shadow:0 7px 20px rgba(0,0,0,.5),0 0 34px rgba(240,200,110,.62),inset 0 -7px 13px rgba(120,80,18,.42),inset 0 7px 11px rgba(255,255,255,.6)}}
 @media(prefers-reduced-motion:reduce){#tlBtn{animation:none}}
 @media(max-width:560px){#tlBtn{left:12px;top:12px;width:68px;height:68px;font-size:14px;letter-spacing:1px}}
+
+.hero .heroTag{color:#9B8C74;font-size:12.5px;letter-spacing:3px;margin-top:4px}
+.hero p.lead{font-size:16px;line-height:1.85;color:#EFE7D8;margin:14px 0 6px}
+.hero p.lead b{color:#F0D9A4;font-weight:700}
+.hero p.sub{font-size:12.5px;line-height:1.7;color:#9B8C74;margin:0 0 4px}
+@media(max-width:560px){.hero p.lead{font-size:15px}.hero p.sub{font-size:11.5px}}
 </style></head><body>
 <header><div class="logo">羅</div><div class="brand">全能玄學羅盤 <span class="tang">抱朴隨緣堂</span><small>MASTER FENG SHUI COMPASS</small></div><nav class="top"><button class="tnav on" data-k="home">首頁</button><details class="ngrp"><summary class="tnav ngs">陽宅</summary><div class="ngbody"><button class="tnav" data-k="luopan">羅盤</button><button class="tnav" data-k="survey">現場勘查</button><button class="tnav" data-k="xk">飛星</button><button class="tnav" data-k="jinsuo">金鎖玉關</button><button class="tnav" data-k="venue">場所</button><button class="tnav" data-k="plan">平面圖</button><button class="tnav" data-k="check">全宅健檢</button><button class="tnav" data-k="xingsha">形煞圖鑑</button><button class="tnav" data-k="ask">主訴反查</button></div></details><details class="ngrp"><summary class="tnav ngs">陰宅</summary><div class="ngbody"><button class="tnav" data-k="water">陰宅水法</button><button class="tnav" data-k="dragon">尋龍</button><button class="tnav" data-k="map">地圖</button></div></details><details class="ngrp"><summary class="tnav ngs">命理</summary><div class="ngbody"><button class="tnav" data-k="zeri">擇日</button><button class="tnav" data-k="time">擇時</button><button class="tnav" data-k="bazi">八字</button><button class="tnav" data-k="ziwei">紫微</button><button class="tnav" data-k="yijing">推命</button><button class="tnav" data-k="name">姓名</button><button class="tnav" data-k="coin">卜卦</button></div></details><details class="ngrp"><summary class="tnav ngs">案件</summary><div class="ngbody"><button class="tnav" data-k="cases">客戶案件簿</button><button class="tnav" data-k="liunian">流年批書</button><button class="tnav" data-k="full">整合報告</button><button class="tnav" data-k="report">報告</button><button class="tnav" data-k="flow">流程</button></div></details><span class="navsep"></span><button class="tnav" data-k="learn">學堂</button><button class="tnav" data-k="guide">說明</button><button class="tnav" data-k="buy">購買</button></nav></header>
 <div id="stage">
@@ -230,11 +236,11 @@ nav.top .ngbody .tnav{display:block;width:100%;text-align:left;white-space:nowra
  <div class="hero"><button type="button" id="tlBtn" data-k="bazi" aria-label="今日運勢"><span>今日<br>運勢</span></button>
  <div class="heroRing"></div><div class="heroRing r2"></div><div class="heroRing r3"></div>
  <div class="heroSeal">羅</div>
- <h2>羅經在手・盤理合一</h2>
- <div class="en">Master Feng Shui Compass</div><div class="tangHero">抱 朴 隨 緣 堂</div>
- <p>不必學過風水。到現場開啟，吉凶立斷。<br>二十四山即時判讀・玄空飛星・八宅・金鎖玉關・擇日・奇門・八字宅命整合</p>
+ <h2>免費測你家風水</h2>
+ <div class="en">Master Feng Shui Compass</div><div class="tangHero">抱 朴 隨 緣 堂</div><div class="heroTag">羅經在手・盤理合一</div>
+ <p class="lead">站在家裡按一下，<b>財位、煞位、床向宜忌</b>，三分鐘看完。<br>不必學過風水，不必請師傅，不必安裝任何 App。</p><p class="sub">二十四山即時判讀・玄空飛星・八宅・金鎖玉關・擇日・奇門・八字宅命整合</p>
  <div class="stats"><span class="stat"><b>9</b> 派排盤・逐局核驗</span><span class="stat">抱朴隨緣堂・臨場心法</span><span class="stat"><b>免安裝</b> 加入主畫面即 App</span></div>
- <div class="ctaRow"><button class="cta" data-k="luopan">🧭 開始量測</button><button class="cta2" data-k="guide">使用說明</button></div>
+ <div class="ctaRow"><button class="cta" data-k="luopan">🧭 免費測我家</button><button class="cta2" data-k="guide">使用說明</button></div>
  </div>
  <!-- ── 今日盤 ── -->
  <div id="todayWrap"><div id="today" class="tpanel"></div></div>
