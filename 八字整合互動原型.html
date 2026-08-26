@@ -933,4 +933,48 @@ render();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
 })();
 </script>
+<style>#bp-anyday{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(201,169,106,.35)}#bp-anyday .ad-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}#bp-anyday .ad-bar b{color:#C9A96A;font-size:13.5px}#bp-anyday input[type=date]{padding:6px 8px;border:1px solid rgba(201,169,106,.4);border-radius:8px;background:#1B1713;color:#EDE3D2;font-size:14px;font-family:inherit}#bp-anyday button{padding:6px 12px;border:1px solid rgba(201,169,106,.5);border-radius:8px;background:rgba(201,169,106,.12);color:#E8C77A;font-size:13px;cursor:pointer;font-family:inherit}#bp-anyday .ad-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}#bp-anyday .ad-gz{font-size:20px;color:#E8C77A;letter-spacing:1px}#bp-anyday .ad-lv{font-size:13px;padding:2px 8px;border-radius:999px;border:1px solid rgba(201,169,106,.45);color:#E8C77A}#bp-anyday .ad-ten{color:#CFC2AA;font-size:13px}#bp-anyday .ad-l{margin:3px 0;color:#EDE3D2;font-size:13.5px;line-height:1.75}#bp-anyday .ad-l b{color:#C9A96A}#bp-anyday .ad-y b{color:#7FD1A8}#bp-anyday .ad-j b{color:#E8A08A}#bp-anyday .ad-note{margin:6px 0 0;color:#9B8C74;font-size:12px;line-height:1.6}</style>
+
+<script>
+(function(){
+  var P=null, F=null, SEL=null, tm=null;
+  function hook(){ if(!window.BPLUCK||!BPLUCK.dayLuck||BPLUCK.__hooked) return false;
+    var o=BPLUCK.dayLuck; BPLUCK.dayLuck=function(p,fav,Y,M,D){ P=p; F=fav; return o.apply(this,arguments); }; BPLUCK.__raw=o; BPLUCK.__hooked=1; return true; }
+  function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+  function calc(y,m,d){
+    if(!P||!F||!window.BPLUCK||!BPLUCK.__raw) return "<p class=\"ad-note\">請先在上方填好出生資料。</p>";
+    try{
+      var L=BPLUCK.__raw(P,F,y,m,d);
+      var gh=(BPLUCK.goodHours(F,L.gan)||[]).slice(0,3).map(function(x){return esc(x.label);}).join("、");
+      var h="<div class=\"ad-hd\"><span class=\"ad-gz\">"+esc(L.gz)+"日</span><span class=\"ad-lv\">"+esc(L.level)+"</span>";
+      if(L.ten) h+="<span class=\"ad-ten\">日主逢 "+esc(L.ten)+"</span>";
+      h+="</div>";
+      var t=L.tenTxt;
+      if(t && typeof t.s==="string"){ h+="<p class=\"ad-l\"><b>今日主題</b>："+esc(t.s)+"</p>";
+        if(t.y) h+="<p class=\"ad-l ad-y\"><b>宜</b>："+esc(t.y)+"</p>";
+        if(t.j) h+="<p class=\"ad-l ad-j\"><b>忌</b>："+esc(t.j)+"</p>"; }
+      if(gh) h+="<p class=\"ad-l\"><b>吉時</b>："+gh+"</p>";
+      if(L.why && L.why.length) h+="<p class=\"ad-note\">"+esc([].concat(L.why).join("；"))+"</p>";
+      return h;
+    }catch(e){ return "<p class=\"ad-note\">推算失敗，請確認日期。</p>"; }
+  }
+  function draw(){
+    var box=document.getElementById("bp-daily"); if(!box||!box.innerHTML) return;
+    if(box.querySelector("#bp-anyday")) return;
+    var n=new Date(); if(!SEL) SEL=n.getFullYear()+"-"+("0"+(n.getMonth()+1)).slice(-2)+"-"+("0"+n.getDate()).slice(-2);
+    var w=document.createElement("div"); w.id="bp-anyday";
+    w.innerHTML='<div class="ad-bar"><b>查任一天的吉凶</b><input type="date" id="ad-date"><button type="button" id="ad-t">今天</button></div><div id="ad-out"></div>';
+    box.appendChild(w);
+    var inp=w.querySelector("#ad-date"); inp.value=SEL;
+    function run(){ SEL=inp.value; if(!SEL) return; var a=SEL.split("-"); document.getElementById("ad-out").innerHTML=calc(+a[0],+a[1],+a[2]); }
+    inp.addEventListener("change",run);
+    w.querySelector("#ad-t").addEventListener("click",function(){ var d=new Date(); inp.value=d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); run(); });
+    run();
+  }
+  function tick(){ hook(); draw(); }
+  var mo=new MutationObserver(function(){ clearTimeout(tm); tm=setTimeout(tick,150); });
+  function start(){ var b=document.getElementById("bp-daily"); if(b) mo.observe(b,{childList:true}); setInterval(tick,1200); setTimeout(tick,500); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
+})();
+</script>
 </body></html>
