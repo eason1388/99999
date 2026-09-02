@@ -926,6 +926,7 @@ render();
       var h=card(x[1],x[2]); if(!h) return;
       var w=document.createElement("div"); w.setAttribute("data-bpcta","1"); w.innerHTML=h;
       el.appendChild(w);
+      if(window.BPSY&&BPSY.bind)BPSY.bind(w);
     }); }catch(e){}
     busy=false;
   }
