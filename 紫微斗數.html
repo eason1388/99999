@@ -1026,4 +1026,90 @@ render();
   boot();
 })();
 </script>
+
+<script>
+/* ---- BPFINGAUGE 財運指數儀表板 ---- */
+(function(){
+var ZH='子丑寅卯辰巳午未申酉戌亥';
+var GD=['祿存','武曲','太陰','天府'];
+var BD=['擎羊','陀羅','火星','鈴星','地空','地劫'];
+function sP(e){if(!e)return 0;var t=e.textContent,s=0;
+GD.forEach(function(x){if(t.indexOf(x)>=0)s+=12});
+BD.forEach(function(x){if(t.indexOf(x)>=0)s-=10});
+if(t.indexOf('化祿')>=0)s+=15;if(t.indexOf('化權')>=0)s+=8;
+if(t.indexOf('化科')>=0)s+=5;if(t.indexOf('化忌')>=0)s-=15;return s}
+function dP(e,nm){if(!e)return nm+'：—';
+var t=e.textContent,g=[],b=[];
+GD.forEach(function(x){if(t.indexOf(x)>=0)g.push(x)});
+BD.forEach(function(x){if(t.indexOf(x)>=0)b.push(x)});
+if(t.indexOf('化祿')>=0)g.push('化祿');
+if(t.indexOf('化忌')>=0)b.push('化忌');
+var r=nm;
+if(g.length)r+='<span style="color:#4CAF50"> ✦'+g.join('、')+'</span>';
+if(b.length)r+='<span style="color:#c0392b"> ⚠'+b.join('、')+'</span>';
+if(!g.length&&!b.length)r+=' 無特殊財星';return r}
+function run(){
+var ps=[].slice.call(document.querySelectorAll('.pal'));if(ps.length!==12)return;
+var mi=-1,ci=-1,fi=-1,ti=-1,di=-1;
+ps.forEach(function(e,i){
+if(/\bming\b/.test(e.className))mi=i;
+if(e.textContent.indexOf('財帛')>=0)ci=i;
+if(e.textContent.indexOf('福德')>=0)fi=i;
+if(e.textContent.indexOf('田宅')>=0)ti=i;
+if(/daxian/.test(e.className))di=i});
+var lyI=document.getElementById('ly'),LY=lyI?(+lyI.value||new Date().getFullYear()):new Date().getFullYear();
+var li=((LY-4)%12+12)%12;
+var dpi=-1;
+try{var info=document.getElementById('lunarInfo');
+if(info&&window.__ZW){
+var bm=parseInt((info.textContent.match(/農曆\s*閏?(\d+)月/)||[])[1],10)||0;
+var bh=ZH.indexOf((info.textContent.match(/([子丑寅卯辰巳午未申酉戌亥])時/)||[])[1]);
+if(bm&&bh>=0){var n=new Date(),Y=n.getFullYear(),M=n.getMonth()+1,D=n.getDate();
+var lun=__ZW.toLunar(Y,M,D),lm=parseInt(lun.month,10)||0,ld=lun.day||0;
+var yz=((LY-4)%12+12)%12,dj=((yz-(bm-1)+bh)%12+12)%12;
+dpi=((dj+(lm-1))%12+(ld-1))%12}}}catch(e){}
+var sN=sP(ps[mi])*0.20+sP(ps[ci])*0.40+sP(ps[fi])*0.20+sP(ps[ti])*0.20;
+var sD=di>=0?sP(ps[di]):0,sL=sP(ps[li]),sR=dpi>=0?sP(ps[dpi]):0;
+var tt=Math.max(0,Math.min(100,Math.round(50+sN*0.55+sD*0.25+sL*0.12+sR*0.08)));
+var lv,lc,ds;
+if(tt>=80){lv='極佳';lc='#4CAF50';ds='財星匯聚、祿馬交馳——先天財運根基深厚，善加經營則富貴可期。'}
+else if(tt>=60){lv='良好';lc='#C9A96A';ds='吉星護財、根基穩健——穩健理財可有可觀積累，宜把握機會。'}
+else if(tt>=40){lv='中等';lc='#FF9800';ds='財運平穩、無大起落——勤勉理財、後天努力可補先天，忌衝動投資。'}
+else if(tt>=20){lv='偏弱';lc='#FF5722';ds='煞忌侵財、耗散較多——理財須謹慎，宜以專業技藝穩定收入。'}
+else{lv='困難';lc='#f44336';ds='財帛受剋較重——宜保守為上、廣結善緣，以陽宅改運補天命不足。'}
+var box=document.getElementById('bp-fin-gauge');
+if(!box){box=document.createElement('div');box.id='bp-fin-gauge';box.className='box';
+var dtl=document.getElementById('detail');
+if(dtl)dtl.parentNode.insertBefore(box,dtl);else document.body.appendChild(box)}
+var al=(tt/100)*251.33;
+box.innerHTML='<h2 style="border-color:var(--gold);color:var(--gold);margin-top:0">💰 財運指數</h2>'
++'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:center">'
++'<svg viewBox="0 0 240 140" width="200" style="flex:none">'
++'<path d="M40,120 A80,80 0 0,1 200,120" fill="none" stroke="#2a2218" stroke-width="16" stroke-linecap="round"/>'
++'<path d="M40,120 A80,80 0 0,1 200,120" fill="none" stroke="'+lc+'" stroke-width="16" stroke-linecap="round" stroke-dasharray="'+al.toFixed(1)+',251.33"/>'
++'<text x="120" y="95" text-anchor="middle" fill="'+lc+'" font-size="38" font-weight="900" font-family="Noto Serif TC,serif">'+tt+'</text>'
++'<text x="120" y="116" text-anchor="middle" fill="#C9A96A" font-size="14" font-weight="700">'+lv+'</text>'
++'<text x="38" y="136" text-anchor="middle" fill="#666" font-size="10">0</text>'
++'<text x="202" y="136" text-anchor="middle" fill="#666" font-size="10">100</text>'
++'</svg>'
++'<div style="flex:1;min-width:200px">'
++'<div style="font-size:14px;line-height:1.85;margin-bottom:8px">'+ds+'</div>'
++'<details style="margin-top:4px"><summary style="cursor:pointer;font-size:13px;color:var(--gold);font-weight:700">📊 計算明細</summary>'
++'<div style="margin-top:6px;padding:8px 10px;background:rgba(0,0,0,.08);border-radius:8px;font-size:12.5px;line-height:1.8">'
++'<b style="color:var(--gold)">▸ 本命盤（55%）</b><br>'
++dP(ps[mi],'　命宮')+'<br>'+dP(ps[ci],'　財帛')+'<br>'+dP(ps[fi],'　福德')+'<br>'+dP(ps[ti],'　田宅')+'<br>'
++'<b style="color:var(--green)">▸ 大限（25%）</b><br>'
++(di>=0?dP(ps[di],'　限宮'):'　未行限')+'<br>'
++'<b style="color:var(--blue)">▸ 流年（12%）</b><br>'
++dP(ps[li],'　年宮')+'<br>'
++'<b style="color:#8e6bb5">▸ 流日（8%）</b><br>'
++(dpi>=0?dP(ps[dpi],'　日宮'):'　未計算')
++'</div></details></div></div>'}
+function boot(){var ch=document.getElementById('chart');
+if(!ch||!ch.children.length)return setTimeout(boot,500);
+run();
+try{new MutationObserver(function(){setTimeout(run,300)}).observe(ch,{childList:true})}catch(e){}}
+setTimeout(boot,800);
+})();
+</script>
 </body></html>
