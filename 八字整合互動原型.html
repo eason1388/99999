@@ -523,11 +523,12 @@ function hhReport(el,pA,pB,male1,male2,gA,gB,sc,lvName,free,deep){
   if(!window.BPRPT)return;
   const SXX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
   const box=document.createElement('div');el.appendChild(box);
+  if(window.BPSY && BPSY.bind) BPSY.bind(box);
   BPRPT.button(box,function(){
     return{
       title:'八字合婚報告書',
       meta:[['甲方',gz(pA.year)+'年 '+gz(pA.month)+'月 '+gz(pA.day)+'日 '+gz(pA.hour)+'時'],
-            ['乙方',gz(pB.year)+'年 '+gz(pB.month)+'月 '+gz(pB.day)+'日 '+gz(pB.hour)+'時'],
+            ['乙方',gz(pB.year)+'年 '+gz(pB.month)+'月 '+gz(pB.day)+'日 '+gz(pB.hour)+'時'],h
             ['甲方命卦',gA+'命(屬'+SXX[pA.year%12]+')'],
             ['乙方命卦',gB+'命(屬'+SXX[pB.year%12]+')'],
             ['合婚評分',sc+' / 100'],['總評',lvName]],
