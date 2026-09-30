@@ -81,6 +81,7 @@ button{font-family:inherit}
 <script src="lock.js"></script>
 <script src="case.js?v=7"></script>
 <script src="report.js"></script>
+<script src="hehun-pair.js"></script>
 <script>
 const ST='甲乙丙丁戊己庚辛壬癸',BR='子丑寅卯辰巳午未申酉戌亥';
 const WX='木木火火土土金金水水',WXC={'木':'#4A6B4F','火':'#A63A2E','土':'#8C6D3F','金':'#948e82','水':'#3E5C76'};
@@ -405,6 +406,23 @@ function heHun(){
   const _hA=h1+n1/60,_hB2=h2+n2/60;
   const pA=fourPillars(Y1,M1,D1,_hA,_useT?trueSolar(Y1,M1,D1,_hA,_lonH).h:_hA),
         pB=fourPillars(Y2,M2,D2,_hB2,_useT?trueSolar(Y2,M2,D2,_hB2,_lonH).h:_hB2);
+  // Match the entered birth data before solar-time adjustment, in either order.
+  const pair=window.BPHEHUNPAIR&&BPHEHUNPAIR.find(
+    {birth:document.getElementById('bd').value,time:document.getElementById('bt').value,sex:document.getElementById('sex').value},
+    {birth:document.getElementById('bd2').value,time:document.getElementById('bt2').value,sex:document.getElementById('sex2').value});
+  if(pair){
+    const gA=mg3(pA.sui,male1),gB=mg3(pB.sui,male2),SX='鼠牛虎兔龍蛇馬羊猴雞狗豬';
+    const free='<div style="text-align:center"><span class="score" style="font-size:44px">'+pair.score+'</span><span style="opacity:.6">/100</span> <b style="color:var(--green)">'+pair.label+'</b></div>'
+      +'<div style="font-size:13px;opacity:.75;text-align:center;margin-bottom:8px">甲:'+gz(pA.year)+'年(屬'+SX[pA.year%12]+')・'+gz(pA.day)+'日・'+gA+'命<br>'
+      +'乙:'+gz(pB.year)+'年(屬'+SX[pB.year%12]+')・'+gz(pB.day)+'日・'+gB+'命</div>'
+      +'<div style="font-size:13.5px;line-height:1.95;padding:10px 12px;background:rgba(140,109,63,.07);border-left:3px solid var(--gold);border-radius:0 10px 10px 0">'+pair.summary+'</div>';
+    const deep='<div style="margin-top:10px">'+pair.deep+'</div>';
+    const el=document.getElementById('hhOut');
+    el.innerHTML=free+(window.BPSY?BPSY.gate(deep,'抱朴心法・合婚深論(八章全解)',pair.teaser):deep);
+    window.BPSY&&BPSY.bind(el);
+    hhReport(el,pA,pB,male1,male2,gA,gB,pair.score,pair.label,free,deep);
+    return;
+  }
   // 指定佳偶:男1975-07-16卯時(5-7時) × 女1976-11-24辰時(7-9時),或對調
   const _hit=(a,ma,b,mb)=>a[0]===1975&&a[1]===7&&a[2]===16&&a[3]>=5&&a[3]<7&&ma&&
                           b[0]===1976&&b[1]===11&&b[2]===24&&b[3]>=7&&b[3]<9&&!mb;
@@ -528,7 +546,7 @@ function hhReport(el,pA,pB,male1,male2,gA,gB,sc,lvName,free,deep){
     return{
       title:'八字合婚報告書',
       meta:[['甲方',gz(pA.year)+'年 '+gz(pA.month)+'月 '+gz(pA.day)+'日 '+gz(pA.hour)+'時'],
-            ['乙方',gz(pB.year)+'年 '+gz(pB.month)+'月 '+gz(pB.day)+'日 '+gz(pB.hour)+'時'],h
+            ['乙方',gz(pB.year)+'年 '+gz(pB.month)+'月 '+gz(pB.day)+'日 '+gz(pB.hour)+'時'],
             ['甲方命卦',gA+'命(屬'+SXX[pA.year%12]+')'],
             ['乙方命卦',gB+'命(屬'+SXX[pB.year%12]+')'],
             ['合婚評分',sc+' / 100'],['總評',lvName]],
