@@ -95,7 +95,7 @@ function openIOSPrintPage(report, title){
       html: report.outerHTML
     }));
   } catch(e) { return false; }
-  var url = 'mobile-report.html?v=70';
+  var url = 'mobile-report.html?v=71';
   try {
     var w = window.open(url, '_blank');
     if (w) return true;

@@ -12,8 +12,10 @@ body{margin:0!important;padding:96px 12px 24px!important;font-family:-apple-syst
 .tip{color:#e8e2d6;text-align:center;font-size:12px;margin-top:7px}.error{max-width:680px;margin:60px auto;background:#fff;padding:24px;border-radius:14px;line-height:1.8}
 @media print{.mobileBar{display:none!important}html,body{background:#fff!important}body{padding:0!important}#bp-print{box-shadow:none!important;padding:0!important;max-width:none!important}}
 </style></head><body>
-<div class="mobileBar"><div class="actions"><button id="backBtn">‹ 返回</button><button id="printBtn">列印／存成 PDF</button></div><div class="tip">列印視窗出現後，可選擇「儲存到檔案」</div></div>
+<div class="mobileBar"><div class="actions"><button id="backBtn">‹ 返回</button><button id="printBtn">產生／儲存 PDF</button></div><div class="tip" id="status">完成後會開啟 iPhone 分享選單，請選「儲存到檔案」</div></div>
 <main id="report"></main>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
 <script>
 (function(){
   var key='bprpt-mobile-report',raw='';
@@ -23,7 +25,35 @@ body{margin:0!important;padding:96px 12px 24px!important;font-family:-apple-syst
     try{var data=JSON.parse(raw);document.title=data.title||document.title;document.getElementById('reportCss').textContent=data.css||'';host.innerHTML=data.html||''}
     catch(e){host.innerHTML='<div class="error">報告資料讀取失敗，請返回後重新按一次列印。</div>'}
   }else host.innerHTML='<div class="error">找不到報告資料，請返回合婚頁後重新按一次列印。</div>';
-  document.getElementById('printBtn').onclick=function(){window.print()};
+  document.getElementById('printBtn').onclick=async function(){
+    var btn=this,status=document.getElementById('status'),target=document.getElementById('bp-print')||host;
+    if(!window.html2canvas||!window.jspdf){status.textContent='PDF 工具載入失敗，請確認網路後重新開啟此頁';return}
+    btn.disabled=true;btn.textContent='正在產生 PDF…';status.textContent='報告較長時約需數秒，請稍候';
+    try{
+      var canvas=await html2canvas(target,{scale:1.4,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:target.scrollWidth});
+      var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      var margin=8,pageW=210,pageH=297,useW=pageW-margin*2,useH=pageH-margin*2;
+      var slicePx=Math.floor(canvas.width*useH/useW),pages=Math.max(1,Math.ceil(canvas.height/slicePx));
+      for(var i=0;i<pages;i++){
+        if(i)pdf.addPage();
+        var y=i*slicePx,h=Math.min(slicePx,canvas.height-y),part=document.createElement('canvas');
+        part.width=canvas.width;part.height=h;
+        var ctx=part.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,part.width,part.height);ctx.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+        pdf.addImage(part.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,useW,h*useW/canvas.width,undefined,'FAST');
+      }
+      var blob=pdf.output('blob'),file=new File([blob],'八字合婚報告書.pdf',{type:'application/pdf'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        status.textContent='請在分享選單選擇「儲存到檔案」';
+        await navigator.share({files:[file],title:'八字合婚報告書'});
+      }else{
+        var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='八字合婚報告書.pdf';document.body.appendChild(a);a.click();a.remove();
+        setTimeout(function(){URL.revokeObjectURL(url)},60000);status.textContent='PDF 已產生；若未下載，請查看瀏覽器下載項目';
+      }
+    }catch(e){
+      if(e&&e.name==='AbortError')status.textContent='已取消儲存，可再次按按鈕重試';
+      else status.textContent='PDF 產生失敗，請重新開啟報告後再試';
+    }finally{btn.disabled=false;btn.textContent='產生／儲存 PDF'}
+  };
   document.getElementById('backBtn').onclick=function(){
     if(window.opener){window.close();return}
     if(history.length>1){history.back();return}
