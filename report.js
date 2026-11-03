@@ -95,7 +95,7 @@ function openIOSPrintPage(report, title){
       html: report.outerHTML
     }));
   } catch(e) { return false; }
-  var url = 'mobile-report.html?v=71';
+  var url = 'mobile-report.html?v=72';
   try {
     var w = window.open(url, '_blank');
     if (w) return true;
@@ -148,8 +148,8 @@ function print_(o){
       '不構成醫療、財務或法律建議。各派傳承或有出入,重大決定請另洽專業面斷。') + '</div>';
 
   document.body.appendChild(d);
+  if (isIOS() && openIOSPrintPage(d, o.title)) return;
   if (o.immediate) {
-    if (isIOS() && window.top !== window.self && openIOSPrintPage(d, o.title)) return;
     try { window.focus(); } catch(e){}
     window.print();
     return;
