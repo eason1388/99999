@@ -57,6 +57,7 @@ th{background:#f2ead6;font-weight:700}
 </div>
 <div class="box" id="report" style="display:none"></div>
 <script src="lock.js"></script>
+<script src="report.js?v=73"></script>
 <script src="case.js?v=7"></script>
 <script>
 // ── 引擎(玄空+八宅+紫白)──
@@ -116,7 +117,11 @@ for(let i=1;i<=9;i++){const o=document.createElement('option');o.value=i;o.textC
 perSel.value=9;yrIn.value=new Date().getFullYear();
 document.getElementById('deg').oninput=e=>{const d=+e.target.value;
   if(isFinite(d)){const i=Math.floor((((d-337.5)%360)+360)%360/15);sitSel.value=M24[(i+12)%24];}};
-document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('printBtn').onclick=()=>{
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios&&window.BPRPT)BPRPT.print({noGate:true,title:'全宅健檢報告書',source:()=>document.getElementById('report')});
+  else window.print();
+};
 document.getElementById('go').onclick=run;
 function g9html(fn,marks){return GRID.flat().map(p=>fn(p)).join('')}
 function run(){

@@ -95,7 +95,7 @@ function openIOSPrintPage(report, title){
       html: report.outerHTML
     }));
   } catch(e) { return false; }
-  var url = 'mobile-report.html?v=72';
+  var url = 'mobile-report.html?v=73';
   try {
     var w = window.open(url, '_blank');
     if (w) return true;
@@ -108,7 +108,7 @@ function print_(o){
   o = o || {};
   /* ── 報告輸出為付費功能 ──
      可交付的文件是師傅拿去跟客戶收費的東西,列印前先驗授權。 */
-  if (!(window.BPSY && BPSY.ok())) {
+  if (!o.noGate && !(window.BPSY && BPSY.ok())) {
     if (window.BPSY && BPSY.open) {
       alert('報告輸出為深解功能。\n\nNT$1,280 一次付清,全站深解與所有報告輸出永久開啟,不限裝置。');
       BPSY.open();
