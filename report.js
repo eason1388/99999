@@ -78,6 +78,47 @@ function today(){
   return d.getFullYear() + '/' + ('0'+(d.getMonth()+1)).slice(-2) + '/' + ('0'+d.getDate()).slice(-2);
 }
 
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/* iPhone Safari 不會從 iframe 可靠地開啟列印視窗。
+   將合婚報告放進使用者點擊所開啟的頂層分頁，再從該分頁列印。 */
+function openIOSPrintPage(report, title){
+  var w;
+  try { w = window.open('', '_blank'); } catch(e) { return false; }
+  if (!w) return false;
+  var st = document.getElementById('bprpt-css');
+  var printCss = st ? st.textContent : '';
+  var safeTitle = String(title || '八字合婚報告書').replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+    '<title>' + safeTitle + '</title><style>' + printCss + '</style>' +
+    '<style>html,body{height:auto!important;overflow:auto!important;background:#f4efe6!important}' +
+    'body{margin:0!important;padding:76px 12px 24px!important}' +
+    '#bp-print{display:block!important;max-width:820px;margin:0 auto;background:#fff;color:#1a1a1a;' +
+    'padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.14)}' +
+    '.bp-mobile-bar{position:fixed;z-index:9999;left:0;right:0;top:0;padding:12px;' +
+    'padding-top:max(12px,env(safe-area-inset-top));background:#14110f;text-align:center}' +
+    '.bp-mobile-bar button{border:0;border-radius:999px;background:#c9a96a;color:#1a1410;' +
+    'font:800 16px -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 28px}' +
+    '.bp-mobile-tip{color:#e8e2d6;font:12px -apple-system,BlinkMacSystemFont,sans-serif;margin-top:7px}' +
+    '@media print{.bp-mobile-bar{display:none!important}html,body{background:#fff!important}' +
+    'body{padding:0!important}#bp-print{box-shadow:none!important;padding:0!important;max-width:none!important}}' +
+    '</style></head><body><div class="bp-mobile-bar"><button id="bp-mobile-print">列印／存成 PDF</button>' +
+    '<div class="bp-mobile-tip">若未自動出現列印視窗，請按上方按鈕</div></div>' +
+    report.outerHTML + '</body></html>');
+  w.document.close();
+  var b = w.document.getElementById('bp-mobile-print');
+  if (b) b.onclick = function(){ w.print(); };
+  try { w.focus(); w.print(); } catch(e) {}
+  return true;
+}
+
 /** 主函式:組出報告書並叫起列印 */
 function print_(o){
   o = o || {};
@@ -124,6 +165,7 @@ function print_(o){
 
   document.body.appendChild(d);
   if (o.immediate) {
+    if (isIOS() && window.top !== window.self && openIOSPrintPage(d, o.title)) return;
     try { window.focus(); } catch(e){}
     window.print();
     return;
