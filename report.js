@@ -123,10 +123,8 @@ function print_(o){
       '不構成醫療、財務或法律建議。各派傳承或有出入,重大決定請另洽專業面斷。') + '</div>';
 
   document.body.appendChild(d);
-  setTimeout(function(){
-    try { window.focus(); } catch(e){}
-    window.print();
-  }, 120);
+  try { window.focus(); } catch(e){}
+  window.print();
 }
 
 /** 在指定容器內插一顆「列印／存成 PDF」按鈕 */
