@@ -89,13 +89,18 @@ function openIOSPrintPage(report, title){
   var st = document.getElementById('bprpt-css');
   var printCss = st ? st.textContent : '';
   try {
+    var head = Array.prototype.map.call(
+      document.head.querySelectorAll('style,link[rel="stylesheet"]'),
+      function(el){ return el.outerHTML; }
+    ).join('');
     localStorage.setItem('bprpt-mobile-report', JSON.stringify({
       title: title || '八字合婚報告書',
       css: printCss,
+      head: head,
       html: report.outerHTML
     }));
   } catch(e) { return false; }
-  var url = 'mobile-report.html?v=73';
+  var url = 'mobile-report.html?v=74';
   try {
     var w = window.open(url, '_blank');
     if (w) return true;

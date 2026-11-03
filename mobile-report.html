@@ -8,11 +8,11 @@ body{margin:0!important;padding:96px 12px 24px!important;font-family:-apple-syst
 #bp-print{display:block!important;max-width:820px;margin:0 auto;background:#fff;color:#1a1a1a;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.14)}
 .mobileBar{position:fixed;z-index:9999;left:0;right:0;top:0;padding:10px 12px 12px;padding-top:max(10px,env(safe-area-inset-top));background:#14110f}
 .actions{display:flex;align-items:center;justify-content:center;gap:10px}.actions button{border:0;border-radius:999px;font:800 15px -apple-system,BlinkMacSystemFont,sans-serif;padding:11px 20px}
-#backBtn{background:#31291f;color:#e8e2d6;border:1px solid rgba(201,169,106,.5)}#printBtn{background:#c9a96a;color:#1a1410;flex:1;max-width:360px}
+#mobileBackBtn{background:#31291f;color:#e8e2d6;border:1px solid rgba(201,169,106,.5)}#mobileSaveBtn{background:#c9a96a;color:#1a1410;flex:1;max-width:360px}
 .tip{color:#e8e2d6;text-align:center;font-size:12px;margin-top:7px}.error{max-width:680px;margin:60px auto;background:#fff;padding:24px;border-radius:14px;line-height:1.8}
 @media print{.mobileBar{display:none!important}html,body{background:#fff!important}body{padding:0!important}#bp-print{box-shadow:none!important;padding:0!important;max-width:none!important}}
 </style></head><body>
-<div class="mobileBar"><div class="actions"><button id="backBtn">‹ 返回</button><button id="printBtn">產生／儲存 PDF</button></div><div class="tip" id="status">完成後會開啟 iPhone 分享選單，請選「儲存到檔案」</div></div>
+<div class="mobileBar"><div class="actions"><button id="mobileBackBtn">‹ 返回</button><button id="mobileSaveBtn">產生／儲存 PDF</button></div><div class="tip" id="mobileStatus">完成後會開啟 iPhone 分享選單，請選「儲存到檔案」</div></div>
 <main id="report"></main>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
@@ -22,15 +22,33 @@ body{margin:0!important;padding:96px 12px 24px!important;font-family:-apple-syst
   try{raw=localStorage.getItem(key)||'';localStorage.removeItem(key)}catch(e){}
   var host=document.getElementById('report');
   if(raw){
-    try{var data=JSON.parse(raw);document.title=data.title||document.title;document.getElementById('reportCss').textContent=data.css||'';host.innerHTML=data.html||''}
+    try{var data=JSON.parse(raw);document.title=data.title||document.title;if(data.head)document.head.insertAdjacentHTML('afterbegin',data.head);document.getElementById('reportCss').textContent=data.css||'';host.innerHTML=data.html||''}
     catch(e){host.innerHTML='<div class="error">報告資料讀取失敗，請返回後重新按一次列印。</div>'}
   }else host.innerHTML='<div class="error">找不到報告資料，請返回合婚頁後重新按一次列印。</div>';
-  document.getElementById('printBtn').onclick=async function(){
-    var btn=this,status=document.getElementById('status'),target=document.getElementById('bp-print')||host;
+  function activatePrintStyles(){
+    var old=document.getElementById('activePrintCss');if(old)old.remove();var out=[];
+    Array.prototype.forEach.call(document.styleSheets,function(sheet){
+      try{Array.prototype.forEach.call(sheet.cssRules||[],function(rule){
+        if(rule.type===4&&/print/i.test(rule.conditionText||rule.media&&rule.media.mediaText||'')){
+          Array.prototype.forEach.call(rule.cssRules||[],function(inner){
+            var text=inner.cssText||'';if(!/^body\s*>?\s*\*/i.test(text))out.push(text);
+          });
+        }
+      })}catch(e){}
+    });
+    var st=document.createElement('style');st.id='activePrintCss';st.textContent=out.join('\n');document.head.appendChild(st);
+  }
+  document.getElementById('mobileSaveBtn').onclick=async function(){
+    var btn=this,status=document.getElementById('mobileStatus'),target=document.getElementById('bp-print')||host;
     if(!window.html2canvas||!window.jspdf){status.textContent='PDF 工具載入失敗，請確認網路後重新開啟此頁';return}
     btn.disabled=true;btn.textContent='正在產生 PDF…';status.textContent='報告較長時約需數秒，請稍候';
     try{
+      if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+      activatePrintStyles();
+      var oldWidth=target.style.width,oldMax=target.style.maxWidth;
+      target.style.width='794px';target.style.maxWidth='794px';
       var canvas=await html2canvas(target,{scale:1.4,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:target.scrollWidth});
+      target.style.width=oldWidth;target.style.maxWidth=oldMax;
       var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
       var margin=8,pageW=210,pageH=297,useW=pageW-margin*2,useH=pageH-margin*2;
       var slicePx=Math.floor(canvas.width*useH/useW),pages=Math.max(1,Math.ceil(canvas.height/slicePx));
@@ -52,9 +70,12 @@ body{margin:0!important;padding:96px 12px 24px!important;font-family:-apple-syst
     }catch(e){
       if(e&&e.name==='AbortError')status.textContent='已取消儲存，可再次按按鈕重試';
       else status.textContent='PDF 產生失敗，請重新開啟報告後再試';
-    }finally{btn.disabled=false;btn.textContent='產生／儲存 PDF'}
+    }finally{
+      if(typeof oldWidth!=='undefined'){target.style.width=oldWidth;target.style.maxWidth=oldMax}
+      btn.disabled=false;btn.textContent='產生／儲存 PDF';
+    }
   };
-  document.getElementById('backBtn').onclick=function(){
+  document.getElementById('mobileBackBtn').onclick=function(){
     if(window.opener){window.close();return}
     if(history.length>1){history.back();return}
     location.href='index.html';
