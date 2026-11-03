@@ -467,7 +467,7 @@ function go(k){
   if(!frames[k]){
     const f=document.createElement('iframe');f.setAttribute('allow','accelerometer; gyroscope; magnetometer; geolocation; camera');
     hookFrame(k,f);
-    if(SRCF[k]){f.src=encodeURIComponent(SRCF[k]);}else{f.srcdoc=SRC[k];}
+    if(SRCF[k]){f.src=k==='bazi'?encodeURI(SRCF[k]):encodeURIComponent(SRCF[k]);}else{f.srcdoc=SRC[k];}
     document.getElementById('stage').appendChild(f);
     frames[k]=f;
   }
